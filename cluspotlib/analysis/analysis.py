@@ -786,35 +786,25 @@ class ClusterAnalysis:
         INT_COLS  = {"n_normal", "n_anomaly", "n_missed", "n_samples"}
         PCT_COLS  = {"anomaly_rate"}
 
-        # Per-column widths sized to fit single-line display names
-        COL_WIDTH = {
-            "model":                25,
-            "dataset":              22,
-            "element":              14,
-            "type":                 10,
-            "E_form_MAE":           23,
-            "E_form_RMSE":          25,
-            "E_form_R2":            14,
-            "E_form_Pearson":       18,
-            "E_form_Spearman":      19,
-            "force_MAE":            20,
-            "force_RMSE":           22,
-            "force_R2":             13,
-            "force_Pearson":        17,
-            "force_Spearman":       18,
-            "force_cosine":         15,
-            "force_AFwT":           10,
-            "n_normal":             12,
-            "n_anomaly":            12,
-            "n_missed":             12,
-            "n_samples":            12,
-            "anomaly_rate":         14,
-            "cluster_time_med_s":   16,
-            "cluster_time_mean_s":  17,
-            "cluster_time_total_s": 17,
-            "time_mean_s":          16,
-            "time_med_s":           15,
-        }
+        def _autosize_columns(ws, headers, min_w=10, max_w=45, pad=2):
+            """Set each column width to fit header + longest cell content."""
+            for col_idx, h in enumerate(headers, 1):
+                col_letter = get_column_letter(col_idx)
+                display = HEADER_DISPLAY.get(h, h)
+                max_len = len(str(display))
+                for row in ws.iter_rows(min_row=2, min_col=col_idx, max_col=col_idx):
+                    for cell in row:
+                        if cell.value is None:
+                            continue
+                        if isinstance(cell.value, float):
+                            s = f"{cell.value:.4f}"
+                        else:
+                            s = str(cell.value)
+                        if len(s) > max_len:
+                            max_len = len(s)
+                ws.column_dimensions[col_letter].width = min(
+                    max(max_len + pad, min_w), max_w
+                )
 
         def _apply_sheet_style(ws, headers):
             for col_idx, h in enumerate(headers, 1):
@@ -824,9 +814,7 @@ class ClusterAnalysis:
                 cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=False)
             ws.row_dimensions[1].height = 20
 
-            for col_idx, h in enumerate(headers, 1):
-                col_letter = get_column_letter(col_idx)
-                ws.column_dimensions[col_letter].width = COL_WIDTH.get(h, 18)
+            _autosize_columns(ws, headers)
 
             for row_idx, row in enumerate(ws.iter_rows(min_row=2), 2):
                 ws.row_dimensions[row_idx].height = 25
@@ -1065,9 +1053,7 @@ class ClusterAnalysis:
                 cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=False)
             ws_fwt.row_dimensions[1].height = 20
 
-            for col_idx, h in enumerate(fwt_headers, 1):
-                col_letter = get_column_letter(col_idx)
-                ws_fwt.column_dimensions[col_letter].width = 22 if h in ("model", "dataset") else 12
+            _autosize_columns(ws_fwt, fwt_headers)
 
             for row_idx, row in enumerate(ws_fwt.iter_rows(min_row=2), 2):
                 ws_fwt.row_dimensions[row_idx].height = 25
@@ -1195,6 +1181,10 @@ class ClusterAnalysis:
                 fwt_df = _normalize_xlsx_df(
                     pd.read_excel(xl, sheet_name="fwt_curves")
                 )
+                # merged cells in the xlsx leave Model as NaN on secondary
+                # rows (e.g. the "total" row of each model) — restore it
+                if "model" in fwt_df.columns:
+                    fwt_df["model"] = fwt_df["model"].ffill()
 
             model_names = summary_df["model"].astype(str).unique().tolist()
 

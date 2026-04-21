@@ -531,6 +531,8 @@ def plot_fwt_curve(
 ):
     """
     Comparison plot of FwT(threshold) curves across models.
+    Curves are sorted by AFwT (descending) and the legend is placed
+    outside the axes on the right so it never overlaps the plot.
 
     Args:
         model_curves: {model_name: (thresholds_array, fwt_pct_array)}
@@ -538,28 +540,39 @@ def plot_fwt_curve(
     if not model_curves:
         return
 
-    cmap = plt.get_cmap("tab10")
-    fig, ax = plt.subplots(figsize=(9, 7))
-
-    for i, (name, (thresholds, fwt_pct)) in enumerate(model_curves.items()):
+    items = []
+    for name, (thresholds, fwt_pct) in model_curves.items():
         afwt = float(np.mean(fwt_pct))
+        items.append((name, thresholds, fwt_pct, afwt))
+    items.sort(key=lambda t: t[3], reverse=True)
+
+    cmap = plt.get_cmap("tab20")
+    linestyles = ["-", "--", ":"]
+    fig, ax = plt.subplots(figsize=(13, 7))
+
+    for i, (name, thresholds, fwt_pct, afwt) in enumerate(items):
         ax.plot(thresholds, fwt_pct,
                 label=f"{name}  (AFwT={afwt:.1f}%)",
-                linewidth=2.5, color=cmap(i % 10))
+                linewidth=2.2,
+                color=cmap(i % 20),
+                linestyle=linestyles[(i // 20) % len(linestyles)])
 
-    ax.set_xlabel("Force threshold (eV/Å)", fontsize=_FS_LABEL)
-    ax.set_ylabel("Force within threshold (%)", fontsize=_FS_LABEL)
-    ax.set_title("Force Accuracy within Threshold (FwT)", fontsize=20,
+    ax.set_xlabel("Force threshold (eV/Å)", fontsize=20)
+    ax.set_ylabel("Force within threshold (%)", fontsize=20)
+    ax.set_title("Force Accuracy within Threshold (FwT)", fontsize=18,
                  fontweight="bold", pad=10)
     ax.set_xlim(left=0)
     ax.set_ylim(0, 101)
     ax.grid(True, linewidth=0.7, alpha=0.4)
     ax.set_axisbelow(True)
-    ax.legend(fontsize=12, loc="lower right", framealpha=0.85)
-    _apply_tick_style(ax)
+    ax.tick_params(axis="both", labelsize=14)
+    ax.legend(fontsize=10,
+              loc="upper left",
+              bbox_to_anchor=(1.02, 1.0),
+              frameon=True, framealpha=0.9,
+              borderaxespad=0.0)
 
-    fig.tight_layout()
-    fig.savefig(_ensure_parent(save_path), dpi=dpi)
+    fig.savefig(_ensure_parent(save_path), dpi=dpi, bbox_inches="tight")
     plt.close(fig)
 
 
@@ -634,6 +647,12 @@ def plot_pareto(
     dpi: int = 300,
     maximize_y: bool = False,
 ):
+    """
+    Pareto scatter plot across models.
+    Each model gets a unique (color, marker) combination; Pareto-optimal
+    models are overlaid with a bold star marker. Model names are shown
+    as an outside legend on the right rather than as text annotations.
+    """
     names = list(model_names)
     x = np.asarray(x_vals, dtype=float)
     y = np.asarray(y_vals, dtype=float)
@@ -671,34 +690,41 @@ def plot_pareto(
     x_pf = x[pareto_sorted]
     y_pf = y[pareto_sorted]
 
-    fig, ax = plt.subplots(figsize=_FIGSIZE)
+    cmap = plt.get_cmap("tab20")
+    markers = ["o", "s", "^", "v", "D", "p", "P", "X", "h", "<"]
 
-    ax.scatter(
-        x, y,
-        s=_MARK_SIZE, alpha=0.85,
-        edgecolors="black",
-        linewidths=_LINEWIDTHS,
-        rasterized=True,
-    )
+    fig, ax = plt.subplots(figsize=(13, 8))
 
-    ax.scatter(
-        x_pf, y_pf,
-        s=_MARK_SIZE * 1.15, alpha=0.95,
-        edgecolors="black",
-        linewidths=_LINEWIDTHS,
-        rasterized=True,
-    )
+    for i, nm in enumerate(names):
+        is_pf = i in pareto
+        ax.scatter(
+            x[i], y[i],
+            s=110 if is_pf else 55,
+            marker="*" if is_pf else markers[i % len(markers)],
+            color=cmap(i % 20),
+            edgecolors="black",
+            linewidths=1.2 if is_pf else 0.8,
+            label=str(nm),
+            zorder=3 if is_pf else 2,
+        )
 
-    ax.plot(x_pf, y_pf, "k--", linewidth=2.0)
+    ax.plot(x_pf, y_pf, "k--", linewidth=1.8, zorder=1)
 
-    for nm, xi, yi in zip(names, x, y):
-        ax.text(xi, yi, str(nm), fontsize=12, ha="left", va="bottom")
-
-    ax.set_xlabel(xlabel, fontsize=_FS_LABEL)
-    ax.set_ylabel(ylabel, fontsize=_FS_LABEL)
+    ax.set_xlabel(xlabel, fontsize=22)
+    ax.set_ylabel(ylabel, fontsize=22)
     if title:
-        ax.set_title(title, fontsize=20, fontweight="bold", pad=8)
-    _apply_tick_style(ax)
+        ax.set_title(title, fontsize=18, fontweight="bold", pad=8)
+    ax.tick_params(axis="both", labelsize=14)
+    ax.grid(True, linewidth=0.6, alpha=0.4)
+    ax.set_axisbelow(True)
 
-    fig.savefig(_ensure_parent(save_path), dpi=dpi)
+    ax.legend(fontsize=10,
+              loc="upper left",
+              bbox_to_anchor=(1.02, 1.0),
+              frameon=True, framealpha=0.9,
+              borderaxespad=0.0,
+              title="Model (★ = Pareto-optimal)",
+              title_fontsize=11)
+
+    fig.savefig(_ensure_parent(save_path), dpi=dpi, bbox_inches="tight")
     plt.close(fig)

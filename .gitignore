@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+
+# Packaging
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual env
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ASE databases (large)
+*.db
+
+# Logs
+log/
+*.log
+
+# Analysis outputs
+**/analysis/element_metrics.csv
+**/analysis/energy/
+**/analysis/force/
+**/analysis/all/
+**/analysis/tm12/
+**/total/
+results.xlsx
+
+# Temp
+*.tmp
+*.bak
+.DS_Store
+
+# Local-only
+backup/

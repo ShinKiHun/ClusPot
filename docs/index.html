@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClusPot — MLIP Cluster Benchmark</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+</head>
+<body>
+<div class="app">
+
+  <aside class="sidebar">
+    <div class="brand"><span class="square"></span> ClusPot</div>
+    <div class="brand-sub">MLIP Cluster Benchmark</div>
+
+    <nav class="nav" id="nav">
+      <a href="#overview" class="active">Overview <span class="num">01</span></a>
+      <a href="#leaderboard">Leaderboard <span class="num">02</span></a>
+      <a href="#compare">Comparison <span class="num">03</span></a>
+      <a href="#pareto">Pareto <span class="num">04</span></a>
+      <a href="#fwt">FwT Curves <span class="num">05</span></a>
+      <a href="#periodic">Periodic Table <span class="num">06</span></a>
+      <a href="#models">Per-Model <span class="num">07</span></a>
+    </nav>
+
+    <div class="sidebar-foot" id="sidebar-foot">
+      Loading…
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <!-- ── Hero / Overview ─────────────────────────── -->
+    <section id="overview" class="hero">
+      <h1>Benchmarking MLIPs<br>on Metal Clusters</h1>
+      <p class="lead">
+        ClusPot evaluates machine-learning interatomic potentials against DFT references on
+        atomic clusters and bulk crystals. Energy, forces, robustness and runtime — all
+        measured on the same single-point set, ranked side by side.
+      </p>
+      <div class="hero-stats" id="hero-stats"></div>
+    </section>
+
+    <!-- ── Leaderboard ─────────────────────────────── -->
+    <section id="leaderboard">
+      <div class="s-head">
+        <h2>Leaderboard</h2>
+        <span class="tag">summary</span>
+        <span class="desc">Click any column header to sort. Best value is highlighted.</span>
+      </div>
+
+      <div class="controls" id="lb-ctrl">
+        <label>Dataset</label>
+        <span class="seg" id="lb-ds-seg"></span>
+      </div>
+
+      <div class="lb-wrap">
+        <table class="lb" id="lb-table">
+          <thead></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ── Model Comparison ────────────────────────── -->
+    <section id="compare">
+      <div class="s-head">
+        <h2>Model Comparison</h2>
+        <span class="tag">bar chart</span>
+        <span class="desc">Pick a metric. Models are sorted best→worst with an orange→navy gradient.</span>
+      </div>
+      <div class="controls" id="cmp-ctrl">
+        <label>Metric</label>
+        <select id="cmp-metric"></select>
+        <label style="margin-left:14px">Dataset</label>
+        <span class="seg" id="cmp-ds-seg"></span>
+      </div>
+      <div class="panel"><div id="cmp-plot" class="plot plot-tall"></div></div>
+    </section>
+
+    <!-- ── Pareto ──────────────────────────────────── -->
+    <section id="pareto">
+      <div class="s-head">
+        <h2>Pareto Frontier</h2>
+        <span class="tag">accuracy ⇄ speed</span>
+        <span class="desc">Lower-left corner is best. Pareto-optimal models are highlighted in orange.</span>
+      </div>
+      <div class="controls" id="par-ctrl">
+        <label>Y-axis</label>
+        <select id="par-metric"></select>
+        <label style="margin-left:14px">X-axis</label>
+        <select id="par-xmetric">
+          <option value="Time_med">Time / step (median, s)</option>
+          <option value="Time_mean">Time / step (mean, s)</option>
+        </select>
+        <label style="margin-left:14px">Dataset</label>
+        <span class="seg" id="par-ds-seg"></span>
+      </div>
+      <div class="panel"><div id="par-plot" class="plot plot-tall"></div></div>
+    </section>
+
+    <!-- ── FwT ─────────────────────────────────────── -->
+    <section id="fwt">
+      <div class="s-head">
+        <h2>Force within Threshold (FwT)</h2>
+        <span class="tag">robustness</span>
+        <span class="desc">Fraction of force components within ε. Click legend entries to toggle models.</span>
+      </div>
+      <div class="controls" id="fwt-ctrl">
+        <label>Dataset</label>
+        <span class="seg" id="fwt-ds-seg"></span>
+      </div>
+      <div class="panel"><div id="fwt-plot" class="plot plot-tall"></div></div>
+    </section>
+
+    <!-- ── Periodic Table ──────────────────────────── -->
+    <section id="periodic">
+      <div class="s-head">
+        <h2>Periodic Heatmap</h2>
+        <span class="tag">per-element</span>
+        <span class="desc">Colored by the chosen metric. Click an element to see all models.</span>
+      </div>
+
+      <div class="controls" id="pt-ctrl">
+        <label>Metric</label>
+        <select id="pt-metric"></select>
+        <label style="margin-left:14px">Model</label>
+        <select id="pt-model"></select>
+        <label style="margin-left:14px">Dataset</label>
+        <span class="seg" id="pt-ds-seg"></span>
+        <label style="margin-left:14px">Type</label>
+        <span class="seg" id="pt-type-seg">
+          <button class="on" data-v="normal">normal</button>
+          <button data-v="anomaly">anomaly</button>
+        </span>
+      </div>
+
+      <div class="pt-wrap">
+        <div>
+          <div class="pt" id="pt-grid"></div>
+          <div class="legend-bar" id="pt-legend">
+            <span id="pt-min">—</span>
+            <div class="bar"></div>
+            <span id="pt-max">—</span>
+          </div>
+        </div>
+        <aside class="pt-side" id="pt-side">
+          <div class="empty-note">Click an active element on the table to see its values across all models.</div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ── Per-Model ───────────────────────────────── -->
+    <section id="models">
+      <div class="s-head">
+        <h2>Per-Model Detail</h2>
+        <span class="tag">deep dive</span>
+        <span class="desc">Browse each MLIP's metrics and per-element breakdown.</span>
+      </div>
+
+      <div class="mdl-grid">
+        <div class="mdl-list" id="mdl-list"></div>
+        <div class="mdl-card" id="mdl-card"></div>
+      </div>
+    </section>
+
+    <div class="footer">
+      <span id="foot-left">ClusPot · MLIP Cluster Benchmark</span>
+      <span id="foot-right"></span>
+    </div>
+
+  </main>
+</div>
+
+<div class="cell-tip" id="cell-tip"></div>
+
+<script src="elements.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

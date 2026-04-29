@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-04-29T10:05:45+00:00",
+    "generated_at": "2026-04-29T11:00:25+00:00",
     "n_models": 10,
     "datasets": [
       "qcd_cluster",
@@ -67,90 +67,101 @@
       {
         "key": "E_form_MAE",
         "col": "E_form MAE (eV/atom)",
-        "label": "E_form MAE",
+        "label": "MAE",
         "unit": "eV/atom",
         "lower_better": true,
-        "group": "energy"
+        "group": "energy",
+        "target": "E_form"
       },
       {
         "key": "E_form_RMSE",
         "col": "E_form RMSE (eV/atom)",
-        "label": "E_form RMSE",
+        "label": "RMSE",
         "unit": "eV/atom",
         "lower_better": true,
-        "group": "energy"
+        "group": "energy",
+        "target": "E_form"
       },
       {
         "key": "E_form_R2",
         "col": "E_form R²",
-        "label": "E_form R²",
+        "label": "R²",
         "unit": "",
         "lower_better": false,
-        "group": "energy"
+        "group": "energy",
+        "target": "E_form"
       },
       {
         "key": "E_form_Pearson",
         "col": "E_form Pearson",
-        "label": "E_form Pearson",
+        "label": "Pearson",
         "unit": "",
         "lower_better": false,
-        "group": "energy"
+        "group": "energy",
+        "target": "E_form"
       },
       {
         "key": "E_form_Spearman",
         "col": "E_form Spearman",
-        "label": "E_form Spearman",
+        "label": "Spearman",
         "unit": "",
         "lower_better": false,
-        "group": "energy"
+        "group": "energy",
+        "target": "E_form"
       },
       {
         "key": "Force_MAE",
         "col": "Force MAE (eV/Å)",
-        "label": "Force MAE",
+        "label": "MAE",
         "unit": "eV/Å",
         "lower_better": true,
-        "group": "force"
+        "group": "force",
+        "target": "Force"
       },
       {
         "key": "Force_RMSE",
         "col": "Force RMSE (eV/Å)",
-        "label": "Force RMSE",
+        "label": "RMSE",
         "unit": "eV/Å",
         "lower_better": true,
-        "group": "force"
+        "group": "force",
+        "target": "Force"
       },
       {
         "key": "Force_R2",
         "col": "Force R²",
-        "label": "Force R²",
+        "label": "R²",
         "unit": "",
         "lower_better": false,
-        "group": "force"
+        "group": "force",
+        "target": "Force"
       },
       {
         "key": "Force_Pearson",
         "col": "Force Pearson",
-        "label": "Force Pearson",
+        "label": "Pearson",
         "unit": "",
         "lower_better": false,
-        "group": "force"
+        "group": "force",
+        "target": "Force"
       },
       {
         "key": "Force_Spearman",
         "col": "Force Spearman",
-        "label": "Force Spearman",
+        "label": "Spearman",
         "unit": "",
         "lower_better": false,
-        "group": "force"
+        "group": "force",
+        "target": "Force"
       },
       {
         "key": "Force_cosine",
         "col": "Force cosine",
-        "label": "Force cosine",
+        "label": "Cosine",
         "unit": "",
         "lower_better": false,
-        "group": "force"
+        "group": "force",
+        "target": "Force"
       },
       {
         "key": "AFwT",
@@ -158,7 +169,8 @@
         "label": "AFwT",
         "unit": "%",
         "lower_better": false,
-        "group": "robustness"
+        "group": "robustness",
+        "target": ""
       },
       {
         "key": "Anomaly_pct",
@@ -166,7 +178,8 @@
         "label": "Anomaly rate",
         "unit": "%",
         "lower_better": true,
-        "group": "robustness"
+        "group": "robustness",
+        "target": ""
       },
       {
         "key": "Time_med",
@@ -174,7 +187,8 @@
         "label": "Time / step (median)",
         "unit": "s",
         "lower_better": true,
-        "group": "efficiency"
+        "group": "efficiency",
+        "target": ""
       },
       {
         "key": "Time_mean",
@@ -182,7 +196,8 @@
         "label": "Time / step (mean)",
         "unit": "s",
         "lower_better": true,
-        "group": "efficiency"
+        "group": "efficiency",
+        "target": ""
       },
       {
         "key": "Time_total",
@@ -190,7 +205,8 @@
         "label": "Total time",
         "unit": "s",
         "lower_better": true,
-        "group": "efficiency"
+        "group": "efficiency",
+        "target": ""
       }
     ],
     "fwt_thresholds": [

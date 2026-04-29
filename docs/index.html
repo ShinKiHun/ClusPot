@@ -11,26 +11,40 @@
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
 </head>
 <body>
+
+<!-- ── SVG sphere gradients (reused by all cluster illustrations) ── -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <radialGradient id="sph-orange"  cx="35%" cy="30%"><stop offset="0%" stop-color="#FFC9A8"/><stop offset="55%" stop-color="#FF6B35"/><stop offset="100%" stop-color="#7A2A0E"/></radialGradient>
+    <radialGradient id="sph-navy"    cx="35%" cy="30%"><stop offset="0%" stop-color="#7BA8DC"/><stop offset="55%" stop-color="#2A5CA8"/><stop offset="100%" stop-color="#0E2447"/></radialGradient>
+    <radialGradient id="sph-teal"    cx="35%" cy="30%"><stop offset="0%" stop-color="#88E2C8"/><stop offset="55%" stop-color="#2EA88E"/><stop offset="100%" stop-color="#0F4438"/></radialGradient>
+    <radialGradient id="sph-gold"    cx="35%" cy="30%"><stop offset="0%" stop-color="#F5DC9A"/><stop offset="55%" stop-color="#E0B040"/><stop offset="100%" stop-color="#6E5118"/></radialGradient>
+    <radialGradient id="sph-magenta" cx="35%" cy="30%"><stop offset="0%" stop-color="#E8A0C6"/><stop offset="55%" stop-color="#C04A8A"/><stop offset="100%" stop-color="#561C3C"/></radialGradient>
+  </defs>
+</svg>
+
 <div class="app">
 
-  <aside class="sidebar">
-    <div class="brand"><span class="square"></span> ClusPot</div>
-    <div class="brand-sub">MLIP Cluster Benchmark</div>
-
-    <nav class="nav" id="nav">
-      <a href="#overview" class="active">Overview <span class="num">01</span></a>
-      <a href="#leaderboard">Leaderboard <span class="num">02</span></a>
-      <a href="#compare">Comparison <span class="num">03</span></a>
-      <a href="#pareto">Pareto <span class="num">04</span></a>
-      <a href="#fwt">FwT Curves <span class="num">05</span></a>
-      <a href="#periodic">Periodic Table <span class="num">06</span></a>
-      <a href="#models">Per-Model <span class="num">07</span></a>
-    </nav>
-
-    <div class="sidebar-foot" id="sidebar-foot">
-      Loading…
+  <!-- ── Top bar ─────────────────────────────── -->
+  <header class="topbar">
+    <div class="brand">
+      <span class="square"></span>
+      <div class="brand-text">
+        <div class="brand-name">ClusPot</div>
+        <div class="brand-sub">MLIP Cluster Benchmark</div>
+      </div>
     </div>
-  </aside>
+    <nav class="nav" id="nav">
+      <a href="#overview" class="active">Home</a>
+      <a href="#leaderboard">Leaderboard</a>
+      <a href="#compare">Compare</a>
+      <a href="#pareto">Pareto</a>
+      <a href="#fwt">FwT</a>
+      <a href="#periodic">Periodic</a>
+      <a href="#models">Models</a>
+    </nav>
+    <div class="meta-right" id="meta-right">Loading…</div>
+  </header>
 
   <main class="main">
 
@@ -38,11 +52,95 @@
     <section id="overview" class="hero">
       <h1>Benchmarking MLIPs<br>on Metal Clusters</h1>
       <p class="lead">
-        ClusPot evaluates machine-learning interatomic potentials against DFT references on
-        atomic clusters and bulk crystals. Energy, forces, robustness and runtime — all
-        measured on the same single-point set, ranked side by side.
+        ClusPot evaluates machine-learning interatomic potentials against DFT references
+        on atomic clusters and bulk crystals. Energy, forces, robustness and runtime —
+        all measured on the same single-point set, ranked side by side.
       </p>
       <div class="hero-stats" id="hero-stats"></div>
+
+      <div class="cluster-cards">
+        <!-- ── Mono ─────────────────────────────── -->
+        <div class="cluster-card active">
+          <div class="cluster-svg">
+            <svg viewBox="0 0 200 130">
+              <!-- back ring -->
+              <circle cx="48"  cy="60" r="14" fill="url(#sph-orange)" opacity="0.45"/>
+              <circle cx="152" cy="60" r="14" fill="url(#sph-orange)" opacity="0.45"/>
+              <circle cx="100" cy="22" r="14" fill="url(#sph-orange)" opacity="0.45"/>
+              <circle cx="100" cy="98" r="14" fill="url(#sph-orange)" opacity="0.45"/>
+              <!-- mid ring -->
+              <circle cx="68"  cy="42" r="16" fill="url(#sph-orange)"/>
+              <circle cx="132" cy="42" r="16" fill="url(#sph-orange)"/>
+              <circle cx="68"  cy="78" r="16" fill="url(#sph-orange)"/>
+              <circle cx="132" cy="78" r="16" fill="url(#sph-orange)"/>
+              <!-- front ring -->
+              <circle cx="100" cy="44" r="18" fill="url(#sph-orange)"/>
+              <circle cx="82"  cy="60" r="18" fill="url(#sph-orange)"/>
+              <circle cx="118" cy="60" r="18" fill="url(#sph-orange)"/>
+              <circle cx="100" cy="76" r="18" fill="url(#sph-orange)"/>
+              <!-- center -->
+              <circle cx="100" cy="60" r="20" fill="url(#sph-orange)"/>
+            </svg>
+          </div>
+          <h3>Monometallic clusters</h3>
+          <span class="badge active">● Active · 55 elements</span>
+          <p>Single-element clusters spanning the periodic table — the current benchmark target.</p>
+        </div>
+
+        <!-- ── Bimetallic ─────────────────────────── -->
+        <div class="cluster-card">
+          <div class="cluster-svg">
+            <svg viewBox="0 0 200 130">
+              <circle cx="48"  cy="60" r="14" fill="url(#sph-navy)"   opacity="0.45"/>
+              <circle cx="152" cy="60" r="14" fill="url(#sph-orange)" opacity="0.45"/>
+              <circle cx="100" cy="22" r="14" fill="url(#sph-orange)" opacity="0.45"/>
+              <circle cx="100" cy="98" r="14" fill="url(#sph-navy)"   opacity="0.45"/>
+
+              <circle cx="68"  cy="42" r="16" fill="url(#sph-orange)"/>
+              <circle cx="132" cy="42" r="16" fill="url(#sph-navy)"/>
+              <circle cx="68"  cy="78" r="16" fill="url(#sph-navy)"/>
+              <circle cx="132" cy="78" r="16" fill="url(#sph-orange)"/>
+
+              <circle cx="100" cy="44" r="18" fill="url(#sph-navy)"/>
+              <circle cx="82"  cy="60" r="18" fill="url(#sph-orange)"/>
+              <circle cx="118" cy="60" r="18" fill="url(#sph-navy)"/>
+              <circle cx="100" cy="76" r="18" fill="url(#sph-orange)"/>
+
+              <circle cx="100" cy="60" r="20" fill="url(#sph-orange)"/>
+            </svg>
+          </div>
+          <h3>Bimetallic clusters</h3>
+          <span class="badge coming">○ Coming soon</span>
+          <p>Binary alloy clusters across composition space — adding next.</p>
+        </div>
+
+        <!-- ── HEA ────────────────────────────────── -->
+        <div class="cluster-card">
+          <div class="cluster-svg">
+            <svg viewBox="0 0 200 130">
+              <circle cx="48"  cy="60" r="14" fill="url(#sph-teal)"    opacity="0.45"/>
+              <circle cx="152" cy="60" r="14" fill="url(#sph-magenta)" opacity="0.45"/>
+              <circle cx="100" cy="22" r="14" fill="url(#sph-gold)"    opacity="0.45"/>
+              <circle cx="100" cy="98" r="14" fill="url(#sph-orange)"  opacity="0.45"/>
+
+              <circle cx="68"  cy="42" r="16" fill="url(#sph-orange)"/>
+              <circle cx="132" cy="42" r="16" fill="url(#sph-navy)"/>
+              <circle cx="68"  cy="78" r="16" fill="url(#sph-magenta)"/>
+              <circle cx="132" cy="78" r="16" fill="url(#sph-teal)"/>
+
+              <circle cx="100" cy="44" r="18" fill="url(#sph-gold)"/>
+              <circle cx="82"  cy="60" r="18" fill="url(#sph-teal)"/>
+              <circle cx="118" cy="60" r="18" fill="url(#sph-magenta)"/>
+              <circle cx="100" cy="76" r="18" fill="url(#sph-navy)"/>
+
+              <circle cx="100" cy="60" r="20" fill="url(#sph-orange)"/>
+            </svg>
+          </div>
+          <h3>High-entropy clusters</h3>
+          <span class="badge coming">○ Coming soon</span>
+          <p>Four+ element high-entropy alloys — on the long-term roadmap.</p>
+        </div>
+      </div>
     </section>
 
     <!-- ── Leaderboard ─────────────────────────────── -->

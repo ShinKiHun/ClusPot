@@ -18,24 +18,25 @@ ROOT = Path("/home/khshin/ClusPot_analysis")
 XLSX = ROOT / "clusterbench" / "analysis" / "results.xlsx"
 OUT  = ROOT / "site" / "data.json"
 
-# (key used in JSON, raw xlsx column, display label, unit, lower_is_better, group)
+# (key, raw xlsx col, short label, unit, lower_is_better, group, target)
+# `target` is the property the metric measures, used for display: "MAE (E_form, eV/atom)"
 METRICS = [
-    ("E_form_MAE",     "E_form MAE (eV/atom)",  "E_form MAE",      "eV/atom",  True,  "energy"),
-    ("E_form_RMSE",    "E_form RMSE (eV/atom)", "E_form RMSE",     "eV/atom",  True,  "energy"),
-    ("E_form_R2",      "E_form R²",             "E_form R²",  "",         False, "energy"),
-    ("E_form_Pearson", "E_form Pearson",        "E_form Pearson",  "",         False, "energy"),
-    ("E_form_Spearman","E_form Spearman",       "E_form Spearman", "",         False, "energy"),
-    ("Force_MAE",      "Force MAE (eV/Å)",      "Force MAE",       "eV/Å",True,  "force"),
-    ("Force_RMSE",     "Force RMSE (eV/Å)",     "Force RMSE",      "eV/Å",True,  "force"),
-    ("Force_R2",       "Force R²",              "Force R²",   "",         False, "force"),
-    ("Force_Pearson",  "Force Pearson",         "Force Pearson",   "",         False, "force"),
-    ("Force_Spearman", "Force Spearman",        "Force Spearman",  "",         False, "force"),
-    ("Force_cosine",   "Force cosine",          "Force cosine",    "",         False, "force"),
-    ("AFwT",           "AFwT",                  "AFwT",            "%",        False, "robustness"),
-    ("Anomaly_pct",    "Anomaly (%)",           "Anomaly rate",    "%",        True,  "robustness"),
-    ("Time_med",       "Time_med (s)",          "Time / step (median)", "s",   True,  "efficiency"),
-    ("Time_mean",      "Time_mean (s)",         "Time / step (mean)",   "s",   True,  "efficiency"),
-    ("Time_total",     "Time_total (s)",        "Total time",      "s",        True,  "efficiency"),
+    ("E_form_MAE",     "E_form MAE (eV/atom)",  "MAE",      "eV/atom", True,  "energy",     "E_form"),
+    ("E_form_RMSE",    "E_form RMSE (eV/atom)", "RMSE",     "eV/atom", True,  "energy",     "E_form"),
+    ("E_form_R2",      "E_form R²",             "R²",       "",        False, "energy",     "E_form"),
+    ("E_form_Pearson", "E_form Pearson",        "Pearson",  "",        False, "energy",     "E_form"),
+    ("E_form_Spearman","E_form Spearman",       "Spearman", "",        False, "energy",     "E_form"),
+    ("Force_MAE",      "Force MAE (eV/Å)",      "MAE",      "eV/Å",    True,  "force",      "Force"),
+    ("Force_RMSE",     "Force RMSE (eV/Å)",     "RMSE",     "eV/Å",    True,  "force",      "Force"),
+    ("Force_R2",       "Force R²",              "R²",       "",        False, "force",      "Force"),
+    ("Force_Pearson",  "Force Pearson",         "Pearson",  "",        False, "force",      "Force"),
+    ("Force_Spearman", "Force Spearman",        "Spearman", "",        False, "force",      "Force"),
+    ("Force_cosine",   "Force cosine",          "Cosine",   "",        False, "force",      "Force"),
+    ("AFwT",           "AFwT",                  "AFwT",     "%",       False, "robustness", ""),
+    ("Anomaly_pct",    "Anomaly (%)",           "Anomaly rate", "%",   True,  "robustness", ""),
+    ("Time_med",       "Time_med (s)",          "Time / step (median)", "s", True, "efficiency", ""),
+    ("Time_mean",      "Time_mean (s)",         "Time / step (mean)",   "s", True, "efficiency", ""),
+    ("Time_total",     "Time_total (s)",        "Total time",           "s", True, "efficiency", ""),
 ]
 COL_TO_KEY = {col: key for key, col, *_ in METRICS}
 
@@ -151,8 +152,8 @@ def main() -> None:
             "active_elements": sorted(active_elements),
             "metrics": [
                 {"key": k, "col": c, "label": l, "unit": u,
-                 "lower_better": lb, "group": g}
-                for k, c, l, u, lb, g in METRICS
+                 "lower_better": lb, "group": g, "target": t}
+                for k, c, l, u, lb, g, t in METRICS
             ],
             "fwt_thresholds": [t for _, t in fwt_cols],
         },

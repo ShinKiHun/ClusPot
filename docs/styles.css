@@ -122,6 +122,26 @@ a:hover { color: var(--orange-hi); }
 }
 .meta-right b { color: var(--text); font-weight: 600; }
 
+.gh-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 11px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  color: var(--subtext);
+  font-size: 12.5px;
+  font-weight: 500;
+  transition: all 0.14s ease;
+  text-decoration: none;
+}
+.gh-link:hover {
+  color: var(--text);
+  border-color: var(--border-hi);
+  background: var(--card);
+}
+.gh-link svg { width: 18px; height: 18px; fill: currentColor; }
+
 .main {
   padding: 48px 32px 80px;
   max-width: 1280px;
@@ -374,10 +394,9 @@ table.lb thead th {
   color: var(--subtext);
   font-weight: 600;
   padding: 12px 14px;
-  text-align: right;
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  text-align: center;
+  font-size: 12.5px;
+  letter-spacing: 0.2px;
   border-bottom: 1px solid var(--border);
   cursor: pointer;
   user-select: none;
@@ -396,7 +415,7 @@ table.lb thead th:hover { color: var(--text); }
 table.lb thead th .arrow { color: var(--orange); margin-left: 4px; }
 table.lb tbody td {
   padding: 11px 14px;
-  text-align: right;
+  text-align: center;
   border-bottom: 1px solid var(--border);
   font-family: var(--mono);
   white-space: nowrap;

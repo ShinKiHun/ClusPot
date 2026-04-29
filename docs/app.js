@@ -177,11 +177,14 @@ function fillMetricSelect(sel, filter = () => true) {
 // ─── 0. metadata bar + hero ────────────────────────────────────────────────
 function initSidebarFoot() {
   const dt = DATA.meta.generated_at?.replace("T", " ").replace(/\+.*$/, "").slice(0, 16) || "—";
-  document.querySelector("#meta-right").innerHTML =
-    `<b>${DATA.meta.n_models}</b> models · <b>${DATA.meta.active_elements.length}</b> elements<br>` +
-    `${dt} UTC`;
-  document.querySelector("#foot-right").textContent =
-    `data.json · ${DATA.meta.generated_at?.slice(0, 10) || ""}`;
+  const right = document.querySelector("#meta-right");
+  if (right) {
+    right.innerHTML =
+      `<b>${DATA.meta.n_models}</b> models · <b>${DATA.meta.active_elements.length}</b> elements<br>` +
+      `${dt} UTC`;
+  }
+  const foot = document.querySelector("#foot-right");
+  if (foot) foot.textContent = `data.json · ${DATA.meta.generated_at?.slice(0, 10) || ""}`;
 }
 
 function initHeroStats() {

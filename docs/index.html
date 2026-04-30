@@ -157,6 +157,21 @@
         </div>
       </div>
 
+      <!-- ── Global leaderboard ──────────────────── -->
+      <section id="home-leaderboard">
+        <div class="s-head">
+          <h2>Global Leaderboard</h2>
+          <span class="tag">all systems combined</span>
+          <span class="desc">One row per MLIP, aggregated across every cluster system it has been evaluated on.</span>
+        </div>
+        <div class="lb-wrap">
+          <table class="lb" id="home-lb-table">
+            <thead></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
       <!-- ── Methodology ────────────────────────── -->
       <section id="home-methodology">
         <div class="s-head">
@@ -214,28 +229,13 @@
           </div>
 
           <div class="method-card">
-            <h3>What the Home leaderboard shows</h3>
+            <h3>Per-system detail</h3>
             <ul>
-              <li>One row per MLIP — metrics aggregated across <em>all available data</em> for that model (mono + bi where both exist).</li>
-              <li>The <b>Coverage</b> column tells you which systems contributed. A model evaluated only on mono is summarised over mono alone.</li>
-              <li>For per-system breakdowns, see the dedicated Monometallic / Bimetallic pages.</li>
+              <li>The Home leaderboard collapses everything to one number per MLIP — useful for an at-a-glance ranking.</li>
+              <li>For breakdowns by element, pair, or dataset, see the dedicated <a href="#mono">Monometallic</a> / <a href="#bi">Bimetallic</a> pages.</li>
+              <li>Each system page exposes per-element heatmaps, Pareto frontiers, FwT curves, and per-model deep dives.</li>
             </ul>
           </div>
-        </div>
-      </section>
-
-      <!-- ── Global leaderboard ──────────────────── -->
-      <section id="home-leaderboard">
-        <div class="s-head">
-          <h2>Global Leaderboard</h2>
-          <span class="tag">all systems combined</span>
-          <span class="desc">One row per MLIP, aggregated across every cluster system it has been evaluated on.</span>
-        </div>
-        <div class="lb-wrap">
-          <table class="lb" id="home-lb-table">
-            <thead></thead>
-            <tbody></tbody>
-          </table>
         </div>
       </section>
 

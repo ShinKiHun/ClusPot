@@ -352,11 +352,10 @@ function renderHomeLeaderboard() {
     })
     .filter(Boolean);
 
-  // header — Model · Coverage · # · metrics · N
+  // header — # · Model · metrics · N
   let thead = `<tr>
-    <th class="sticky-l" data-k="model">Model</th>
-    <th data-k="coverage">Coverage</th>
-    <th data-k="rank">#</th>`;
+    <th data-k="rank">#</th>
+    <th class="sticky-l" data-k="model">Model</th>`;
   HOME_LB_KEYS.forEach(k => {
     const m = METRIC_BY_KEY[k];
     const arrow = sortKey === k ? `<span class="arrow">${sortAsc ? "▲" : "▼"}</span>` : "";
@@ -391,13 +390,9 @@ function renderHomeLeaderboard() {
   let body = "";
   order.forEach((i, rk) => {
     const r = rows[i];
-    const covPills = r.systems.map((sk, j) =>
-      `<span class="sys-pill" style="--c:${SYSTEM_COLORS[sk] || PALETTE.subtext}">${r.sysLabels[j]}</span>`
-    ).join(" ");
     let row = `<tr>
-      <td class="name">${r.model}</td>
-      <td class="cov">${covPills}</td>
-      <td class="rank">${rk + 1}</td>`;
+      <td class="rank">${rk + 1}</td>
+      <td class="name">${r.model}</td>`;
     HOME_LB_KEYS.forEach(k => {
       const v = r[k];
       const cls = bestIdx[k] === i ? "best" : "";

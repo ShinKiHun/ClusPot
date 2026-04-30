@@ -79,11 +79,11 @@ def make_metal(name, base_color, roughness=0.2):
         bsdf.inputs['Specular'].default_value = 0.55
     return mat
 
-mat_au = make_metal("Gold",      (1.000, 0.700, 0.250), 0.18)
-mat_ag = make_metal("Silver",    (0.940, 0.940, 0.920), 0.16)
-mat_cu = make_metal("Copper",    (0.955, 0.580, 0.430), 0.20)
-mat_pt = make_metal("Platinum",  (0.820, 0.810, 0.770), 0.22)
-mat_pd = make_metal("Palladium", (0.700, 0.680, 0.650), 0.26)
+mat_au = make_metal("Gold",      (1.000, 0.700, 0.250), 0.20)
+mat_ag = make_metal("Silver",    (0.940, 0.940, 0.920), 0.18)
+mat_cu = make_metal("Copper",    (0.955, 0.580, 0.430), 0.22)
+mat_pt = make_metal("Platinum",  (0.820, 0.810, 0.770), 0.24)
+mat_pd = make_metal("Palladium", (0.700, 0.680, 0.650), 0.28)
 
 
 # ─── Composition by mode ─────────────────────────────────────────────
@@ -148,27 +148,18 @@ def add_area_light(loc, rot, energy, size=5.0):
     L.rotation_euler = rot
     return L
 
-# Key light — bright, upper-left, slightly in front
+# Reference-matched 3-point rig: dominant key from upper-left (gives the
+# classic specular-on-each-ball look), modest fill for shadow-side
+# legibility, rim for silhouette.
 add_area_light(loc=(-9, -9, 11),
                rot=(math.radians(40), 0, math.radians(-42)),
-               energy=14000, size=6)
-# Fill — right side, softer
+               energy=9000, size=6)
 add_area_light(loc=(8, -3, 4),
                rot=(math.radians(58), 0, math.radians(72)),
-               energy=4500, size=5)
-# Rim — back, picks out silhouette
-add_area_light(loc=(0, 9, 7),
+               energy=1500, size=5)
+add_area_light(loc=(0, 9, 6),
                rot=(math.radians(-55), 0, math.radians(180)),
-               energy=6000, size=5)
-# Top fill — diffuse from above so the upper hemisphere isn't black
-add_area_light(loc=(0, 0, 14),
-               rot=(0, 0, 0),
-               energy=2000, size=10)
-# Front fill — gentle key-side fill that brightens the camera-facing
-# side without killing the rim contrast
-add_area_light(loc=(0, -10, 2),
-               rot=(math.radians(80), 0, 0),
-               energy=2500, size=8)
+               energy=2200, size=5)
 
 
 # ─── Camera ─────────────────────────────────────────────────────────
@@ -216,9 +207,9 @@ links.new(gradient.outputs['Color'],      ramp.inputs['Fac'])
 links.new(ramp.outputs['Color'],          bg_node.inputs[0])
 links.new(bg_node.outputs['Background'],  out_node.inputs['Surface'])
 
-ramp.color_ramp.elements[0].color = (0.020, 0.030, 0.055, 1)   # bottom
-ramp.color_ramp.elements[1].color = (0.140, 0.180, 0.250, 1)   # top — modest sky tint, lights do the work
-bg_node.inputs[1].default_value = 1.0
+ramp.color_ramp.elements[0].color = (0.025, 0.035, 0.060, 1)   # bottom
+ramp.color_ramp.elements[1].color = (0.220, 0.260, 0.330, 1)   # top — gives the metal something to reflect, but still dim
+bg_node.inputs[1].default_value = 1.4
 
 
 # ─── Render settings ────────────────────────────────────────────────
@@ -232,8 +223,8 @@ scene.render.film_transparent           = True
 scene.render.image_settings.file_format = 'PNG'
 scene.render.image_settings.color_mode  = 'RGBA'
 scene.view_settings.view_transform      = 'Standard'
-scene.view_settings.look                = 'High Contrast'
-scene.view_settings.exposure            = 1.1
+scene.view_settings.look                = 'Medium Contrast'
+scene.view_settings.exposure            = 0.3
 
 # Try GPU; silently fall back to CPU if no device
 try:

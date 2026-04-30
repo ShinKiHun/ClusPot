@@ -23,6 +23,41 @@
 
 * { box-sizing: border-box; }
 
+/* ── Themed scrollbars ────────────────────────────────── */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-hi) transparent;
+}
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--border-hi);
+  border-radius: 8px;
+  border: 2px solid var(--panel);
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--orange);
+}
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}
+/* Leaderboard wrap: a touch more contrast since the bar floats over the table */
+.lb-wrap::-webkit-scrollbar-thumb {
+  background: var(--navy-soft);
+  border-color: var(--card);
+}
+.lb-wrap::-webkit-scrollbar-thumb:hover {
+  background: var(--orange);
+}
+.lb-wrap {
+  scrollbar-color: var(--navy-soft) transparent;
+}
+
 html, body {
   margin: 0;
   padding: 0;

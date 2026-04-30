@@ -1,7 +1,9 @@
 """
 ClusPot site — xlsx → data.json builder.
 
-Run any time results.xlsx changes:
+Reads two analysis xlsx files (mono + bimetallic) and produces a single
+data.json keyed by system. Run any time either xlsx changes:
+
     python build_data.py
 """
 from __future__ import annotations
@@ -14,12 +16,23 @@ from pathlib import Path
 
 import pandas as pd
 
+# ── Inputs / output ──────────────────────────────────────────────────────────
 ROOT = Path("/home/khshin/ClusPot_analysis")
-XLSX = ROOT / "clusterbench" / "analysis" / "results.xlsx"
 OUT  = ROOT / "site" / "data.json"
 
+# Each entry: (system_key, label, xlsx path, element-column kind)
+#   kind = "single" → Element column holds a symbol like "Fe"
+#   kind = "pair"   → Element column holds "Ag-Au" (binary alloy pair)
+SYSTEMS = [
+    ("mono", "Monometallic",
+     ROOT / "clusterbench" / "analysis" / "results.xlsx",
+     "single"),
+    ("bi",   "Bimetallic",
+     Path("/DATA/user_scratch/khshin/ClusPot_bimetallic/clusterbench/analysis/results.xlsx"),
+     "pair"),
+]
+
 # (key, raw xlsx col, short label, unit, lower_is_better, group, target)
-# `target` is the property the metric measures, used for display: "MAE (E_form, eV/atom)"
 METRICS = [
     ("E_form_MAE",     "E_form MAE (eV/atom)",  "MAE",      "eV/atom", True,  "energy",     "E_form"),
     ("E_form_RMSE",    "E_form RMSE (eV/atom)", "RMSE",     "eV/atom", True,  "energy",     "E_form"),
@@ -40,7 +53,6 @@ METRICS = [
 ]
 COL_TO_KEY = {col: key for key, col, *_ in METRICS}
 
-# per-element metrics (subset of METRICS that exist in per-model sheets)
 ELEM_METRIC_COLS = [
     "E_form MAE (eV/atom)", "E_form RMSE (eV/atom)", "E_form R²",
     "E_form Pearson", "E_form Spearman",
@@ -51,7 +63,6 @@ ELEM_METRIC_COLS = [
 
 
 def _num(v):
-    """Return float or None for any cell. Strips ASE '-' placeholder."""
     if v is None:
         return None
     if isinstance(v, str):
@@ -71,24 +82,38 @@ def _num(v):
     return f
 
 
-def _fwt_threshold(col: str) -> float | None:
+def _fwt_threshold(col: str):
     m = re.match(r"FwT@([\d.]+)", col)
     return float(m.group(1)) if m else None
 
 
-def main() -> None:
-    xl = pd.ExcelFile(XLSX)
-    sheets = xl.sheet_names
-    print(f"sheets: {sheets}")
+def _canon_pair(label: str) -> str:
+    """Return alphabetically-ordered canonical pair key, e.g. 'Au-Ag' → 'Ag-Au'."""
+    parts = [p.strip() for p in str(label).split("-") if p.strip()]
+    if len(parts) != 2:
+        return str(label)
+    a, b = sorted(parts)
+    return f"{a}-{b}"
 
-    summary = pd.read_excel(XLSX, sheet_name="summary")
+
+def build_system(system_key: str, xlsx: Path, kind: str) -> dict:
+    print(f"\n── {system_key.upper()} · {xlsx} ──")
+    if not xlsx.exists():
+        print(f"  ! xlsx not found, skipping")
+        return None
+
+    xl = pd.ExcelFile(xlsx)
+    sheets = xl.sheet_names
+
+    summary = pd.read_excel(xlsx, sheet_name="summary")
     summary["Model"] = summary["Model"].ffill()
-    fwt = pd.read_excel(XLSX, sheet_name="fwt_curves")
-    fwt["Model"] = fwt["Model"].ffill()
+    fwt = pd.read_excel(xlsx, sheet_name="fwt_curves") if "fwt_curves" in sheets else None
+    if fwt is not None:
+        fwt["Model"] = fwt["Model"].ffill()
 
     models = list(summary["Model"].dropna().unique())
     datasets = list(summary["Dataset"].dropna().unique())
-    print(f"models: {len(models)}  datasets: {datasets}")
+    print(f"  models: {len(models)}  datasets: {datasets}")
 
     # ── summary block ────────────────────────────────────────────────────────
     summary_block: dict = {}
@@ -105,29 +130,33 @@ def main() -> None:
         bucket["N_missed"]  = _num(row.get("N_missed"))
 
     # ── fwt block ────────────────────────────────────────────────────────────
-    fwt_cols = [(c, _fwt_threshold(c)) for c in fwt.columns]
-    fwt_cols = [(c, t) for c, t in fwt_cols if t is not None]
-
     fwt_block: dict = {}
-    for _, row in fwt.iterrows():
-        m, d = row["Model"], row["Dataset"]
-        if pd.isna(m) or pd.isna(d):
-            continue
-        pts = []
-        for c, t in fwt_cols:
-            v = _num(row[c])
-            if v is not None:
-                pts.append({"threshold": t, "pct": v})
-        if pts:
-            fwt_block.setdefault(m, {})[d] = pts
+    fwt_thresholds: list = []
+    if fwt is not None:
+        fwt_cols = [(c, _fwt_threshold(c)) for c in fwt.columns]
+        fwt_cols = [(c, t) for c, t in fwt_cols if t is not None]
+        fwt_thresholds = [t for _, t in fwt_cols]
+        for _, row in fwt.iterrows():
+            m, d = row["Model"], row["Dataset"]
+            if pd.isna(m) or pd.isna(d):
+                continue
+            pts = []
+            for c, t in fwt_cols:
+                v = _num(row[c])
+                if v is not None:
+                    pts.append({"threshold": t, "pct": v})
+            if pts:
+                fwt_block.setdefault(m, {})[d] = pts
 
-    # ── per-model element block ──────────────────────────────────────────────
-    elements_block: dict = {}
-    active_elements: set[str] = set()
+    # ── per-model element / pair block ──────────────────────────────────────
+    detail_block: dict = {}            # {model: {dataset: {key: {type: {...}}}}}
+    active_keys: set[str] = set()      # element symbols (mono) or pair keys (bi)
+    active_elements: set[str] = set()  # for bi: unique elements that participate
+
     for m in models:
         if m not in sheets:
             continue
-        df = pd.read_excel(XLSX, sheet_name=m)
+        df = pd.read_excel(xlsx, sheet_name=m)
         df["Dataset"] = df["Dataset"].ffill()
         for _, row in df.iterrows():
             d   = row.get("Dataset")
@@ -135,9 +164,17 @@ def main() -> None:
             el  = row.get("Element")
             if pd.isna(d) or pd.isna(el) or pd.isna(t):
                 continue
-            active_elements.add(el)
-            ds_block = elements_block.setdefault(m, {}).setdefault(d, {})
-            entry = ds_block.setdefault(el, {})
+            if kind == "pair":
+                key = _canon_pair(el)
+                a, b = key.split("-") if "-" in key else (key, key)
+                active_elements.add(a)
+                active_elements.add(b)
+            else:
+                key = str(el)
+                active_elements.add(key)
+            active_keys.add(key)
+            ds_block = detail_block.setdefault(m, {}).setdefault(d, {})
+            entry = ds_block.setdefault(key, {})
             slot = entry.setdefault(t, {})
             slot["N_samples"] = _num(row.get("N_samples"))
             for col in ELEM_METRIC_COLS:
@@ -145,28 +182,67 @@ def main() -> None:
                     slot[COL_TO_KEY.get(col, col)] = _num(row[col])
 
     out = {
+        "kind":            kind,
+        "models":          models,
+        "n_models":        len(models),
+        "datasets":        datasets,
+        "active_elements": sorted(active_elements),
+        "summary":         summary_block,
+        "fwt":             fwt_block,
+        "fwt_thresholds":  fwt_thresholds,
+    }
+    if kind == "pair":
+        out["active_pairs"] = sorted(active_keys)
+        out["pairs"]        = detail_block
+    else:
+        out["elements"] = detail_block
+
+    print(f"  ✓ summary={len(summary_block)} models, "
+          f"{'pairs' if kind == 'pair' else 'elements'}={len(active_keys)}")
+    return out
+
+
+def main() -> None:
+    systems_block: dict = {}
+    for key, label, xlsx, kind in SYSTEMS:
+        sys_data = build_system(key, xlsx, kind)
+        if sys_data is None:
+            continue
+        sys_data["label"] = label
+        systems_block[key] = sys_data
+
+    # HEA placeholder so the front-end can render a "coming soon" page
+    systems_block["hea"] = {
+        "kind":     "hea",
+        "label":    "High-entropy",
+        "status":   "coming_soon",
+        "models":   [],
+        "datasets": [],
+    }
+
+    out = {
         "meta": {
             "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-            "n_models": len(models),
-            "datasets": datasets,
-            "active_elements": sorted(active_elements),
+            "systems": [k for k in ("mono", "bi", "hea") if k in systems_block],
             "metrics": [
                 {"key": k, "col": c, "label": l, "unit": u,
                  "lower_better": lb, "group": g, "target": t}
                 for k, c, l, u, lb, g, t in METRICS
             ],
-            "fwt_thresholds": [t for _, t in fwt_cols],
         },
-        "models":   models,
-        "summary":  summary_block,
-        "fwt":      fwt_block,
-        "elements": elements_block,
+        "systems": systems_block,
     }
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(out, ensure_ascii=False, indent=2))
     print(f"\n✓ wrote {OUT}  ({OUT.stat().st_size/1024:.1f} KB)")
-    print(f"  models: {len(models)}   active elements: {len(active_elements)}")
+    for sk, sv in systems_block.items():
+        if sv.get("status") == "coming_soon":
+            print(f"  · {sk}: coming_soon")
+        else:
+            print(f"  · {sk}: {sv['n_models']} models, "
+                  f"{len(sv.get('active_pairs', sv.get('active_elements', [])))} "
+                  f"{'pairs' if sv['kind']=='pair' else 'elements'}")
 
 
 if __name__ == "__main__":

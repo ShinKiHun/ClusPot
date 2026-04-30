@@ -27,21 +27,18 @@
 
   <!-- ── Top bar ─────────────────────────────── -->
   <header class="topbar">
-    <div class="brand">
+    <a class="brand" href="#home">
       <span class="square"></span>
       <div class="brand-text">
         <div class="brand-name">ClusPot</div>
         <div class="brand-sub">MLIP Cluster Benchmark</div>
       </div>
-    </div>
+    </a>
     <nav class="nav" id="nav">
-      <a href="#overview" class="active">Home</a>
-      <a href="#leaderboard">Leaderboard</a>
-      <a href="#compare">Compare</a>
-      <a href="#pareto">Pareto</a>
-      <a href="#fwt">FwT</a>
-      <a href="#periodic">Periodic</a>
-      <a href="#models">Models</a>
+      <a href="#home" data-page="home" class="active">Home</a>
+      <a href="#mono" data-page="mono">Monometallic</a>
+      <a href="#bi"   data-page="bi">Bimetallic</a>
+      <a href="#hea"  data-page="hea">High-entropy</a>
     </nav>
     <a class="gh-link" href="https://github.com/ShinKiHun/ClusPot"
        target="_blank" rel="noopener" title="ShinKiHun / ClusPot on GitHub">
@@ -55,238 +52,424 @@
 
   <main class="main">
 
-    <!-- ── Hero / Overview ─────────────────────────── -->
-    <section id="overview" class="hero">
-      <h1>Benchmarking MLIPs<br>on Metal Clusters</h1>
-      <p class="lead">
-        ClusPot evaluates machine-learning interatomic potentials against DFT references
-        on atomic clusters and bulk crystals. Energy, forces, robustness and runtime —
-        all measured on the same single-point set, ranked side by side.
-      </p>
-      <div class="hero-stats" id="hero-stats"></div>
+    <!-- ════════════════════════════════════════════════════════ -->
+    <!-- ─── HOME PAGE ─────────────────────────────────────────── -->
+    <!-- ════════════════════════════════════════════════════════ -->
+    <section class="page page--active" id="page-home">
 
-      <div class="cluster-cards">
-        <!-- ── Mono ─────────────────────────────── -->
-        <div class="cluster-card active">
-          <div class="cluster-svg">
-            <svg viewBox="0 0 100 100">
-              <!-- outer ring (12 atoms · 30° spacing · forms circular outline) -->
-              <circle cx="78"   cy="50"   r="8" fill="url(#sph-orange)"/>
-              <circle cx="74.2" cy="36"   r="8" fill="url(#sph-orange)"/>
-              <circle cx="64"   cy="25.8" r="8" fill="url(#sph-orange)"/>
-              <circle cx="50"   cy="22"   r="8" fill="url(#sph-orange)"/>
-              <circle cx="36"   cy="25.8" r="8" fill="url(#sph-orange)"/>
-              <circle cx="25.8" cy="36"   r="8" fill="url(#sph-orange)"/>
-              <circle cx="22"   cy="50"   r="8" fill="url(#sph-orange)"/>
-              <circle cx="25.8" cy="64"   r="8" fill="url(#sph-orange)"/>
-              <circle cx="36"   cy="74.2" r="8" fill="url(#sph-orange)"/>
-              <circle cx="50"   cy="78"   r="8" fill="url(#sph-orange)"/>
-              <circle cx="64"   cy="74.2" r="8" fill="url(#sph-orange)"/>
-              <circle cx="74.2" cy="64"   r="8" fill="url(#sph-orange)"/>
-              <!-- mid ring (6 atoms · 60° spacing) -->
-              <circle cx="62.1" cy="43"   r="12" fill="url(#sph-orange)"/>
-              <circle cx="50"   cy="36"   r="12" fill="url(#sph-orange)"/>
-              <circle cx="37.9" cy="43"   r="12" fill="url(#sph-orange)"/>
-              <circle cx="37.9" cy="57"   r="12" fill="url(#sph-orange)"/>
-              <circle cx="50"   cy="64"   r="12" fill="url(#sph-orange)"/>
-              <circle cx="62.1" cy="57"   r="12" fill="url(#sph-orange)"/>
-              <!-- center -->
-              <circle cx="50"   cy="50"   r="16" fill="url(#sph-orange)"/>
-            </svg>
-          </div>
-          <h3>Monometallic</h3>
-          <span class="badge active">● Active · 55 elements</span>
-          <p>Single-element clusters across the periodic table.</p>
-        </div>
+      <div class="hero">
+        <h1>Benchmarking MLIPs<br>on Metal Clusters</h1>
+        <p class="lead">
+          ClusPot evaluates machine-learning interatomic potentials against DFT references
+          on metal clusters across composition space — monometallic, bimetallic, and high-entropy.
+          Energy, forces, robustness, and runtime — all measured side by side.
+        </p>
+        <div class="hero-stats" id="hero-stats"></div>
 
-        <!-- ── Bimetallic ─────────────────────────── -->
-        <div class="cluster-card">
-          <div class="cluster-svg">
-            <svg viewBox="0 0 100 100">
-              <circle cx="78"   cy="50"   r="8" fill="url(#sph-navy)"/>
-              <circle cx="74.2" cy="36"   r="8" fill="url(#sph-orange)"/>
-              <circle cx="64"   cy="25.8" r="8" fill="url(#sph-navy)"/>
-              <circle cx="50"   cy="22"   r="8" fill="url(#sph-orange)"/>
-              <circle cx="36"   cy="25.8" r="8" fill="url(#sph-navy)"/>
-              <circle cx="25.8" cy="36"   r="8" fill="url(#sph-orange)"/>
-              <circle cx="22"   cy="50"   r="8" fill="url(#sph-navy)"/>
-              <circle cx="25.8" cy="64"   r="8" fill="url(#sph-orange)"/>
-              <circle cx="36"   cy="74.2" r="8" fill="url(#sph-navy)"/>
-              <circle cx="50"   cy="78"   r="8" fill="url(#sph-orange)"/>
-              <circle cx="64"   cy="74.2" r="8" fill="url(#sph-navy)"/>
-              <circle cx="74.2" cy="64"   r="8" fill="url(#sph-orange)"/>
+        <div class="cluster-cards">
+          <a class="cluster-card active" href="#mono">
+            <div class="cluster-svg">
+              <svg viewBox="0 0 100 100">
+                <circle cx="78"   cy="50"   r="8" fill="url(#sph-orange)"/>
+                <circle cx="74.2" cy="36"   r="8" fill="url(#sph-orange)"/>
+                <circle cx="64"   cy="25.8" r="8" fill="url(#sph-orange)"/>
+                <circle cx="50"   cy="22"   r="8" fill="url(#sph-orange)"/>
+                <circle cx="36"   cy="25.8" r="8" fill="url(#sph-orange)"/>
+                <circle cx="25.8" cy="36"   r="8" fill="url(#sph-orange)"/>
+                <circle cx="22"   cy="50"   r="8" fill="url(#sph-orange)"/>
+                <circle cx="25.8" cy="64"   r="8" fill="url(#sph-orange)"/>
+                <circle cx="36"   cy="74.2" r="8" fill="url(#sph-orange)"/>
+                <circle cx="50"   cy="78"   r="8" fill="url(#sph-orange)"/>
+                <circle cx="64"   cy="74.2" r="8" fill="url(#sph-orange)"/>
+                <circle cx="74.2" cy="64"   r="8" fill="url(#sph-orange)"/>
+                <circle cx="62.1" cy="43"   r="12" fill="url(#sph-orange)"/>
+                <circle cx="50"   cy="36"   r="12" fill="url(#sph-orange)"/>
+                <circle cx="37.9" cy="43"   r="12" fill="url(#sph-orange)"/>
+                <circle cx="37.9" cy="57"   r="12" fill="url(#sph-orange)"/>
+                <circle cx="50"   cy="64"   r="12" fill="url(#sph-orange)"/>
+                <circle cx="62.1" cy="57"   r="12" fill="url(#sph-orange)"/>
+                <circle cx="50"   cy="50"   r="16" fill="url(#sph-orange)"/>
+              </svg>
+            </div>
+            <h3>Monometallic</h3>
+            <span class="badge active" id="home-mono-badge">●  Active</span>
+            <p>Single-element clusters across the periodic table.</p>
+          </a>
 
-              <circle cx="62.1" cy="43"   r="12" fill="url(#sph-orange)"/>
-              <circle cx="50"   cy="36"   r="12" fill="url(#sph-navy)"/>
-              <circle cx="37.9" cy="43"   r="12" fill="url(#sph-orange)"/>
-              <circle cx="37.9" cy="57"   r="12" fill="url(#sph-navy)"/>
-              <circle cx="50"   cy="64"   r="12" fill="url(#sph-orange)"/>
-              <circle cx="62.1" cy="57"   r="12" fill="url(#sph-navy)"/>
+          <a class="cluster-card active" href="#bi">
+            <div class="cluster-svg">
+              <svg viewBox="0 0 100 100">
+                <circle cx="78"   cy="50"   r="8" fill="url(#sph-navy)"/>
+                <circle cx="74.2" cy="36"   r="8" fill="url(#sph-orange)"/>
+                <circle cx="64"   cy="25.8" r="8" fill="url(#sph-navy)"/>
+                <circle cx="50"   cy="22"   r="8" fill="url(#sph-orange)"/>
+                <circle cx="36"   cy="25.8" r="8" fill="url(#sph-navy)"/>
+                <circle cx="25.8" cy="36"   r="8" fill="url(#sph-orange)"/>
+                <circle cx="22"   cy="50"   r="8" fill="url(#sph-navy)"/>
+                <circle cx="25.8" cy="64"   r="8" fill="url(#sph-orange)"/>
+                <circle cx="36"   cy="74.2" r="8" fill="url(#sph-navy)"/>
+                <circle cx="50"   cy="78"   r="8" fill="url(#sph-orange)"/>
+                <circle cx="64"   cy="74.2" r="8" fill="url(#sph-navy)"/>
+                <circle cx="74.2" cy="64"   r="8" fill="url(#sph-orange)"/>
+                <circle cx="62.1" cy="43"   r="12" fill="url(#sph-orange)"/>
+                <circle cx="50"   cy="36"   r="12" fill="url(#sph-navy)"/>
+                <circle cx="37.9" cy="43"   r="12" fill="url(#sph-orange)"/>
+                <circle cx="37.9" cy="57"   r="12" fill="url(#sph-navy)"/>
+                <circle cx="50"   cy="64"   r="12" fill="url(#sph-orange)"/>
+                <circle cx="62.1" cy="57"   r="12" fill="url(#sph-navy)"/>
+                <circle cx="50"   cy="50"   r="16" fill="url(#sph-orange)"/>
+              </svg>
+            </div>
+            <h3>Bimetallic</h3>
+            <span class="badge active" id="home-bi-badge">●  Active</span>
+            <p>Binary alloy clusters across composition space.</p>
+          </a>
 
-              <circle cx="50"   cy="50"   r="16" fill="url(#sph-orange)"/>
-            </svg>
-          </div>
-          <h3>Bimetallic</h3>
-          <span class="badge coming">○ Coming soon</span>
-          <p>Binary alloy clusters across composition space.</p>
-        </div>
-
-        <!-- ── HEA (5 distinct colors, ~4 each) ──── -->
-        <div class="cluster-card">
-          <div class="cluster-svg">
-            <svg viewBox="0 0 100 100">
-              <circle cx="78"   cy="50"   r="8" fill="url(#sph-orange)"/>
-              <circle cx="74.2" cy="36"   r="8" fill="url(#sph-navy)"/>
-              <circle cx="64"   cy="25.8" r="8" fill="url(#sph-teal)"/>
-              <circle cx="50"   cy="22"   r="8" fill="url(#sph-gold)"/>
-              <circle cx="36"   cy="25.8" r="8" fill="url(#sph-magenta)"/>
-              <circle cx="25.8" cy="36"   r="8" fill="url(#sph-orange)"/>
-              <circle cx="22"   cy="50"   r="8" fill="url(#sph-navy)"/>
-              <circle cx="25.8" cy="64"   r="8" fill="url(#sph-teal)"/>
-              <circle cx="36"   cy="74.2" r="8" fill="url(#sph-gold)"/>
-              <circle cx="50"   cy="78"   r="8" fill="url(#sph-navy)"/>
-              <circle cx="64"   cy="74.2" r="8" fill="url(#sph-teal)"/>
-              <circle cx="74.2" cy="64"   r="8" fill="url(#sph-gold)"/>
-
-              <circle cx="62.1" cy="43"   r="12" fill="url(#sph-navy)"/>
-              <circle cx="50"   cy="36"   r="12" fill="url(#sph-teal)"/>
-              <circle cx="37.9" cy="43"   r="12" fill="url(#sph-gold)"/>
-              <circle cx="37.9" cy="57"   r="12" fill="url(#sph-magenta)"/>
-              <circle cx="50"   cy="64"   r="12" fill="url(#sph-orange)"/>
-              <circle cx="62.1" cy="57"   r="12" fill="url(#sph-magenta)"/>
-
-              <circle cx="50"   cy="50"   r="16" fill="url(#sph-orange)"/>
-            </svg>
-          </div>
-          <h3>High-entropy</h3>
-          <span class="badge coming">○ Coming soon</span>
-          <p>Four+ element high-entropy alloy clusters.</p>
+          <a class="cluster-card" href="#hea">
+            <div class="cluster-svg">
+              <svg viewBox="0 0 100 100">
+                <circle cx="78"   cy="50"   r="8" fill="url(#sph-orange)"/>
+                <circle cx="74.2" cy="36"   r="8" fill="url(#sph-navy)"/>
+                <circle cx="64"   cy="25.8" r="8" fill="url(#sph-teal)"/>
+                <circle cx="50"   cy="22"   r="8" fill="url(#sph-gold)"/>
+                <circle cx="36"   cy="25.8" r="8" fill="url(#sph-magenta)"/>
+                <circle cx="25.8" cy="36"   r="8" fill="url(#sph-orange)"/>
+                <circle cx="22"   cy="50"   r="8" fill="url(#sph-navy)"/>
+                <circle cx="25.8" cy="64"   r="8" fill="url(#sph-teal)"/>
+                <circle cx="36"   cy="74.2" r="8" fill="url(#sph-gold)"/>
+                <circle cx="50"   cy="78"   r="8" fill="url(#sph-navy)"/>
+                <circle cx="64"   cy="74.2" r="8" fill="url(#sph-teal)"/>
+                <circle cx="74.2" cy="64"   r="8" fill="url(#sph-gold)"/>
+                <circle cx="62.1" cy="43"   r="12" fill="url(#sph-navy)"/>
+                <circle cx="50"   cy="36"   r="12" fill="url(#sph-teal)"/>
+                <circle cx="37.9" cy="43"   r="12" fill="url(#sph-gold)"/>
+                <circle cx="37.9" cy="57"   r="12" fill="url(#sph-magenta)"/>
+                <circle cx="50"   cy="64"   r="12" fill="url(#sph-orange)"/>
+                <circle cx="62.1" cy="57"   r="12" fill="url(#sph-magenta)"/>
+                <circle cx="50"   cy="50"   r="16" fill="url(#sph-orange)"/>
+              </svg>
+            </div>
+            <h3>High-entropy</h3>
+            <span class="badge coming">○ Coming soon</span>
+            <p>Four+ element high-entropy alloy clusters.</p>
+          </a>
         </div>
       </div>
-    </section>
 
-    <!-- ── Leaderboard ─────────────────────────────── -->
-    <section id="leaderboard">
-      <div class="s-head">
-        <h2>Leaderboard</h2>
-        <span class="tag">summary</span>
-        <span class="desc">Click any column header to sort. Best value is highlighted.</span>
-      </div>
-
-      <div class="controls" id="lb-ctrl">
-        <label>Dataset</label>
-        <span class="seg" id="lb-ds-seg"></span>
-      </div>
-
-      <div class="lb-wrap">
-        <table class="lb" id="lb-table">
-          <thead></thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </section>
-
-    <!-- ── Model Comparison ────────────────────────── -->
-    <section id="compare">
-      <div class="s-head">
-        <h2>Model Comparison</h2>
-        <span class="tag">bar chart</span>
-        <span class="desc">Pick a metric. Models are sorted best→worst with an orange→navy gradient.</span>
-      </div>
-      <div class="controls" id="cmp-ctrl">
-        <label>Metric</label>
-        <select id="cmp-metric"></select>
-        <label style="margin-left:14px">Dataset</label>
-        <span class="seg" id="cmp-ds-seg"></span>
-      </div>
-      <div class="panel"><div id="cmp-plot" class="plot plot-tall"></div></div>
-    </section>
-
-    <!-- ── Pareto ──────────────────────────────────── -->
-    <section id="pareto">
-      <div class="s-head">
-        <h2>Pareto Frontier</h2>
-        <span class="tag">accuracy ⇄ speed</span>
-        <span class="desc">Lower-left corner is best. Pareto-optimal models are highlighted in orange.</span>
-      </div>
-      <div class="controls" id="par-ctrl">
-        <label>Y-axis</label>
-        <select id="par-metric"></select>
-        <label style="margin-left:14px">X-axis</label>
-        <select id="par-xmetric">
-          <option value="Time_med">Time / step (median, s)</option>
-          <option value="Time_mean">Time / step (mean, s)</option>
-        </select>
-        <label style="margin-left:14px">Dataset</label>
-        <span class="seg" id="par-ds-seg"></span>
-      </div>
-      <div class="panel"><div id="par-plot" class="plot plot-tall"></div></div>
-    </section>
-
-    <!-- ── FwT ─────────────────────────────────────── -->
-    <section id="fwt">
-      <div class="s-head">
-        <h2>Force within Threshold (FwT)</h2>
-        <span class="tag">robustness</span>
-        <span class="desc">Fraction of force components within ε. Click legend entries to toggle models.</span>
-      </div>
-      <div class="controls" id="fwt-ctrl">
-        <label>Dataset</label>
-        <span class="seg" id="fwt-ds-seg"></span>
-      </div>
-      <div class="panel"><div id="fwt-plot" class="plot plot-tall"></div></div>
-    </section>
-
-    <!-- ── Periodic Table ──────────────────────────── -->
-    <section id="periodic">
-      <div class="s-head">
-        <h2>Periodic Heatmap</h2>
-        <span class="tag">per-element</span>
-        <span class="desc">Colored by the chosen metric. Click an element to see all models.</span>
-      </div>
-
-      <div class="controls" id="pt-ctrl">
-        <label>Metric</label>
-        <select id="pt-metric"></select>
-        <label style="margin-left:14px">Model</label>
-        <select id="pt-model"></select>
-        <label style="margin-left:14px">Dataset</label>
-        <span class="seg" id="pt-ds-seg"></span>
-        <label style="margin-left:14px">Type</label>
-        <span class="seg" id="pt-type-seg">
-          <button class="on" data-v="normal">normal</button>
-          <button data-v="anomaly">anomaly</button>
-        </span>
-      </div>
-
-      <div class="pt-wrap">
-        <div>
-          <div class="pt" id="pt-grid"></div>
-          <div class="legend-bar" id="pt-legend">
-            <span id="pt-min">—</span>
-            <div class="bar"></div>
-            <span id="pt-max">—</span>
-          </div>
+      <section id="home-leaderboard">
+        <div class="s-head">
+          <h2>Global Leaderboard</h2>
+          <span class="tag">all systems</span>
+          <span class="desc">Top-line metrics for every (system, model). Sort any column.</span>
         </div>
-        <aside class="pt-side" id="pt-side">
-          <div class="empty-note">Click an active element on the table to see its values across all models.</div>
-        </aside>
+        <div class="lb-wrap">
+          <table class="lb" id="home-lb-table">
+            <thead></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+    </section>
+
+
+    <!-- ════════════════════════════════════════════════════════ -->
+    <!-- ─── MONO PAGE ─────────────────────────────────────────── -->
+    <!-- ════════════════════════════════════════════════════════ -->
+    <section class="page" id="page-mono">
+
+      <header class="page-head">
+        <h1>Monometallic Clusters</h1>
+        <p>Single-element clusters benchmarked across the periodic table. Click any element on the heatmap for a per-model breakdown.</p>
+      </header>
+
+      <section id="mono-leaderboard">
+        <div class="s-head">
+          <h2>Leaderboard</h2>
+          <span class="tag">summary</span>
+          <span class="desc">Click column headers to sort. Best value highlighted.</span>
+        </div>
+        <div class="controls">
+          <label>Dataset</label>
+          <span class="seg" id="mono-lb-ds-seg"></span>
+        </div>
+        <div class="lb-wrap">
+          <table class="lb" id="mono-lb-table"><thead></thead><tbody></tbody></table>
+        </div>
+      </section>
+
+      <section id="mono-compare">
+        <div class="s-head">
+          <h2>Model Comparison</h2>
+          <span class="tag">bar chart</span>
+          <span class="desc">Pick a metric. Models sorted best→worst with an orange→navy gradient.</span>
+        </div>
+        <div class="controls">
+          <label>Metric</label>
+          <select id="mono-cmp-metric"></select>
+          <label style="margin-left:14px">Dataset</label>
+          <span class="seg" id="mono-cmp-ds-seg"></span>
+        </div>
+        <div class="panel"><div id="mono-cmp-plot" class="plot plot-tall"></div></div>
+      </section>
+
+      <section id="mono-pareto">
+        <div class="s-head">
+          <h2>Pareto Frontier</h2>
+          <span class="tag">accuracy ⇄ speed</span>
+          <span class="desc">Lower-left is best. Pareto-optimal models highlighted in orange.</span>
+        </div>
+        <div class="controls">
+          <label>Y-axis</label>
+          <select id="mono-par-metric"></select>
+          <label style="margin-left:14px">X-axis</label>
+          <select id="mono-par-xmetric">
+            <option value="Time_med">Time / step (median, s)</option>
+            <option value="Time_mean">Time / step (mean, s)</option>
+          </select>
+          <label style="margin-left:14px">Dataset</label>
+          <span class="seg" id="mono-par-ds-seg"></span>
+        </div>
+        <div class="panel"><div id="mono-par-plot" class="plot plot-tall"></div></div>
+      </section>
+
+      <section id="mono-fwt">
+        <div class="s-head">
+          <h2>Force within Threshold (FwT)</h2>
+          <span class="tag">robustness</span>
+          <span class="desc">Fraction of force components within ε. Click legend entries to toggle.</span>
+        </div>
+        <div class="controls">
+          <label>Dataset</label>
+          <span class="seg" id="mono-fwt-ds-seg"></span>
+        </div>
+        <div class="panel"><div id="mono-fwt-plot" class="plot plot-tall"></div></div>
+      </section>
+
+      <section id="mono-periodic">
+        <div class="s-head">
+          <h2>Periodic Heatmap</h2>
+          <span class="tag">per-element</span>
+          <span class="desc">Colored by the chosen metric. Click an element for the full model breakdown.</span>
+        </div>
+        <div class="controls">
+          <label>Metric</label>
+          <select id="mono-pt-metric"></select>
+          <label style="margin-left:14px">Model</label>
+          <select id="mono-pt-model"></select>
+          <label style="margin-left:14px">Dataset</label>
+          <span class="seg" id="mono-pt-ds-seg"></span>
+          <label style="margin-left:14px">Type</label>
+          <span class="seg" id="mono-pt-type-seg">
+            <button class="on" data-v="normal">normal</button>
+            <button data-v="anomaly">anomaly</button>
+          </span>
+        </div>
+        <div class="pt-wrap">
+          <div>
+            <div class="pt" id="mono-pt-grid"></div>
+            <div class="legend-bar" id="mono-pt-legend">
+              <span id="mono-pt-min">—</span><div class="bar"></div><span id="mono-pt-max">—</span>
+            </div>
+          </div>
+          <aside class="pt-side" id="mono-pt-side">
+            <div class="empty-note">Click an active element on the table to see its values across all models.</div>
+          </aside>
+        </div>
+      </section>
+
+      <section id="mono-models">
+        <div class="s-head">
+          <h2>Per-Model Detail</h2>
+          <span class="tag">deep dive</span>
+          <span class="desc">Browse each MLIP's metrics and per-element breakdown.</span>
+        </div>
+        <div class="mdl-grid">
+          <div class="mdl-list" id="mono-mdl-list"></div>
+          <div class="mdl-card" id="mono-mdl-card"></div>
+        </div>
+      </section>
+    </section>
+
+
+    <!-- ════════════════════════════════════════════════════════ -->
+    <!-- ─── BI PAGE ───────────────────────────────────────────── -->
+    <!-- ════════════════════════════════════════════════════════ -->
+    <section class="page" id="page-bi">
+
+      <header class="page-head">
+        <h1>Bimetallic Clusters</h1>
+        <p>Binary alloy clusters spanning the transition-metal block. Inspect any pair via the matrix view, or click two elements on the periodic table.</p>
+      </header>
+
+      <section id="bi-leaderboard">
+        <div class="s-head">
+          <h2>Leaderboard</h2>
+          <span class="tag">summary</span>
+          <span class="desc">Click column headers to sort. Best value highlighted.</span>
+        </div>
+        <div class="controls">
+          <label>Dataset</label>
+          <span class="seg" id="bi-lb-ds-seg"></span>
+        </div>
+        <div class="lb-wrap">
+          <table class="lb" id="bi-lb-table"><thead></thead><tbody></tbody></table>
+        </div>
+      </section>
+
+      <section id="bi-compare">
+        <div class="s-head">
+          <h2>Model Comparison</h2>
+          <span class="tag">bar chart</span>
+          <span class="desc">Pick a metric. Models sorted best→worst with an orange→navy gradient.</span>
+        </div>
+        <div class="controls">
+          <label>Metric</label>
+          <select id="bi-cmp-metric"></select>
+          <label style="margin-left:14px">Dataset</label>
+          <span class="seg" id="bi-cmp-ds-seg"></span>
+        </div>
+        <div class="panel"><div id="bi-cmp-plot" class="plot plot-tall"></div></div>
+      </section>
+
+      <section id="bi-pareto">
+        <div class="s-head">
+          <h2>Pareto Frontier</h2>
+          <span class="tag">accuracy ⇄ speed</span>
+          <span class="desc">Lower-left is best. Pareto-optimal models highlighted in orange.</span>
+        </div>
+        <div class="controls">
+          <label>Y-axis</label>
+          <select id="bi-par-metric"></select>
+          <label style="margin-left:14px">X-axis</label>
+          <select id="bi-par-xmetric">
+            <option value="Time_med">Time / step (median, s)</option>
+            <option value="Time_mean">Time / step (mean, s)</option>
+          </select>
+          <label style="margin-left:14px">Dataset</label>
+          <span class="seg" id="bi-par-ds-seg"></span>
+        </div>
+        <div class="panel"><div id="bi-par-plot" class="plot plot-tall"></div></div>
+      </section>
+
+      <section id="bi-fwt">
+        <div class="s-head">
+          <h2>Force within Threshold (FwT)</h2>
+          <span class="tag">robustness</span>
+          <span class="desc">Fraction of force components within ε. Click legend entries to toggle.</span>
+        </div>
+        <div class="controls">
+          <label>Dataset</label>
+          <span class="seg" id="bi-fwt-ds-seg"></span>
+        </div>
+        <div class="panel"><div id="bi-fwt-plot" class="plot plot-tall"></div></div>
+      </section>
+
+      <!-- ─── Pair matrix (NxN) ─── -->
+      <section id="bi-pairmatrix">
+        <div class="s-head">
+          <h2>Pair Matrix</h2>
+          <span class="tag">A × B heatmap</span>
+          <span class="desc">Each cell = one binary alloy pair. Click a cell for a per-model breakdown.</span>
+        </div>
+        <div class="controls">
+          <label>Metric</label>
+          <select id="bi-pm-metric"></select>
+          <label style="margin-left:14px">Model</label>
+          <select id="bi-pm-model"></select>
+          <label style="margin-left:14px">Dataset</label>
+          <span class="seg" id="bi-pm-ds-seg"></span>
+        </div>
+        <div class="pm-wrap">
+          <div class="panel"><div id="bi-pm-plot" class="plot" style="min-height:560px"></div></div>
+          <aside class="pt-side" id="bi-pm-side">
+            <div class="empty-note">Click any cell to see all models' performance on that pair.</div>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ─── Two-click periodic table ─── -->
+      <section id="bi-periodic">
+        <div class="s-head">
+          <h2>Two-Click Periodic Table</h2>
+          <span class="tag">pick A, then B</span>
+          <span class="desc">Click element A first → eligible B partners highlight → click B for the pair detail.</span>
+        </div>
+        <div class="controls">
+          <label>Metric</label>
+          <select id="bi-pt-metric"></select>
+          <label style="margin-left:14px">Model</label>
+          <select id="bi-pt-model"></select>
+          <label style="margin-left:14px">Dataset</label>
+          <span class="seg" id="bi-pt-ds-seg"></span>
+          <button id="bi-pt-reset" class="reset-btn" style="margin-left:auto">Reset selection</button>
+        </div>
+        <div class="pt-wrap">
+          <div>
+            <div class="pt" id="bi-pt-grid"></div>
+            <div class="pt-status" id="bi-pt-status">Click any element to start.</div>
+            <div class="legend-bar" id="bi-pt-legend">
+              <span id="bi-pt-min">—</span><div class="bar"></div><span id="bi-pt-max">—</span>
+            </div>
+          </div>
+          <aside class="pt-side" id="bi-pt-side">
+            <div class="empty-note">Pick two elements above to see their pair's metrics across all models.</div>
+          </aside>
+        </div>
+      </section>
+
+      <section id="bi-models">
+        <div class="s-head">
+          <h2>Per-Model Detail</h2>
+          <span class="tag">deep dive</span>
+          <span class="desc">Browse each MLIP's metrics and top pairs by sample count.</span>
+        </div>
+        <div class="mdl-grid">
+          <div class="mdl-list" id="bi-mdl-list"></div>
+          <div class="mdl-card" id="bi-mdl-card"></div>
+        </div>
+      </section>
+    </section>
+
+
+    <!-- ════════════════════════════════════════════════════════ -->
+    <!-- ─── HEA PAGE (placeholder) ────────────────────────────── -->
+    <!-- ════════════════════════════════════════════════════════ -->
+    <section class="page" id="page-hea">
+      <header class="page-head">
+        <h1>High-entropy Alloys</h1>
+        <p>Five+ element high-entropy alloy clusters across composition families.</p>
+      </header>
+      <div class="coming-soon-panel">
+        <div class="cs-icon">
+          <svg viewBox="0 0 100 100">
+            <circle cx="78"   cy="50"   r="8" fill="url(#sph-orange)"/>
+            <circle cx="74.2" cy="36"   r="8" fill="url(#sph-navy)"/>
+            <circle cx="64"   cy="25.8" r="8" fill="url(#sph-teal)"/>
+            <circle cx="50"   cy="22"   r="8" fill="url(#sph-gold)"/>
+            <circle cx="36"   cy="25.8" r="8" fill="url(#sph-magenta)"/>
+            <circle cx="25.8" cy="36"   r="8" fill="url(#sph-orange)"/>
+            <circle cx="22"   cy="50"   r="8" fill="url(#sph-navy)"/>
+            <circle cx="25.8" cy="64"   r="8" fill="url(#sph-teal)"/>
+            <circle cx="36"   cy="74.2" r="8" fill="url(#sph-gold)"/>
+            <circle cx="50"   cy="78"   r="8" fill="url(#sph-navy)"/>
+            <circle cx="64"   cy="74.2" r="8" fill="url(#sph-teal)"/>
+            <circle cx="74.2" cy="64"   r="8" fill="url(#sph-gold)"/>
+            <circle cx="62.1" cy="43"   r="12" fill="url(#sph-navy)"/>
+            <circle cx="50"   cy="36"   r="12" fill="url(#sph-teal)"/>
+            <circle cx="37.9" cy="43"   r="12" fill="url(#sph-gold)"/>
+            <circle cx="37.9" cy="57"   r="12" fill="url(#sph-magenta)"/>
+            <circle cx="50"   cy="64"   r="12" fill="url(#sph-orange)"/>
+            <circle cx="62.1" cy="57"   r="12" fill="url(#sph-magenta)"/>
+            <circle cx="50"   cy="50"   r="16" fill="url(#sph-orange)"/>
+          </svg>
+        </div>
+        <h2>Coming soon</h2>
+        <p>HEA cluster benchmarks are being prepared. We're collecting DFT references over a curated composition family set, then will benchmark the same MLIP roster used here for mono- and bi-metallic systems.</p>
+        <p class="hint">Check back later — or follow the <a href="https://github.com/ShinKiHun/ClusPot" target="_blank" rel="noopener">GitHub repo</a> for updates.</p>
       </div>
     </section>
 
-    <!-- ── Per-Model ───────────────────────────────── -->
-    <section id="models">
-      <div class="s-head">
-        <h2>Per-Model Detail</h2>
-        <span class="tag">deep dive</span>
-        <span class="desc">Browse each MLIP's metrics and per-element breakdown.</span>
-      </div>
-
-      <div class="mdl-grid">
-        <div class="mdl-list" id="mdl-list"></div>
-        <div class="mdl-card" id="mdl-card"></div>
-      </div>
-    </section>
 
     <div class="footer">
       <span id="foot-left">ClusPot · MLIP Cluster Benchmark</span>

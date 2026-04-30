@@ -71,7 +71,10 @@ a:hover { color: var(--orange-hi); }
   gap: 10px;
   font-weight: 700;
   letter-spacing: 0.2px;
+  color: var(--text);
+  text-decoration: none;
 }
+.brand:hover { color: var(--text); }
 .brand .square {
   width: 14px;
   height: 14px;
@@ -154,6 +157,133 @@ section {
   scroll-margin-top: 24px;
 }
 
+/* ── Page routing ──────────────────────────────────────── */
+.page { display: none; }
+.page.page--active { display: block; }
+.page > section { margin-bottom: 64px; }
+
+.page-head {
+  text-align: left;
+  margin-bottom: 36px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--border);
+}
+.page-head h1 {
+  font-size: 36px;
+  margin: 0 0 6px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  background: linear-gradient(135deg, #FF6B35 0%, #FF9560 50%, #D4A870 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.page-head p {
+  color: var(--subtext);
+  font-size: 14.5px;
+  margin: 0;
+  max-width: 780px;
+  line-height: 1.6;
+}
+
+/* ── Coming-soon panel (HEA) ───────────────────────────── */
+.coming-soon-panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 56px 32px;
+  text-align: center;
+  max-width: 720px;
+  margin: 24px auto 0;
+  box-shadow: var(--shadow);
+}
+.coming-soon-panel .cs-icon {
+  width: 130px; height: 130px; margin: 0 auto 18px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+}
+.coming-soon-panel .cs-icon svg { width: 80%; height: 80%; }
+.coming-soon-panel h2 {
+  font-size: 26px;
+  color: var(--orange);
+  margin: 0 0 14px;
+  letter-spacing: -0.3px;
+}
+.coming-soon-panel p {
+  color: var(--subtext);
+  font-size: 14px;
+  line-height: 1.7;
+  margin: 0 0 14px;
+}
+.coming-soon-panel p.hint {
+  color: var(--subtext);
+  font-size: 12.5px;
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px dashed var(--border);
+}
+
+/* ── Pair-matrix layout (bi page) ──────────────────────── */
+.pm-wrap {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 22px;
+  align-items: start;
+}
+
+/* ── Reset button (bi periodic table) ──────────────────── */
+.reset-btn {
+  background: var(--card);
+  color: var(--subtext);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 12.5px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.14s ease;
+}
+.reset-btn:hover {
+  color: var(--text);
+  border-color: var(--orange);
+  background: var(--orange-soft);
+}
+
+.pt-status {
+  margin-top: 12px;
+  padding: 9px 14px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 12.5px;
+  color: var(--subtext);
+  font-family: var(--mono);
+}
+.pt-status .pick {
+  color: var(--orange);
+  font-weight: 600;
+}
+
+/* ── Bi-mode periodic table cell states ────────────────── */
+.cell.dim {
+  opacity: 0.18 !important;
+  pointer-events: none;
+  filter: grayscale(0.8);
+}
+.cell.eligible {
+  outline: 2px dashed rgba(255, 107, 53, 0.6);
+  outline-offset: -2px;
+  cursor: pointer;
+}
+.cell.first-pick {
+  outline: 2px solid var(--orange);
+  outline-offset: 1px;
+  z-index: 4;
+  box-shadow: 0 0 18px rgba(255, 107, 53, 0.45);
+}
+
 /* ── Hero ──────────────────────────────────────────────── */
 .hero {
   margin-bottom: 80px;
@@ -202,10 +332,14 @@ section {
   position: relative;
   overflow: hidden;
   transition: border-color 0.18s ease, transform 0.18s ease;
+  color: var(--text);
+  text-decoration: none;
+  display: block;
 }
 .cluster-card:hover {
   border-color: var(--border-hi);
   transform: translateY(-2px);
+  color: var(--text);
 }
 .cluster-card.active {
   border-color: rgba(255, 107, 53, 0.35);
@@ -436,6 +570,19 @@ table.lb td.rank {
   width: 38px;
   color: var(--subtext);
   text-align: center;
+}
+
+.sys-pill {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--mono);
+  letter-spacing: 0.3px;
+  background: color-mix(in srgb, var(--c) 18%, transparent);
+  color: var(--c);
+  border: 1px solid color-mix(in srgb, var(--c) 40%, transparent);
 }
 
 /* ── Periodic table ────────────────────────────────────── */
@@ -737,7 +884,8 @@ table.lb td.rank {
   .nav { flex-wrap: wrap; gap: 2px; margin: 0; }
   .nav a { padding: 6px 10px; font-size: 12.5px; }
   .meta-right { display: none; }
-  .pt-wrap, .mdl-grid { grid-template-columns: 1fr; }
+  .pt-wrap, .pm-wrap, .mdl-grid { grid-template-columns: 1fr; }
+  .page-head h1 { font-size: 26px; }
   .pt-side { position: static; }
   .main { padding: 24px 16px 60px; }
   .hero h1 { font-size: 34px; }

@@ -29,23 +29,41 @@ for light in list(bpy.data.lights):     bpy.data.lights.remove(light)
 for cam   in list(bpy.data.cameras):    bpy.data.cameras.remove(cam)
 
 
-# ─── FCC cuboctahedral magic-number cluster ──────────────────────────
-def cluster_atoms(n_shells, atom_r=1.0):
-    """Generate atom positions of an FCC cuboctahedral M(N) cluster.
-    n_shells=2 → 55 atoms (M55).  n_shells=3 → 147 atoms (M147)."""
-    a_nn   = 2.0 * atom_r
-    a_lat  = a_nn * math.sqrt(2)
-    R_max  = n_shells * a_nn
-    R2_max = R_max ** 2 + 0.001
-    atoms  = []
-    nm     = int(R_max / (a_lat / 2)) + 2
-    for h in range(-nm, nm + 1):
-        for k in range(-nm, nm + 1):
-            for l in range(-nm, nm + 1):
-                if (h + k + l) % 2:                continue
-                x, y, z = h * a_lat/2, k * a_lat/2, l * a_lat/2
-                if x*x + y*y + z*z <= R2_max:      atoms.append((x, y, z))
+# ─── Truly spherical onion-shell cluster ─────────────────────────────
+def fib_sphere(n, radius):
+    """N points uniformly distributed on a sphere of given radius
+    (Fibonacci-spiral lattice — no clustering, no FCC facets)."""
+    if n == 1:
+        return [(0.0, 0.0, 0.0)]
+    pts = []
+    golden = math.pi * (3 - math.sqrt(5))
+    for i in range(n):
+        y   = 1 - 2 * i / (n - 1)
+        rho = math.sqrt(max(0.0, 1 - y * y))
+        ang = golden * i
+        pts.append((math.cos(ang) * rho * radius,
+                    y * radius,
+                    math.sin(ang) * rho * radius))
+    return pts
+
+
+def spherical_cluster(n_shells, atom_r=1.0):
+    """Mackay-icosahedral magic atom counts (1, 12, 42, 92, 162) but laid
+    out on Fibonacci-uniform spheres → perfectly round cluster, no
+    crystallographic facets visible.
+
+    n_shells = 3 → 1 + 12 + 42 + 92 = 147 atoms (Mackay magic M147).
+    """
+    shell_counts = [12, 42, 92, 162, 252]
+    atoms = [(0.0, 0.0, 0.0)]
+    for s in range(n_shells):
+        r = (s + 1) * 2.0 * atom_r
+        atoms.extend(fib_sphere(shell_counts[s], r))
     return atoms
+
+
+# Backwards-compatible alias (script body uses the new name)
+cluster_atoms = spherical_cluster
 
 
 # ─── PBR metal materials ─────────────────────────────────────────────
@@ -69,15 +87,17 @@ mat_pd = make_metal("Palladium", (0.700, 0.680, 0.650), 0.26)
 
 
 # ─── Composition by mode ─────────────────────────────────────────────
+# Same physical size (M147 = 147 atoms, 3-shell sphere) for all three
+# modes — the user wants a side-by-side comparison, not size variation.
+N_SHELLS = 3
+atoms = cluster_atoms(n_shells=N_SHELLS)
+
 if mode == "mono":
-    atoms = cluster_atoms(n_shells=2)                    # M55
-    mats  = [mat_au] * len(atoms)
+    mats = [mat_au] * len(atoms)
 elif mode == "bi":
-    atoms = cluster_atoms(n_shells=3)                    # M147
     rng = random.Random(42)
     mats = [rng.choice([mat_au, mat_ag]) for _ in atoms]
 elif mode == "hea":
-    atoms = cluster_atoms(n_shells=3)                    # M147
     rng = random.Random(7)
     pool = [mat_au, mat_ag, mat_pt, mat_pd, mat_cu]
     mats = [rng.choice(pool) for _ in atoms]
@@ -131,24 +151,30 @@ def add_area_light(loc, rot, energy, size=5.0):
 # Key light — bright, upper-left, slightly in front
 add_area_light(loc=(-9, -9, 11),
                rot=(math.radians(40), 0, math.radians(-42)),
-               energy=8000, size=6)
+               energy=14000, size=6)
 # Fill — right side, softer
 add_area_light(loc=(8, -3, 4),
                rot=(math.radians(58), 0, math.radians(72)),
-               energy=2200, size=5)
+               energy=4500, size=5)
 # Rim — back, picks out silhouette
 add_area_light(loc=(0, 9, 7),
                rot=(math.radians(-55), 0, math.radians(180)),
-               energy=3500, size=5)
+               energy=6000, size=5)
 # Top fill — diffuse from above so the upper hemisphere isn't black
 add_area_light(loc=(0, 0, 14),
                rot=(0, 0, 0),
-               energy=800, size=10)
+               energy=2000, size=10)
+# Front fill — gentle key-side fill that brightens the camera-facing
+# side without killing the rim contrast
+add_area_light(loc=(0, -10, 2),
+               rot=(math.radians(80), 0, 0),
+               energy=2500, size=8)
 
 
 # ─── Camera ─────────────────────────────────────────────────────────
-n_shells   = 2 if mode == "mono" else 3
-R_cluster  = n_shells * 2.0 + 1.0          # bounding-sphere radius
+# All modes use the same N_SHELLS so the cluster is visually identical
+# in size across mono/bi/hea (only colours differ).
+R_cluster  = N_SHELLS * 2.0 + 1.0          # bounding-sphere radius
 cam_dist   = R_cluster * 4.5
 cam_height = R_cluster * 0.7
 
@@ -207,7 +233,7 @@ scene.render.image_settings.file_format = 'PNG'
 scene.render.image_settings.color_mode  = 'RGBA'
 scene.view_settings.view_transform      = 'Standard'
 scene.view_settings.look                = 'High Contrast'
-scene.view_settings.exposure            = 0.5
+scene.view_settings.exposure            = 1.1
 
 # Try GPU; silently fall back to CPU if no device
 try:

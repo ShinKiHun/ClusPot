@@ -30,6 +30,12 @@ for cam   in list(bpy.data.cameras):    bpy.data.cameras.remove(cam)
 
 
 # ─── Truly spherical onion-shell cluster ─────────────────────────────
+# Visible ball radius. The cluster's "lattice" spacing is 2.0 (so adjacent
+# shells are 2.0 apart), and any value < 1.0 leaves a small gap between
+# adjacent atoms — keeps them visually discrete instead of melted.
+ATOM_R = 0.85
+
+
 def fib_sphere(n, radius):
     """N points uniformly distributed on a sphere of given radius
     (Fibonacci-spiral lattice — no clustering, no FCC facets)."""
@@ -47,17 +53,24 @@ def fib_sphere(n, radius):
     return pts
 
 
-def spherical_cluster(n_shells, atom_r=1.0):
+def spherical_cluster(n_shells, atom_r=0.92):
     """Mackay-icosahedral magic atom counts (1, 12, 42, 92, 162) but laid
     out on Fibonacci-uniform spheres → perfectly round cluster, no
     crystallographic facets visible.
+
+    Default atom_r=0.92 leaves a small visible gap between adjacent
+    atoms so they read as discrete spheres instead of looking melted
+    together by indirect-light hot-spots in the crevices.
 
     n_shells = 3 → 1 + 12 + 42 + 92 = 147 atoms (Mackay magic M147).
     """
     shell_counts = [12, 42, 92, 162, 252]
     atoms = [(0.0, 0.0, 0.0)]
+    # Inter-shell separation stays at 2.0 (the unit "lattice") so the
+    # cluster keeps the same overall size; only the rendered ball size
+    # shrinks via atom_r.
     for s in range(n_shells):
-        r = (s + 1) * 2.0 * atom_r
+        r = (s + 1) * 2.0
         atoms.extend(fib_sphere(shell_counts[s], r))
     return atoms
 
@@ -109,7 +122,7 @@ print(f"[render] mode={mode}  atoms={len(atoms)}")
 # ─── Place atoms ────────────────────────────────────────────────────
 # Build a single low-poly sphere mesh, then instance it for every atom
 # (much faster than calling primitive_uv_sphere_add 147 times).
-bpy.ops.mesh.primitive_uv_sphere_add(radius=1.0, segments=48, ring_count=24)
+bpy.ops.mesh.primitive_uv_sphere_add(radius=ATOM_R, segments=48, ring_count=24)
 template = bpy.context.object
 template.name = "atom_template"
 bpy.ops.object.shade_smooth()
@@ -217,6 +230,16 @@ scene = bpy.context.scene
 scene.render.engine                     = 'CYCLES'
 scene.cycles.samples                    = 192
 scene.cycles.use_denoising              = True
+# Kill the "molten / welded crevice" look: cap glossy bounces at 1 so
+# gold-on-gold reflections can't compound into hot spots, and clamp
+# indirect light so any remaining radiosity hot-spot is brought down
+# to a sane level.
+scene.cycles.max_bounces                = 2
+scene.cycles.diffuse_bounces            = 0   # metals have no diffuse
+scene.cycles.glossy_bounces             = 1
+scene.cycles.transmission_bounces       = 0
+scene.cycles.volume_bounces             = 0
+scene.cycles.sample_clamp_indirect      = 1.5
 scene.render.resolution_x               = 1024
 scene.render.resolution_y               = 1024
 scene.render.film_transparent           = True

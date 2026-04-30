@@ -351,12 +351,40 @@ section {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--panel);
+  /* Subtle radial vignette so the cluster looks lit by a softbox above-left */
+  background:
+    radial-gradient(ellipse 70% 55% at 30% 30%, rgba(255, 200, 140, 0.05), transparent 70%),
+    radial-gradient(ellipse 110% 80% at 50% 130%, rgba(0, 0, 0, 0.55), transparent 60%),
+    var(--panel);
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
   margin-bottom: 12px;
+  overflow: hidden;
+  position: relative;
 }
-.cluster-svg svg { width: auto; height: 92%; max-width: 100%; }
+.cluster-svg svg {
+  width: auto;
+  height: 92%;
+  max-width: 100%;
+  /* Glossy treatment:
+       1. drop-shadow      → soft contact shadow under the whole cluster
+       2. extra drop-shadow → tighter rim glow for separation from the panel
+       3. saturate         → richer jewel-tone colors
+       4. contrast         → deeper shadows on each ball */
+  filter:
+    drop-shadow(0 6px 14px rgba(0, 0, 0, 0.55))
+    drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4))
+    saturate(1.12)
+    contrast(1.06);
+}
+/* Coming-soon HEA icon gets the same treatment so the placeholder matches */
+.coming-soon-panel .cs-icon svg {
+  filter:
+    drop-shadow(0 8px 18px rgba(0, 0, 0, 0.55))
+    drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4))
+    saturate(1.12)
+    contrast(1.06);
+}
 .cluster-card h3 {
   margin: 0 0 6px;
   font-size: 15px;

@@ -13,13 +13,55 @@
 <body>
 
 <!-- ── SVG sphere gradients (reused by all cluster illustrations) ── -->
+<!-- Five-stop radial gradients give a tight specular highlight + saturated mid-tone
+     + dark rim, which (combined with a CSS drop-shadow on the SVG) reads as a
+     glossy 3D ball without needing per-ball overlay highlights. -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
-    <radialGradient id="sph-orange"  cx="35%" cy="30%"><stop offset="0%" stop-color="#FFC9A8"/><stop offset="55%" stop-color="#FF6B35"/><stop offset="100%" stop-color="#7A2A0E"/></radialGradient>
-    <radialGradient id="sph-navy"    cx="35%" cy="30%"><stop offset="0%" stop-color="#7BA8DC"/><stop offset="55%" stop-color="#2A5CA8"/><stop offset="100%" stop-color="#0E2447"/></radialGradient>
-    <radialGradient id="sph-teal"    cx="35%" cy="30%"><stop offset="0%" stop-color="#88E2C8"/><stop offset="55%" stop-color="#2EA88E"/><stop offset="100%" stop-color="#0F4438"/></radialGradient>
-    <radialGradient id="sph-gold"    cx="35%" cy="30%"><stop offset="0%" stop-color="#F5DC9A"/><stop offset="55%" stop-color="#E0B040"/><stop offset="100%" stop-color="#6E5118"/></radialGradient>
-    <radialGradient id="sph-magenta" cx="35%" cy="30%"><stop offset="0%" stop-color="#E8A0C6"/><stop offset="55%" stop-color="#C04A8A"/><stop offset="100%" stop-color="#561C3C"/></radialGradient>
+    <radialGradient id="sph-orange" cx="30%" cy="25%" r="70%">
+      <stop offset="0%"   stop-color="#FFFFFF"/>
+      <stop offset="6%"   stop-color="#FFEAD4"/>
+      <stop offset="22%"  stop-color="#FFB680"/>
+      <stop offset="55%"  stop-color="#FF6B35"/>
+      <stop offset="85%"  stop-color="#8E2A14"/>
+      <stop offset="100%" stop-color="#2A0C04"/>
+    </radialGradient>
+
+    <radialGradient id="sph-navy" cx="30%" cy="25%" r="70%">
+      <stop offset="0%"   stop-color="#FFFFFF"/>
+      <stop offset="6%"   stop-color="#E0EBF8"/>
+      <stop offset="22%"  stop-color="#88B0DC"/>
+      <stop offset="55%"  stop-color="#2A5CA8"/>
+      <stop offset="85%"  stop-color="#0E2447"/>
+      <stop offset="100%" stop-color="#040A18"/>
+    </radialGradient>
+
+    <radialGradient id="sph-teal" cx="30%" cy="25%" r="70%">
+      <stop offset="0%"   stop-color="#FFFFFF"/>
+      <stop offset="6%"   stop-color="#E2F7EF"/>
+      <stop offset="22%"  stop-color="#7AD8BE"/>
+      <stop offset="55%"  stop-color="#2EA88E"/>
+      <stop offset="85%"  stop-color="#0F4438"/>
+      <stop offset="100%" stop-color="#03140F"/>
+    </radialGradient>
+
+    <radialGradient id="sph-gold" cx="30%" cy="25%" r="70%">
+      <stop offset="0%"   stop-color="#FFFFFF"/>
+      <stop offset="6%"   stop-color="#FFF6D8"/>
+      <stop offset="22%"  stop-color="#F4D274"/>
+      <stop offset="55%"  stop-color="#E0B040"/>
+      <stop offset="85%"  stop-color="#6E5118"/>
+      <stop offset="100%" stop-color="#1F1607"/>
+    </radialGradient>
+
+    <radialGradient id="sph-magenta" cx="30%" cy="25%" r="70%">
+      <stop offset="0%"   stop-color="#FFFFFF"/>
+      <stop offset="6%"   stop-color="#FBE0EE"/>
+      <stop offset="22%"  stop-color="#E098BE"/>
+      <stop offset="55%"  stop-color="#C04A8A"/>
+      <stop offset="85%"  stop-color="#561C3C"/>
+      <stop offset="100%" stop-color="#180610"/>
+    </radialGradient>
   </defs>
 </svg>
 

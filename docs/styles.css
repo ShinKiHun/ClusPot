@@ -367,24 +367,27 @@ section {
   overflow: hidden;
   position: relative;
 }
-.cluster-svg svg {
+.cluster-svg svg,
+.cluster-svg img {
   width: auto;
-  height: 92%;
+  height: 100%;
   max-width: 100%;
-  /* Polished-metal treatment: soft contact shadow + tight rim shadow.
-     Saturate stays at 1.0 so the metallic colours don't drift toward
-     candy; a small contrast bump deepens the rim. */
+  object-fit: contain;
+  display: block;
+  /* Soft contact shadow + tight rim shadow */
   filter:
     drop-shadow(0 7px 16px rgba(0, 0, 0, 0.65))
-    drop-shadow(0 1px 2px rgba(0, 0, 0, 0.55))
-    contrast(1.04);
+    drop-shadow(0 1px 2px rgba(0, 0, 0, 0.55));
 }
 /* Coming-soon HEA icon gets the same treatment so the placeholder matches */
-.coming-soon-panel .cs-icon svg {
+.coming-soon-panel .cs-icon svg,
+.coming-soon-panel .cs-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
   filter:
     drop-shadow(0 9px 20px rgba(0, 0, 0, 0.65))
-    drop-shadow(0 1px 2px rgba(0, 0, 0, 0.55))
-    contrast(1.04);
+    drop-shadow(0 1px 2px rgba(0, 0, 0, 0.55));
 }
 .cluster-card h3 {
   margin: 0 0 6px;

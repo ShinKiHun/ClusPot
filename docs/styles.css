@@ -351,11 +351,14 @@ section {
   display: flex;
   align-items: center;
   justify-content: center;
-  /* Subtle radial vignette so the cluster looks lit by a softbox above-left */
+  /* Deep-navy "studio" background like the Gemini reference: a soft warm
+     softbox above-left, a cool fill on the right, and a strong ground
+     shadow at the bottom. Panel itself is darkened a touch. */
   background:
-    radial-gradient(ellipse 70% 55% at 30% 30%, rgba(255, 200, 140, 0.05), transparent 70%),
-    radial-gradient(ellipse 110% 80% at 50% 130%, rgba(0, 0, 0, 0.55), transparent 60%),
-    var(--panel);
+    radial-gradient(ellipse 65% 55% at 28% 24%, rgba(255, 220, 170, 0.07), transparent 65%),
+    radial-gradient(ellipse 55% 50% at 80% 35%, rgba(80, 130, 200, 0.05), transparent 70%),
+    radial-gradient(ellipse 110% 85% at 50% 130%, rgba(0, 0, 0, 0.7), transparent 60%),
+    linear-gradient(180deg, #060a14 0%, #04070d 100%);
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
   margin-bottom: 12px;
@@ -366,24 +369,20 @@ section {
   width: auto;
   height: 92%;
   max-width: 100%;
-  /* Glossy treatment:
-       1. drop-shadow      → soft contact shadow under the whole cluster
-       2. extra drop-shadow → tighter rim glow for separation from the panel
-       3. saturate         → richer jewel-tone colors
-       4. contrast         → deeper shadows on each ball */
+  /* Polished-metal treatment: soft contact shadow + tight rim shadow.
+     Saturate stays at 1.0 so the metallic colours don't drift toward
+     candy; a small contrast bump deepens the rim. */
   filter:
-    drop-shadow(0 6px 14px rgba(0, 0, 0, 0.55))
-    drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4))
-    saturate(1.12)
-    contrast(1.06);
+    drop-shadow(0 7px 16px rgba(0, 0, 0, 0.65))
+    drop-shadow(0 1px 2px rgba(0, 0, 0, 0.55))
+    contrast(1.04);
 }
 /* Coming-soon HEA icon gets the same treatment so the placeholder matches */
 .coming-soon-panel .cs-icon svg {
   filter:
-    drop-shadow(0 8px 18px rgba(0, 0, 0, 0.55))
-    drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4))
-    saturate(1.12)
-    contrast(1.06);
+    drop-shadow(0 9px 20px rgba(0, 0, 0, 0.65))
+    drop-shadow(0 1px 2px rgba(0, 0, 0, 0.55))
+    contrast(1.04);
 }
 .cluster-card h3 {
   margin: 0 0 6px;

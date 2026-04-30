@@ -12,55 +12,76 @@
 </head>
 <body>
 
-<!-- ── SVG sphere gradients (reused by all cluster illustrations) ── -->
-<!-- Five-stop radial gradients give a tight specular highlight + saturated mid-tone
-     + dark rim, which (combined with a CSS drop-shadow on the SVG) reads as a
-     glossy 3D ball without needing per-ball overlay highlights. -->
+<!-- ── SVG sphere gradients (reused by all cluster illustrations) ──
+     Tuned to read as polished metal (Gemini-style poster render) rather
+     than candy-coated plastic. Each gradient: tight white-cream specular
+     highlight from upper-left, deep saturated mid-tone, almost-black rim. -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
-    <radialGradient id="sph-orange" cx="30%" cy="25%" r="70%">
-      <stop offset="0%"   stop-color="#FFFFFF"/>
-      <stop offset="6%"   stop-color="#FFEAD4"/>
-      <stop offset="22%"  stop-color="#FFB680"/>
-      <stop offset="55%"  stop-color="#FF6B35"/>
-      <stop offset="85%"  stop-color="#8E2A14"/>
-      <stop offset="100%" stop-color="#2A0C04"/>
+    <!-- Au — primary monometallic, polished gold -->
+    <radialGradient id="sph-gold" cx="30%" cy="25%" r="72%">
+      <stop offset="0%"   stop-color="#FFFCEC"/>
+      <stop offset="6%"   stop-color="#FFEFB0"/>
+      <stop offset="20%"  stop-color="#F2CD60"/>
+      <stop offset="44%"  stop-color="#C99826"/>
+      <stop offset="72%"  stop-color="#7C5510"/>
+      <stop offset="92%"  stop-color="#2E1E04"/>
+      <stop offset="100%" stop-color="#0A0601"/>
     </radialGradient>
 
-    <radialGradient id="sph-navy" cx="30%" cy="25%" r="70%">
+    <!-- Ag — silver companion (Au + Ag bimetallic looks à la Au25Ag34) -->
+    <radialGradient id="sph-silver" cx="30%" cy="25%" r="72%">
       <stop offset="0%"   stop-color="#FFFFFF"/>
-      <stop offset="6%"   stop-color="#E0EBF8"/>
-      <stop offset="22%"  stop-color="#88B0DC"/>
-      <stop offset="55%"  stop-color="#2A5CA8"/>
-      <stop offset="85%"  stop-color="#0E2447"/>
-      <stop offset="100%" stop-color="#040A18"/>
+      <stop offset="6%"   stop-color="#F2F4F8"/>
+      <stop offset="20%"  stop-color="#C9CFD8"/>
+      <stop offset="44%"  stop-color="#878E98"/>
+      <stop offset="72%"  stop-color="#3D424B"/>
+      <stop offset="92%"  stop-color="#13161B"/>
+      <stop offset="100%" stop-color="#03050A"/>
     </radialGradient>
 
-    <radialGradient id="sph-teal" cx="30%" cy="25%" r="70%">
-      <stop offset="0%"   stop-color="#FFFFFF"/>
-      <stop offset="6%"   stop-color="#E2F7EF"/>
-      <stop offset="22%"  stop-color="#7AD8BE"/>
-      <stop offset="55%"  stop-color="#2EA88E"/>
-      <stop offset="85%"  stop-color="#0F4438"/>
-      <stop offset="100%" stop-color="#03140F"/>
+    <!-- Cu — burnished copper (replaces the candy orange) -->
+    <radialGradient id="sph-orange" cx="30%" cy="25%" r="72%">
+      <stop offset="0%"   stop-color="#FFF1DC"/>
+      <stop offset="6%"   stop-color="#FFCC9A"/>
+      <stop offset="20%"  stop-color="#E89058"/>
+      <stop offset="44%"  stop-color="#B85F2A"/>
+      <stop offset="72%"  stop-color="#5C2A10"/>
+      <stop offset="92%"  stop-color="#1F0C04"/>
+      <stop offset="100%" stop-color="#080300"/>
     </radialGradient>
 
-    <radialGradient id="sph-gold" cx="30%" cy="25%" r="70%">
-      <stop offset="0%"   stop-color="#FFFFFF"/>
-      <stop offset="6%"   stop-color="#FFF6D8"/>
-      <stop offset="22%"  stop-color="#F4D274"/>
-      <stop offset="55%"  stop-color="#E0B040"/>
-      <stop offset="85%"  stop-color="#6E5118"/>
-      <stop offset="100%" stop-color="#1F1607"/>
+    <!-- Cool steel-blue (used as visual contrast on bi/HEA) -->
+    <radialGradient id="sph-navy" cx="30%" cy="25%" r="72%">
+      <stop offset="0%"   stop-color="#F4F7FB"/>
+      <stop offset="6%"   stop-color="#D2DEEC"/>
+      <stop offset="20%"  stop-color="#7AA3CC"/>
+      <stop offset="44%"  stop-color="#2C5C92"/>
+      <stop offset="72%"  stop-color="#0E2440"/>
+      <stop offset="92%"  stop-color="#040A14"/>
+      <stop offset="100%" stop-color="#01030A"/>
     </radialGradient>
 
-    <radialGradient id="sph-magenta" cx="30%" cy="25%" r="70%">
-      <stop offset="0%"   stop-color="#FFFFFF"/>
-      <stop offset="6%"   stop-color="#FBE0EE"/>
-      <stop offset="22%"  stop-color="#E098BE"/>
-      <stop offset="55%"  stop-color="#C04A8A"/>
-      <stop offset="85%"  stop-color="#561C3C"/>
-      <stop offset="100%" stop-color="#180610"/>
+    <!-- Patina/oxide green — HEA accent -->
+    <radialGradient id="sph-teal" cx="30%" cy="25%" r="72%">
+      <stop offset="0%"   stop-color="#EEFAF3"/>
+      <stop offset="6%"   stop-color="#BFEAD6"/>
+      <stop offset="20%"  stop-color="#5BB590"/>
+      <stop offset="44%"  stop-color="#1E7A60"/>
+      <stop offset="72%"  stop-color="#093A2C"/>
+      <stop offset="92%"  stop-color="#02110C"/>
+      <stop offset="100%" stop-color="#000604"/>
+    </radialGradient>
+
+    <!-- Wine / garnet — HEA accent -->
+    <radialGradient id="sph-magenta" cx="30%" cy="25%" r="72%">
+      <stop offset="0%"   stop-color="#F8E2EC"/>
+      <stop offset="6%"   stop-color="#E5A8C2"/>
+      <stop offset="20%"  stop-color="#B85F8A"/>
+      <stop offset="44%"  stop-color="#7A2A50"/>
+      <stop offset="72%"  stop-color="#3A0E22"/>
+      <stop offset="92%"  stop-color="#10040A"/>
+      <stop offset="100%" stop-color="#050103"/>
     </radialGradient>
   </defs>
 </svg>
@@ -113,25 +134,25 @@
           <a class="cluster-card active" href="#mono">
             <div class="cluster-svg">
               <svg viewBox="0 0 100 100">
-                <circle cx="78"   cy="50"   r="8" fill="url(#sph-orange)"/>
-                <circle cx="74.2" cy="36"   r="8" fill="url(#sph-orange)"/>
-                <circle cx="64"   cy="25.8" r="8" fill="url(#sph-orange)"/>
-                <circle cx="50"   cy="22"   r="8" fill="url(#sph-orange)"/>
-                <circle cx="36"   cy="25.8" r="8" fill="url(#sph-orange)"/>
-                <circle cx="25.8" cy="36"   r="8" fill="url(#sph-orange)"/>
-                <circle cx="22"   cy="50"   r="8" fill="url(#sph-orange)"/>
-                <circle cx="25.8" cy="64"   r="8" fill="url(#sph-orange)"/>
-                <circle cx="36"   cy="74.2" r="8" fill="url(#sph-orange)"/>
-                <circle cx="50"   cy="78"   r="8" fill="url(#sph-orange)"/>
-                <circle cx="64"   cy="74.2" r="8" fill="url(#sph-orange)"/>
-                <circle cx="74.2" cy="64"   r="8" fill="url(#sph-orange)"/>
-                <circle cx="62.1" cy="43"   r="12" fill="url(#sph-orange)"/>
-                <circle cx="50"   cy="36"   r="12" fill="url(#sph-orange)"/>
-                <circle cx="37.9" cy="43"   r="12" fill="url(#sph-orange)"/>
-                <circle cx="37.9" cy="57"   r="12" fill="url(#sph-orange)"/>
-                <circle cx="50"   cy="64"   r="12" fill="url(#sph-orange)"/>
-                <circle cx="62.1" cy="57"   r="12" fill="url(#sph-orange)"/>
-                <circle cx="50"   cy="50"   r="16" fill="url(#sph-orange)"/>
+                <circle cx="78"   cy="50"   r="8" fill="url(#sph-gold)"/>
+                <circle cx="74.2" cy="36"   r="8" fill="url(#sph-gold)"/>
+                <circle cx="64"   cy="25.8" r="8" fill="url(#sph-gold)"/>
+                <circle cx="50"   cy="22"   r="8" fill="url(#sph-gold)"/>
+                <circle cx="36"   cy="25.8" r="8" fill="url(#sph-gold)"/>
+                <circle cx="25.8" cy="36"   r="8" fill="url(#sph-gold)"/>
+                <circle cx="22"   cy="50"   r="8" fill="url(#sph-gold)"/>
+                <circle cx="25.8" cy="64"   r="8" fill="url(#sph-gold)"/>
+                <circle cx="36"   cy="74.2" r="8" fill="url(#sph-gold)"/>
+                <circle cx="50"   cy="78"   r="8" fill="url(#sph-gold)"/>
+                <circle cx="64"   cy="74.2" r="8" fill="url(#sph-gold)"/>
+                <circle cx="74.2" cy="64"   r="8" fill="url(#sph-gold)"/>
+                <circle cx="62.1" cy="43"   r="12" fill="url(#sph-gold)"/>
+                <circle cx="50"   cy="36"   r="12" fill="url(#sph-gold)"/>
+                <circle cx="37.9" cy="43"   r="12" fill="url(#sph-gold)"/>
+                <circle cx="37.9" cy="57"   r="12" fill="url(#sph-gold)"/>
+                <circle cx="50"   cy="64"   r="12" fill="url(#sph-gold)"/>
+                <circle cx="62.1" cy="57"   r="12" fill="url(#sph-gold)"/>
+                <circle cx="50"   cy="50"   r="16" fill="url(#sph-gold)"/>
               </svg>
             </div>
             <h3>Monometallic</h3>
@@ -142,25 +163,25 @@
           <a class="cluster-card active" href="#bi">
             <div class="cluster-svg">
               <svg viewBox="0 0 100 100">
-                <circle cx="78"   cy="50"   r="8" fill="url(#sph-navy)"/>
-                <circle cx="74.2" cy="36"   r="8" fill="url(#sph-orange)"/>
-                <circle cx="64"   cy="25.8" r="8" fill="url(#sph-navy)"/>
-                <circle cx="50"   cy="22"   r="8" fill="url(#sph-orange)"/>
-                <circle cx="36"   cy="25.8" r="8" fill="url(#sph-navy)"/>
-                <circle cx="25.8" cy="36"   r="8" fill="url(#sph-orange)"/>
-                <circle cx="22"   cy="50"   r="8" fill="url(#sph-navy)"/>
-                <circle cx="25.8" cy="64"   r="8" fill="url(#sph-orange)"/>
-                <circle cx="36"   cy="74.2" r="8" fill="url(#sph-navy)"/>
-                <circle cx="50"   cy="78"   r="8" fill="url(#sph-orange)"/>
-                <circle cx="64"   cy="74.2" r="8" fill="url(#sph-navy)"/>
-                <circle cx="74.2" cy="64"   r="8" fill="url(#sph-orange)"/>
-                <circle cx="62.1" cy="43"   r="12" fill="url(#sph-orange)"/>
-                <circle cx="50"   cy="36"   r="12" fill="url(#sph-navy)"/>
-                <circle cx="37.9" cy="43"   r="12" fill="url(#sph-orange)"/>
-                <circle cx="37.9" cy="57"   r="12" fill="url(#sph-navy)"/>
-                <circle cx="50"   cy="64"   r="12" fill="url(#sph-orange)"/>
-                <circle cx="62.1" cy="57"   r="12" fill="url(#sph-navy)"/>
-                <circle cx="50"   cy="50"   r="16" fill="url(#sph-orange)"/>
+                <circle cx="78"   cy="50"   r="8" fill="url(#sph-silver)"/>
+                <circle cx="74.2" cy="36"   r="8" fill="url(#sph-gold)"/>
+                <circle cx="64"   cy="25.8" r="8" fill="url(#sph-silver)"/>
+                <circle cx="50"   cy="22"   r="8" fill="url(#sph-gold)"/>
+                <circle cx="36"   cy="25.8" r="8" fill="url(#sph-silver)"/>
+                <circle cx="25.8" cy="36"   r="8" fill="url(#sph-gold)"/>
+                <circle cx="22"   cy="50"   r="8" fill="url(#sph-silver)"/>
+                <circle cx="25.8" cy="64"   r="8" fill="url(#sph-gold)"/>
+                <circle cx="36"   cy="74.2" r="8" fill="url(#sph-silver)"/>
+                <circle cx="50"   cy="78"   r="8" fill="url(#sph-gold)"/>
+                <circle cx="64"   cy="74.2" r="8" fill="url(#sph-silver)"/>
+                <circle cx="74.2" cy="64"   r="8" fill="url(#sph-gold)"/>
+                <circle cx="62.1" cy="43"   r="12" fill="url(#sph-gold)"/>
+                <circle cx="50"   cy="36"   r="12" fill="url(#sph-silver)"/>
+                <circle cx="37.9" cy="43"   r="12" fill="url(#sph-gold)"/>
+                <circle cx="37.9" cy="57"   r="12" fill="url(#sph-silver)"/>
+                <circle cx="50"   cy="64"   r="12" fill="url(#sph-gold)"/>
+                <circle cx="62.1" cy="57"   r="12" fill="url(#sph-silver)"/>
+                <circle cx="50"   cy="50"   r="16" fill="url(#sph-gold)"/>
               </svg>
             </div>
             <h3>Bimetallic</h3>

@@ -189,7 +189,7 @@ function metricValsFor(sysData, metricKey, dataset) {
 // ════════════════════════════════════════════════════════════════════════════
 function pageFromHash() {
   const h = (location.hash || "#home").replace("#", "").split("/")[0];
-  return ["home", "mono", "bi", "hea"].includes(h) ? h : "home";
+  return ["home", "mono", "bi", "hea", "reference"].includes(h) ? h : "home";
 }
 function initRouter() {
   document.querySelectorAll(".nav a").forEach(a => {
@@ -240,19 +240,22 @@ function initHomePage() {
   const m = DATA.systems.mono;
   const b = DATA.systems.bi;
 
-  // hero stats — combined view
-  const monoEl = m?.active_elements?.length || 0;
+  // hero stats — combined view (best AFwT computed from aggregated global rows)
+  const monoEl  = m?.active_elements?.length || 0;
   const biPairs = b?.active_pairs?.length || 0;
   const allModels = new Set([...(m?.models || []), ...(b?.models || [])]);
-  const bestAFwTMono = m ? Math.max(...metricValsFor(m, "AFwT", "total").filter(v => v != null), 0) : 0;
-  const bestAFwTBi   = b ? Math.max(...metricValsFor(b, "AFwT", "total").filter(v => v != null), 0) : 0;
-  const bestAFwT = Math.max(bestAFwTMono, bestAFwTBi);
+
+  let bestAFwT = 0;
+  allModels.forEach(mn => {
+    const agg = aggregateGlobalRow(mn);
+    if (agg && agg.AFwT != null && isFinite(agg.AFwT) && agg.AFwT > bestAFwT) bestAFwT = agg.AFwT;
+  });
 
   const stats = [
-    { v: allModels.size,                  k: "MLIPs benchmarked" },
-    { v: monoEl,                          k: "Mono elements" },
-    { v: biPairs,                         k: "Bi pairs" },
-    { v: `${bestAFwT.toFixed(1)}%`,       k: "Best AFwT (overall)" },
+    { v: allModels.size,             k: "MLIPs benchmarked" },
+    { v: monoEl,                     k: "Mono elements" },
+    { v: biPairs,                    k: "Bi pairs" },
+    { v: `${bestAFwT.toFixed(1)}%`,  k: "Best AFwT (aggregated)" },
   ];
   document.querySelector("#hero-stats").innerHTML =
     stats.map(s => `<div class="stat"><div class="v">${s.v}</div><div class="k">${s.k}</div></div>`).join("");
@@ -264,7 +267,69 @@ function initHomePage() {
   renderHomeLeaderboard();
 }
 
-const HOME_LB_KEYS = ["AFwT", "E_form_MAE", "Force_MAE", "Anomaly_pct", "Time_med"];
+// Metrics shown in the global leaderboard (Home page).
+const HOME_LB_KEYS = ["AFwT", "E_form_MAE", "E_form_RMSE", "Force_MAE", "Anomaly_pct", "Time_med"];
+
+// Metric weighting policy when aggregating across systems.
+//   wNormal: weight by N_normal           — use for accuracy on the "normal" subset
+//   wAll:    weight by N_normal + N_anomaly — use for rates / time spanning all samples
+const METRIC_WEIGHT = {
+  E_form_MAE: "wNormal", E_form_RMSE: "wNormal",
+  E_form_R2: "wNormal", E_form_Pearson: "wNormal", E_form_Spearman: "wNormal",
+  Force_MAE: "wNormal", Force_RMSE: "wNormal",
+  Force_R2: "wNormal", Force_Pearson: "wNormal", Force_Spearman: "wNormal", Force_cosine: "wNormal",
+  AFwT: "wAll", Anomaly_pct: "wAll",
+  Time_med: "wAll", Time_mean: "wAll",
+};
+// RMSE-style metrics combine via weighted root-mean-square instead of weighted mean.
+const RMS_METRICS = new Set(["E_form_RMSE", "Force_RMSE"]);
+
+function aggregateGlobalRow(modelName) {
+  const rows = [];
+  ["mono", "bi"].forEach(sk => {
+    const sys = DATA.systems[sk];
+    if (!sys) return;
+    const s = sys.summary[modelName]?.["total"];
+    if (!s) return;
+    rows.push({ system: sk, label: sys.label, ...s });
+  });
+  if (!rows.length) return null;
+
+  const wNormal = rows.map(r => r.N_normal || 0);
+  const wAll    = rows.map(r => (r.N_normal || 0) + (r.N_anomaly || 0));
+  const weights = { wNormal, wAll };
+
+  const wmean = (key, w) => {
+    let num = 0, den = 0;
+    rows.forEach((r, i) => {
+      const v = r[key];
+      if (v == null || !isFinite(v) || w[i] === 0) return;
+      num += v * w[i]; den += w[i];
+    });
+    return den > 0 ? num / den : null;
+  };
+  const wrms = (key, w) => {
+    let num = 0, den = 0;
+    rows.forEach((r, i) => {
+      const v = r[key];
+      if (v == null || !isFinite(v) || w[i] === 0) return;
+      num += v * v * w[i]; den += w[i];
+    });
+    return den > 0 ? Math.sqrt(num / den) : null;
+  };
+
+  const out = {
+    systems:   rows.map(r => r.system),
+    sysLabels: rows.map(r => r.label),
+    N_normal:  rows.reduce((a, r) => a + (r.N_normal  || 0), 0),
+    N_anomaly: rows.reduce((a, r) => a + (r.N_anomaly || 0), 0),
+  };
+  Object.keys(METRIC_WEIGHT).forEach(k => {
+    const w = weights[METRIC_WEIGHT[k]];
+    out[k] = RMS_METRICS.has(k) ? wrms(k, w) : wmean(k, w);
+  });
+  return out;
+}
 
 function renderHomeLeaderboard() {
   const tbl = document.querySelector("#home-lb-table");
@@ -272,50 +337,48 @@ function renderHomeLeaderboard() {
   const sortAsc = STATE.home.lb_sort.asc;
   const sortMeta = METRIC_BY_KEY[sortKey];
 
-  // build rows: one row per (system, model)
-  const rows = [];
+  // unique model list across all systems
+  const modelSet = new Set();
   ["mono", "bi"].forEach(sk => {
     const sys = DATA.systems[sk];
     if (!sys) return;
-    sys.models.forEach(mn => {
-      const s = sys.summary[mn]?.["total"] || {};
-      rows.push({
-        system: sk,
-        systemLabel: sys.label,
-        model: mn,
-        metrics: HOME_LB_KEYS.reduce((acc, k) => (acc[k] = s[k] ?? null, acc), {}),
-      });
-    });
+    sys.models.forEach(m => modelSet.add(m));
   });
 
-  // header
+  const rows = Array.from(modelSet)
+    .map(m => {
+      const agg = aggregateGlobalRow(m);
+      return agg ? { model: m, ...agg } : null;
+    })
+    .filter(Boolean);
+
+  // header — Model · Coverage · # · metrics · N
   let thead = `<tr>
     <th class="sticky-l" data-k="model">Model</th>
-    <th data-k="system">System</th>
+    <th data-k="coverage">Coverage</th>
     <th data-k="rank">#</th>`;
   HOME_LB_KEYS.forEach(k => {
     const m = METRIC_BY_KEY[k];
     const arrow = sortKey === k ? `<span class="arrow">${sortAsc ? "▲" : "▼"}</span>` : "";
     thead += `<th data-k="${k}">${metricLabel(m)}${arrow}</th>`;
   });
+  thead += `<th data-k="N">N samples</th>`;
   thead += `</tr>`;
   tbl.querySelector("thead").innerHTML = thead;
 
-  // best per metric (across all rows)
+  // best per metric (across all aggregated rows)
   const bestIdx = {};
   HOME_LB_KEYS.forEach(k => {
     const m = METRIC_BY_KEY[k];
-    const ranked = rows
-      .map((r, i) => [i, r.metrics[k]])
-      .filter(([, v]) => v != null);
+    const ranked = rows.map((r, i) => [i, r[k]]).filter(([, v]) => v != null);
     if (ranked.length) {
       ranked.sort((a, b) => m.lower_better ? a[1] - b[1] : b[1] - a[1]);
       bestIdx[k] = ranked[0][0];
     }
   });
 
-  // sort rows
-  const order = rows.map((r, i) => [i, r.metrics[sortKey]])
+  // sort rows by chosen metric
+  const order = rows.map((r, i) => [i, r[sortKey]])
     .sort((a, b) => {
       if (a[1] == null) return 1;
       if (b[1] == null) return -1;
@@ -328,25 +391,28 @@ function renderHomeLeaderboard() {
   let body = "";
   order.forEach((i, rk) => {
     const r = rows[i];
-    const sysCol = SYSTEM_COLORS[r.system] || PALETTE.subtext;
+    const covPills = r.systems.map((sk, j) =>
+      `<span class="sys-pill" style="--c:${SYSTEM_COLORS[sk] || PALETTE.subtext}">${r.sysLabels[j]}</span>`
+    ).join(" ");
     let row = `<tr>
       <td class="name">${r.model}</td>
-      <td><span class="sys-pill" style="--c:${sysCol}">${r.systemLabel}</span></td>
+      <td class="cov">${covPills}</td>
       <td class="rank">${rk + 1}</td>`;
     HOME_LB_KEYS.forEach(k => {
-      const v = r.metrics[k];
+      const v = r[k];
       const cls = bestIdx[k] === i ? "best" : "";
       row += `<td class="${cls}">${fmt(v, 4)}</td>`;
     });
+    row += `<td class="n-cell">${fmtInt((r.N_normal || 0) + (r.N_anomaly || 0))}</td>`;
     row += `</tr>`;
     body += row;
   });
   tbl.querySelector("tbody").innerHTML = body;
 
-  // header click → sort
+  // header click → sort (skip non-metric columns)
   tbl.querySelectorAll("thead th").forEach(th => {
     const k = th.dataset.k;
-    if (k === "model" || k === "rank" || k === "system") return;
+    if (!METRIC_BY_KEY[k]) return;
     th.addEventListener("click", () => {
       if (STATE.home.lb_sort.key === k) STATE.home.lb_sort.asc = !STATE.home.lb_sort.asc;
       else STATE.home.lb_sort = { key: k, asc: METRIC_BY_KEY[k]?.lower_better ?? false };

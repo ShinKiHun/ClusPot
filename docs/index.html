@@ -35,10 +35,11 @@
       </div>
     </a>
     <nav class="nav" id="nav">
-      <a href="#home" data-page="home" class="active">Home</a>
-      <a href="#mono" data-page="mono">Monometallic</a>
-      <a href="#bi"   data-page="bi">Bimetallic</a>
-      <a href="#hea"  data-page="hea">High-entropy</a>
+      <a href="#home"      data-page="home" class="active">Home</a>
+      <a href="#mono"      data-page="mono">Monometallic</a>
+      <a href="#bi"        data-page="bi">Bimetallic</a>
+      <a href="#hea"       data-page="hea">High-entropy</a>
+      <a href="#reference" data-page="reference">Reference</a>
     </nav>
     <a class="gh-link" href="https://github.com/ShinKiHun/ClusPot"
        target="_blank" rel="noopener" title="ShinKiHun / ClusPot on GitHub">
@@ -156,11 +157,79 @@
         </div>
       </div>
 
+      <!-- ── Methodology ────────────────────────── -->
+      <section id="home-methodology">
+        <div class="s-head">
+          <h2>Methodology</h2>
+          <span class="tag">how we benchmark</span>
+          <span class="desc">DFT-referenced single-point evaluation across every cluster ionic step.</span>
+        </div>
+
+        <div class="method-grid">
+          <div class="method-card">
+            <h3>Reference data</h3>
+            <ul>
+              <li><b>Cluster trajectories</b> — DFT relaxation runs on metal clusters; <em>every</em> ionic step (not only the final geometry) is benchmarked.</li>
+              <li><b>Bulk references</b> — pulled from the <a href="https://next-gen.materialsproject.org/" target="_blank" rel="noopener">Materials Project</a>. Each MLIP re-relaxes its own bulk to obtain a model-consistent <code>E<sub>bulk/atom</sub></code>.</li>
+              <li><b>Coverage</b> — monometallic across the periodic table, bimetallic across binary alloy pairs. HEA in preparation.</li>
+            </ul>
+          </div>
+
+          <div class="method-card">
+            <h3>Evaluation protocol</h3>
+            <ul>
+              <li>For each DFT trajectory step, the MLIP performs a <b>single-point evaluation</b> on the same nuclear configuration.</li>
+              <li>Energy and forces are compared to DFT directly — no MLIP relaxation, no atom-by-atom bias correction.</li>
+              <li>Configurations whose MLIP energy or forces explode (catastrophic failure) are split out as <b>anomaly</b> and reported separately from the <b>normal</b> regime.</li>
+            </ul>
+          </div>
+
+          <div class="method-card">
+            <h3>Formation energy</h3>
+            <p>Per-atom formation energy referenced to the model's own bulk:</p>
+            <pre><code>E_form = ( E_cluster − Σ<sub>i</sub> n<sub>i</sub> · E<sub>bulk,i</sub><sup>(per atom)</sup> ) / N<sub>atoms</sub></code></pre>
+            <ul>
+              <li>Monometallic: <code>n<sub>i</sub> = N</code> (single element).</li>
+              <li>Bimetallic: weighted by composition (<code>n<sub>A</sub></code>, <code>n<sub>B</sub></code>).</li>
+              <li>Each MLIP uses <em>its own</em> relaxed bulk energy — keeps the comparison internally consistent and avoids penalizing models for absolute energy offset.</li>
+            </ul>
+          </div>
+
+          <div class="method-card">
+            <h3>Robustness metrics</h3>
+            <ul>
+              <li><b>FwT@ε</b> — fraction of force components within threshold ε (eV/Å).</li>
+              <li><b>AFwT</b> — area / mean of FwT across the threshold sweep ε ∈ [0, 1] eV/Å. One number summarizing force fidelity.</li>
+              <li><b>Anomaly rate</b> — share of trajectory steps flagged as catastrophic relative to the full sample set.</li>
+            </ul>
+          </div>
+
+          <div class="method-card">
+            <h3>Aggregation rules</h3>
+            <ul>
+              <li><b>MAE / Anomaly% / AFwT / Time</b> — sample-weighted mean across systems (exact for MAE).</li>
+              <li><b>RMSE</b> — sample-weighted root-mean-square (exact when underlying errors share the same scale).</li>
+              <li><b>R² / Pearson / Spearman / cosine</b> — sample-weighted average across (model, dataset). Treat as a summary, not a re-derivation from raw pairs.</li>
+            </ul>
+          </div>
+
+          <div class="method-card">
+            <h3>What the Home leaderboard shows</h3>
+            <ul>
+              <li>One row per MLIP — metrics aggregated across <em>all available data</em> for that model (mono + bi where both exist).</li>
+              <li>The <b>Coverage</b> column tells you which systems contributed. A model evaluated only on mono is summarised over mono alone.</li>
+              <li>For per-system breakdowns, see the dedicated Monometallic / Bimetallic pages.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Global leaderboard ──────────────────── -->
       <section id="home-leaderboard">
         <div class="s-head">
           <h2>Global Leaderboard</h2>
-          <span class="tag">all systems</span>
-          <span class="desc">Top-line metrics for every (system, model). Sort any column.</span>
+          <span class="tag">all systems combined</span>
+          <span class="desc">One row per MLIP, aggregated across every cluster system it has been evaluated on.</span>
         </div>
         <div class="lb-wrap">
           <table class="lb" id="home-lb-table">
@@ -468,6 +537,130 @@
         <p>HEA cluster benchmarks are being prepared. We're collecting DFT references over a curated composition family set, then will benchmark the same MLIP roster used here for mono- and bi-metallic systems.</p>
         <p class="hint">Check back later — or follow the <a href="https://github.com/ShinKiHun/ClusPot" target="_blank" rel="noopener">GitHub repo</a> for updates.</p>
       </div>
+    </section>
+
+
+    <!-- ════════════════════════════════════════════════════════ -->
+    <!-- ─── REFERENCE PAGE ────────────────────────────────────── -->
+    <!-- ════════════════════════════════════════════════════════ -->
+    <section class="page" id="page-reference">
+
+      <header class="page-head">
+        <h1>References</h1>
+        <p>Source datasets, MLIP papers, and supporting tooling that ClusPot builds on. Please cite the original works when using results from this site.</p>
+      </header>
+
+      <section class="ref-block">
+        <div class="s-head">
+          <h2>Source datasets</h2>
+          <span class="tag">DFT reference</span>
+          <span class="desc">The QCD-derived cluster reference data and the bulk reference used for formation energies.</span>
+        </div>
+        <div class="ref-list">
+          <div class="ref-card">
+            <div class="ref-tag">Mono · cluster</div>
+            <h4>QCD — quasi-cluster database (monometallic clusters)</h4>
+            <p class="ref-cite" data-tbd>[ TBD — original QCD publication, please add citation ]</p>
+            <p class="ref-meta">Cluster geometries and DFT trajectories used as the monometallic reference set.</p>
+          </div>
+
+          <div class="ref-card">
+            <div class="ref-tag">Bi · cluster</div>
+            <h4>Bimetallic cluster reference</h4>
+            <p class="ref-cite" data-tbd>[ TBD — bimetallic dataset citation ]</p>
+            <p class="ref-meta">Binary alloy cluster geometries and DFT energies/forces across the transition-metal block.</p>
+          </div>
+
+          <div class="ref-card">
+            <div class="ref-tag">Bulk</div>
+            <h4>The Materials Project</h4>
+            <p class="ref-cite">A. Jain, S.P. Ong, G. Hautier, et al. <em>Commentary: The Materials Project: A materials genome approach to accelerating materials innovation</em>, APL Materials <b>1</b>, 011002 (2013). <a href="https://doi.org/10.1063/1.4812323" target="_blank" rel="noopener">DOI</a></p>
+            <p class="ref-meta">Bulk reference structures used to compute per-atom bulk energies for E<sub>form</sub>.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="ref-block">
+        <div class="s-head">
+          <h2>MLIPs benchmarked</h2>
+          <span class="tag">model papers</span>
+          <span class="desc">Cite the model paper if you use a specific MLIP's score from ClusPot.</span>
+        </div>
+        <div class="ref-list" id="ref-models">
+          <div class="ref-card">
+            <h4>MACE / MACE-MP</h4>
+            <p class="ref-cite">I. Batatia, D.P. Kovács, G. Simm, C. Ortner, G. Csányi. <em>MACE: Higher Order Equivariant Message Passing Neural Networks</em>, NeurIPS (2022). MACE-MP-0 foundation model: I. Batatia et al., <em>arXiv:2401.00096</em> (2024).</p>
+          </div>
+          <div class="ref-card">
+            <h4>NequIP</h4>
+            <p class="ref-cite">S. Batzner, A. Musaelian, L. Sun, et al. <em>E(3)-equivariant graph neural networks for data-efficient and accurate interatomic potentials</em>, Nature Communications <b>13</b>, 2453 (2022).</p>
+          </div>
+          <div class="ref-card">
+            <h4>Allegro</h4>
+            <p class="ref-cite">A. Musaelian, S. Batzner, A. Johansson, et al. <em>Learning local equivariant representations for large-scale atomistic dynamics</em>, Nature Communications <b>14</b>, 579 (2023).</p>
+          </div>
+          <div class="ref-card">
+            <h4>CHGNet</h4>
+            <p class="ref-cite">B. Deng, P. Zhong, K. Jun, et al. <em>CHGNet as a pretrained universal neural network potential for charge-informed atomistic modelling</em>, Nature Machine Intelligence <b>5</b>, 1031–1041 (2023).</p>
+          </div>
+          <div class="ref-card">
+            <h4>GRACE</h4>
+            <p class="ref-cite" data-tbd>[ TBD — GRACE-2L-OAM citation, please add ]</p>
+          </div>
+          <div class="ref-card">
+            <h4>eSEN</h4>
+            <p class="ref-cite" data-tbd>[ TBD — eSEN-30M-OAM citation, please add ]</p>
+          </div>
+          <div class="ref-card">
+            <h4>UMA</h4>
+            <p class="ref-cite" data-tbd>[ TBD — UMA / UMA-1p2-OMAT citation, please add ]</p>
+          </div>
+          <div class="ref-card">
+            <h4>AlphaNet</h4>
+            <p class="ref-cite" data-tbd>[ TBD — AlphaNet-OMA-v1 citation, please add ]</p>
+          </div>
+          <div class="ref-card">
+            <h4>Matlantis (PFP)</h4>
+            <p class="ref-cite">S. Takamoto, C. Shinagawa, D. Motoki, et al. <em>Towards universal neural network potential for material discovery applicable to arbitrary combination of 45 elements</em>, Nature Communications <b>13</b>, 2991 (2022).</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="ref-block">
+        <div class="s-head">
+          <h2>Tooling &amp; software</h2>
+          <span class="tag">infrastructure</span>
+          <span class="desc">Core stack that ClusPot's pipeline depends on.</span>
+        </div>
+        <div class="ref-list">
+          <div class="ref-card">
+            <h4>ASE — Atomic Simulation Environment</h4>
+            <p class="ref-cite">A.H. Larsen, J.J. Mortensen, J. Blomqvist, et al. <em>The atomic simulation environment — a Python library for working with atoms</em>, J. Phys.: Condens. Matter <b>29</b>, 273002 (2017).</p>
+          </div>
+          <div class="ref-card">
+            <h4>VASP</h4>
+            <p class="ref-cite">G. Kresse and J. Furthmüller. <em>Efficient iterative schemes for ab initio total-energy calculations using a plane-wave basis set</em>, Phys. Rev. B <b>54</b>, 11169 (1996).</p>
+          </div>
+          <div class="ref-card">
+            <h4>pymatgen</h4>
+            <p class="ref-cite">S.P. Ong, W.D. Richards, A. Jain, et al. <em>Python Materials Genomics (pymatgen): A robust, open-source Python library for materials analysis</em>, Comput. Mater. Sci. <b>68</b>, 314–319 (2013).</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="ref-block">
+        <div class="s-head">
+          <h2>Citing ClusPot</h2>
+          <span class="tag">this benchmark</span>
+        </div>
+        <div class="ref-list">
+          <div class="ref-card">
+            <h4>ClusPot benchmark site</h4>
+            <p class="ref-cite" data-tbd>[ TBD — ClusPot manuscript / preprint citation once available ]</p>
+            <p class="ref-meta">Source code &amp; data: <a href="https://github.com/ShinKiHun/ClusPot" target="_blank" rel="noopener">github.com/ShinKiHun/ClusPot</a></p>
+          </div>
+        </div>
+      </section>
     </section>
 
 

@@ -878,6 +878,135 @@ table.lb td.rank {
 }
 .cell-tip.show { opacity: 1; }
 
+/* ── Home methodology ──────────────────────────────────── */
+.method-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+}
+.method-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.method-card h3 {
+  margin: 0 0 4px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--orange);
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+.method-card p { margin: 0; color: var(--text); font-size: 13.5px; line-height: 1.55; }
+.method-card ul { margin: 4px 0 0; padding: 0 0 0 18px; color: var(--text); font-size: 13.5px; line-height: 1.6; }
+.method-card li { margin-bottom: 4px; }
+.method-card li b { color: var(--text); }
+.method-card em { color: var(--subtext); font-style: italic; }
+.method-card a { color: var(--orange); text-decoration: none; }
+.method-card a:hover { text-decoration: underline; }
+.method-card code {
+  background: var(--card-hi);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  color: var(--text);
+}
+.method-card pre {
+  background: var(--card-hi);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 12px;
+  margin: 6px 0;
+  overflow-x: auto;
+}
+.method-card pre code {
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-size: 12.5px;
+  color: var(--text);
+  white-space: pre;
+}
+
+/* ── Reference page ───────────────────────────────────── */
+.ref-block { margin-bottom: 32px; }
+.ref-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 14px;
+}
+.ref-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ref-card h4 {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text);
+  font-weight: 700;
+}
+.ref-tag {
+  display: inline-block;
+  align-self: flex-start;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 600;
+  font-family: var(--mono);
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  background: color-mix(in srgb, var(--orange) 15%, transparent);
+  color: var(--orange);
+  border: 1px solid color-mix(in srgb, var(--orange) 35%, transparent);
+}
+.ref-cite {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text);
+}
+.ref-cite[data-tbd] {
+  color: var(--subtext);
+  font-style: italic;
+  background: color-mix(in srgb, var(--orange) 6%, transparent);
+  border-left: 2px solid var(--orange);
+  padding: 6px 10px;
+  border-radius: 0 4px 4px 0;
+}
+.ref-cite a { color: var(--orange); text-decoration: none; }
+.ref-cite a:hover { text-decoration: underline; }
+.ref-cite em { color: var(--subtext); font-style: italic; }
+.ref-cite b { color: var(--text); }
+.ref-meta {
+  margin: 0;
+  font-size: 12px;
+  color: var(--subtext);
+  line-height: 1.5;
+}
+.ref-meta a { color: var(--subtext); text-decoration: underline; }
+.ref-meta a:hover { color: var(--orange); }
+
+/* ── Home leaderboard — coverage cell ────────────────── */
+table.lb td.cov { white-space: nowrap; }
+table.lb td.cov .sys-pill { margin-right: 4px; }
+table.lb td.n-cell {
+  font-family: var(--mono);
+  color: var(--subtext);
+  font-size: 12px;
+  text-align: right;
+}
+
 /* ── Responsive ────────────────────────────────────────── */
 @media (max-width: 1100px) {
   .topbar { gap: 12px; padding: 12px 18px; flex-wrap: wrap; }

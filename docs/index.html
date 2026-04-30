@@ -84,14 +84,22 @@
       <stop offset="100%" stop-color="#050103"/>
     </radialGradient>
 
-    <!-- Multiplies RGB by ~0.5 → use on back-layer balls so they read
-         as "in shadow / further away" without changing the gradient. -->
+    <!-- Multiplies RGB by ~0.45 → silhouette ring sits "in shadow / behind". -->
     <filter id="dim-back" x="-10%" y="-10%" width="120%" height="120%">
       <feColorMatrix type="matrix"
-        values="0.5 0   0   0 0
-                0   0.5 0   0 0
-                0   0   0.5 0 0
-                0   0   0   1 0"/>
+        values="0.45 0    0    0 0
+                0    0.45 0    0 0
+                0    0    0.45 0 0
+                0    0    0    1 0"/>
+    </filter>
+
+    <!-- Slightly less aggressive dim for the next-back ring. -->
+    <filter id="dim-mid" x="-10%" y="-10%" width="120%" height="120%">
+      <feColorMatrix type="matrix"
+        values="0.78 0    0    0 0
+                0    0.78 0    0 0
+                0    0    0.78 0 0
+                0    0    0    1 0"/>
     </filter>
 
     <!-- Soft ground-shadow under each cluster (separate from the CSS
@@ -150,27 +158,50 @@
           <a class="cluster-card active" href="#mono">
             <div class="cluster-svg">
               <svg viewBox="0 0 100 100">
-                <!-- Soft ground shadow under the cluster -->
-                <ellipse cx="50" cy="88" rx="30" ry="3.5"
-                  fill="#000" opacity="0.55" filter="url(#ground-blur)"/>
-                <!-- Back layer (dimmed → in-shadow / further away) -->
+                <!-- Concentric spherical projection of a polished gold nanocluster.
+                     Ring 1 (silhouette, 10 balls) is drawn first and dimmed →
+                     reads as the back hemisphere edge. Each successive ring
+                     comes forward in z, larger and brighter, ending at a
+                     central pole ball. -->
+                <ellipse cx="50" cy="93" rx="33" ry="3"
+                  fill="#000" opacity="0.7" filter="url(#ground-blur)"/>
+
+                <!-- Silhouette ring (10 balls, dimmed, polar 90°) -->
                 <g filter="url(#dim-back)">
-                  <circle cx="28" cy="22" r="9"  fill="url(#sph-gold)"/>
-                  <circle cx="52" cy="18" r="9"  fill="url(#sph-gold)"/>
-                  <circle cx="72" cy="24" r="9"  fill="url(#sph-gold)"/>
-                  <circle cx="80" cy="50" r="9"  fill="url(#sph-gold)"/>
+                  <circle cx="81.4" cy="60.2" r="7" fill="url(#sph-gold)"/>
+                  <circle cx="69.4" cy="76.7" r="7" fill="url(#sph-gold)"/>
+                  <circle cx="50"   cy="83"   r="7" fill="url(#sph-gold)"/>
+                  <circle cx="30.6" cy="76.7" r="7" fill="url(#sph-gold)"/>
+                  <circle cx="18.6" cy="60.2" r="7" fill="url(#sph-gold)"/>
+                  <circle cx="18.6" cy="39.8" r="7" fill="url(#sph-gold)"/>
+                  <circle cx="30.6" cy="23.3" r="7" fill="url(#sph-gold)"/>
+                  <circle cx="50"   cy="17"   r="7" fill="url(#sph-gold)"/>
+                  <circle cx="69.4" cy="23.3" r="7" fill="url(#sph-gold)"/>
+                  <circle cx="81.4" cy="39.8" r="7" fill="url(#sph-gold)"/>
                 </g>
-                <!-- Mid layer -->
-                <circle cx="20" cy="44" r="11" fill="url(#sph-gold)"/>
-                <circle cx="40" cy="28" r="12" fill="url(#sph-gold)"/>
-                <circle cx="60" cy="28" r="12" fill="url(#sph-gold)"/>
-                <circle cx="76" cy="60" r="10" fill="url(#sph-gold)"/>
-                <!-- Front cluster (largest, drawn last) -->
-                <circle cx="32" cy="48" r="14" fill="url(#sph-gold)"/>
-                <circle cx="50" cy="42" r="15" fill="url(#sph-gold)"/>
-                <circle cx="68" cy="50" r="14" fill="url(#sph-gold)"/>
-                <circle cx="40" cy="65" r="14" fill="url(#sph-gold)"/>
-                <circle cx="58" cy="67" r="14" fill="url(#sph-gold)"/>
+
+                <!-- Mid ring (8 balls, slightly dimmed) -->
+                <g filter="url(#dim-mid)">
+                  <circle cx="71"    cy="50"    r="9" fill="url(#sph-gold)"/>
+                  <circle cx="64.85" cy="64.85" r="9" fill="url(#sph-gold)"/>
+                  <circle cx="50"    cy="71"    r="9" fill="url(#sph-gold)"/>
+                  <circle cx="35.15" cy="64.85" r="9" fill="url(#sph-gold)"/>
+                  <circle cx="29"    cy="50"    r="9" fill="url(#sph-gold)"/>
+                  <circle cx="35.15" cy="35.15" r="9" fill="url(#sph-gold)"/>
+                  <circle cx="50"    cy="29"    r="9" fill="url(#sph-gold)"/>
+                  <circle cx="64.85" cy="35.15" r="9" fill="url(#sph-gold)"/>
+                </g>
+
+                <!-- Inner ring (6 balls, full brightness) -->
+                <circle cx="59.5" cy="55.5" r="10" fill="url(#sph-gold)"/>
+                <circle cx="50"   cy="61"   r="10" fill="url(#sph-gold)"/>
+                <circle cx="40.5" cy="55.5" r="10" fill="url(#sph-gold)"/>
+                <circle cx="40.5" cy="44.5" r="10" fill="url(#sph-gold)"/>
+                <circle cx="50"   cy="39"   r="10" fill="url(#sph-gold)"/>
+                <circle cx="59.5" cy="44.5" r="10" fill="url(#sph-gold)"/>
+
+                <!-- Center pole (drawn last, largest) -->
+                <circle cx="50" cy="50" r="13" fill="url(#sph-gold)"/>
               </svg>
             </div>
             <h3>Monometallic</h3>
@@ -181,23 +212,41 @@
           <a class="cluster-card active" href="#bi">
             <div class="cluster-svg">
               <svg viewBox="0 0 100 100">
-                <ellipse cx="50" cy="88" rx="30" ry="3.5"
-                  fill="#000" opacity="0.55" filter="url(#ground-blur)"/>
+                <ellipse cx="50" cy="93" rx="33" ry="3"
+                  fill="#000" opacity="0.7" filter="url(#ground-blur)"/>
+
                 <g filter="url(#dim-back)">
-                  <circle cx="28" cy="22" r="9"  fill="url(#sph-silver)"/>
-                  <circle cx="52" cy="18" r="9"  fill="url(#sph-gold)"/>
-                  <circle cx="72" cy="24" r="9"  fill="url(#sph-silver)"/>
-                  <circle cx="80" cy="50" r="9"  fill="url(#sph-gold)"/>
+                  <circle cx="81.4" cy="60.2" r="7" fill="url(#sph-silver)"/>
+                  <circle cx="69.4" cy="76.7" r="7" fill="url(#sph-gold)"/>
+                  <circle cx="50"   cy="83"   r="7" fill="url(#sph-silver)"/>
+                  <circle cx="30.6" cy="76.7" r="7" fill="url(#sph-gold)"/>
+                  <circle cx="18.6" cy="60.2" r="7" fill="url(#sph-silver)"/>
+                  <circle cx="18.6" cy="39.8" r="7" fill="url(#sph-gold)"/>
+                  <circle cx="30.6" cy="23.3" r="7" fill="url(#sph-silver)"/>
+                  <circle cx="50"   cy="17"   r="7" fill="url(#sph-gold)"/>
+                  <circle cx="69.4" cy="23.3" r="7" fill="url(#sph-silver)"/>
+                  <circle cx="81.4" cy="39.8" r="7" fill="url(#sph-gold)"/>
                 </g>
-                <circle cx="20" cy="44" r="11" fill="url(#sph-gold)"/>
-                <circle cx="40" cy="28" r="12" fill="url(#sph-silver)"/>
-                <circle cx="60" cy="28" r="12" fill="url(#sph-gold)"/>
-                <circle cx="76" cy="60" r="10" fill="url(#sph-silver)"/>
-                <circle cx="32" cy="48" r="14" fill="url(#sph-silver)"/>
-                <circle cx="50" cy="42" r="15" fill="url(#sph-gold)"/>
-                <circle cx="68" cy="50" r="14" fill="url(#sph-silver)"/>
-                <circle cx="40" cy="65" r="14" fill="url(#sph-gold)"/>
-                <circle cx="58" cy="67" r="14" fill="url(#sph-silver)"/>
+
+                <g filter="url(#dim-mid)">
+                  <circle cx="71"    cy="50"    r="9" fill="url(#sph-gold)"/>
+                  <circle cx="64.85" cy="64.85" r="9" fill="url(#sph-silver)"/>
+                  <circle cx="50"    cy="71"    r="9" fill="url(#sph-gold)"/>
+                  <circle cx="35.15" cy="64.85" r="9" fill="url(#sph-silver)"/>
+                  <circle cx="29"    cy="50"    r="9" fill="url(#sph-gold)"/>
+                  <circle cx="35.15" cy="35.15" r="9" fill="url(#sph-silver)"/>
+                  <circle cx="50"    cy="29"    r="9" fill="url(#sph-gold)"/>
+                  <circle cx="64.85" cy="35.15" r="9" fill="url(#sph-silver)"/>
+                </g>
+
+                <circle cx="59.5" cy="55.5" r="10" fill="url(#sph-silver)"/>
+                <circle cx="50"   cy="61"   r="10" fill="url(#sph-gold)"/>
+                <circle cx="40.5" cy="55.5" r="10" fill="url(#sph-silver)"/>
+                <circle cx="40.5" cy="44.5" r="10" fill="url(#sph-gold)"/>
+                <circle cx="50"   cy="39"   r="10" fill="url(#sph-silver)"/>
+                <circle cx="59.5" cy="44.5" r="10" fill="url(#sph-gold)"/>
+
+                <circle cx="50" cy="50" r="13" fill="url(#sph-gold)"/>
               </svg>
             </div>
             <h3>Bimetallic</h3>
@@ -208,23 +257,41 @@
           <a class="cluster-card" href="#hea">
             <div class="cluster-svg">
               <svg viewBox="0 0 100 100">
-                <ellipse cx="50" cy="88" rx="30" ry="3.5"
-                  fill="#000" opacity="0.55" filter="url(#ground-blur)"/>
+                <ellipse cx="50" cy="93" rx="33" ry="3"
+                  fill="#000" opacity="0.7" filter="url(#ground-blur)"/>
+
                 <g filter="url(#dim-back)">
-                  <circle cx="28" cy="22" r="9"  fill="url(#sph-silver)"/>
-                  <circle cx="52" cy="18" r="9"  fill="url(#sph-teal)"/>
-                  <circle cx="72" cy="24" r="9"  fill="url(#sph-orange)"/>
-                  <circle cx="80" cy="50" r="9"  fill="url(#sph-magenta)"/>
+                  <circle cx="81.4" cy="60.2" r="7" fill="url(#sph-gold)"/>
+                  <circle cx="69.4" cy="76.7" r="7" fill="url(#sph-orange)"/>
+                  <circle cx="50"   cy="83"   r="7" fill="url(#sph-silver)"/>
+                  <circle cx="30.6" cy="76.7" r="7" fill="url(#sph-teal)"/>
+                  <circle cx="18.6" cy="60.2" r="7" fill="url(#sph-magenta)"/>
+                  <circle cx="18.6" cy="39.8" r="7" fill="url(#sph-gold)"/>
+                  <circle cx="30.6" cy="23.3" r="7" fill="url(#sph-orange)"/>
+                  <circle cx="50"   cy="17"   r="7" fill="url(#sph-silver)"/>
+                  <circle cx="69.4" cy="23.3" r="7" fill="url(#sph-teal)"/>
+                  <circle cx="81.4" cy="39.8" r="7" fill="url(#sph-magenta)"/>
                 </g>
-                <circle cx="20" cy="44" r="11" fill="url(#sph-gold)"/>
-                <circle cx="40" cy="28" r="12" fill="url(#sph-orange)"/>
-                <circle cx="60" cy="28" r="12" fill="url(#sph-silver)"/>
-                <circle cx="76" cy="60" r="10" fill="url(#sph-teal)"/>
-                <circle cx="32" cy="48" r="14" fill="url(#sph-magenta)"/>
-                <circle cx="50" cy="42" r="15" fill="url(#sph-gold)"/>
-                <circle cx="68" cy="50" r="14" fill="url(#sph-orange)"/>
-                <circle cx="40" cy="65" r="14" fill="url(#sph-silver)"/>
-                <circle cx="58" cy="67" r="14" fill="url(#sph-gold)"/>
+
+                <g filter="url(#dim-mid)">
+                  <circle cx="71"    cy="50"    r="9" fill="url(#sph-silver)"/>
+                  <circle cx="64.85" cy="64.85" r="9" fill="url(#sph-gold)"/>
+                  <circle cx="50"    cy="71"    r="9" fill="url(#sph-magenta)"/>
+                  <circle cx="35.15" cy="64.85" r="9" fill="url(#sph-orange)"/>
+                  <circle cx="29"    cy="50"    r="9" fill="url(#sph-teal)"/>
+                  <circle cx="35.15" cy="35.15" r="9" fill="url(#sph-silver)"/>
+                  <circle cx="50"    cy="29"    r="9" fill="url(#sph-gold)"/>
+                  <circle cx="64.85" cy="35.15" r="9" fill="url(#sph-orange)"/>
+                </g>
+
+                <circle cx="59.5" cy="55.5" r="10" fill="url(#sph-magenta)"/>
+                <circle cx="50"   cy="61"   r="10" fill="url(#sph-gold)"/>
+                <circle cx="40.5" cy="55.5" r="10" fill="url(#sph-silver)"/>
+                <circle cx="40.5" cy="44.5" r="10" fill="url(#sph-teal)"/>
+                <circle cx="50"   cy="39"   r="10" fill="url(#sph-orange)"/>
+                <circle cx="59.5" cy="44.5" r="10" fill="url(#sph-gold)"/>
+
+                <circle cx="50" cy="50" r="13" fill="url(#sph-gold)"/>
               </svg>
             </div>
             <h3>High-entropy</h3>
@@ -589,23 +656,41 @@
       <div class="coming-soon-panel">
         <div class="cs-icon">
           <svg viewBox="0 0 100 100">
-            <ellipse cx="50" cy="88" rx="30" ry="3.5"
-              fill="#000" opacity="0.55" filter="url(#ground-blur)"/>
+            <ellipse cx="50" cy="93" rx="33" ry="3"
+              fill="#000" opacity="0.7" filter="url(#ground-blur)"/>
+
             <g filter="url(#dim-back)">
-              <circle cx="28" cy="22" r="9"  fill="url(#sph-silver)"/>
-              <circle cx="52" cy="18" r="9"  fill="url(#sph-teal)"/>
-              <circle cx="72" cy="24" r="9"  fill="url(#sph-orange)"/>
-              <circle cx="80" cy="50" r="9"  fill="url(#sph-magenta)"/>
+              <circle cx="81.4" cy="60.2" r="7" fill="url(#sph-gold)"/>
+              <circle cx="69.4" cy="76.7" r="7" fill="url(#sph-orange)"/>
+              <circle cx="50"   cy="83"   r="7" fill="url(#sph-silver)"/>
+              <circle cx="30.6" cy="76.7" r="7" fill="url(#sph-teal)"/>
+              <circle cx="18.6" cy="60.2" r="7" fill="url(#sph-magenta)"/>
+              <circle cx="18.6" cy="39.8" r="7" fill="url(#sph-gold)"/>
+              <circle cx="30.6" cy="23.3" r="7" fill="url(#sph-orange)"/>
+              <circle cx="50"   cy="17"   r="7" fill="url(#sph-silver)"/>
+              <circle cx="69.4" cy="23.3" r="7" fill="url(#sph-teal)"/>
+              <circle cx="81.4" cy="39.8" r="7" fill="url(#sph-magenta)"/>
             </g>
-            <circle cx="20" cy="44" r="11" fill="url(#sph-gold)"/>
-            <circle cx="40" cy="28" r="12" fill="url(#sph-orange)"/>
-            <circle cx="60" cy="28" r="12" fill="url(#sph-silver)"/>
-            <circle cx="76" cy="60" r="10" fill="url(#sph-teal)"/>
-            <circle cx="32" cy="48" r="14" fill="url(#sph-magenta)"/>
-            <circle cx="50" cy="42" r="15" fill="url(#sph-gold)"/>
-            <circle cx="68" cy="50" r="14" fill="url(#sph-orange)"/>
-            <circle cx="40" cy="65" r="14" fill="url(#sph-silver)"/>
-            <circle cx="58" cy="67" r="14" fill="url(#sph-gold)"/>
+
+            <g filter="url(#dim-mid)">
+              <circle cx="71"    cy="50"    r="9" fill="url(#sph-silver)"/>
+              <circle cx="64.85" cy="64.85" r="9" fill="url(#sph-gold)"/>
+              <circle cx="50"    cy="71"    r="9" fill="url(#sph-magenta)"/>
+              <circle cx="35.15" cy="64.85" r="9" fill="url(#sph-orange)"/>
+              <circle cx="29"    cy="50"    r="9" fill="url(#sph-teal)"/>
+              <circle cx="35.15" cy="35.15" r="9" fill="url(#sph-silver)"/>
+              <circle cx="50"    cy="29"    r="9" fill="url(#sph-gold)"/>
+              <circle cx="64.85" cy="35.15" r="9" fill="url(#sph-orange)"/>
+            </g>
+
+            <circle cx="59.5" cy="55.5" r="10" fill="url(#sph-magenta)"/>
+            <circle cx="50"   cy="61"   r="10" fill="url(#sph-gold)"/>
+            <circle cx="40.5" cy="55.5" r="10" fill="url(#sph-silver)"/>
+            <circle cx="40.5" cy="44.5" r="10" fill="url(#sph-teal)"/>
+            <circle cx="50"   cy="39"   r="10" fill="url(#sph-orange)"/>
+            <circle cx="59.5" cy="44.5" r="10" fill="url(#sph-gold)"/>
+
+            <circle cx="50" cy="50" r="13" fill="url(#sph-gold)"/>
           </svg>
         </div>
         <h2>Coming soon</h2>

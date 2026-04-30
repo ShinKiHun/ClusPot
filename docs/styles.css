@@ -347,18 +347,20 @@ section {
 }
 .cluster-svg {
   width: 100%;
-  height: 110px;
+  height: 130px;
   display: flex;
   align-items: center;
   justify-content: center;
-  /* Deep-navy "studio" background like the Gemini reference: a soft warm
-     softbox above-left, a cool fill on the right, and a strong ground
-     shadow at the bottom. Panel itself is darkened a touch. */
+  /* Studio background à la Gemini reference: deep navy with very faint
+     molecular grid lines, a warm key light upper-left, a cool fill
+     upper-right, and a hard ground shadow at the bottom. */
   background:
     radial-gradient(ellipse 65% 55% at 28% 24%, rgba(255, 220, 170, 0.07), transparent 65%),
-    radial-gradient(ellipse 55% 50% at 80% 35%, rgba(80, 130, 200, 0.05), transparent 70%),
-    radial-gradient(ellipse 110% 85% at 50% 130%, rgba(0, 0, 0, 0.7), transparent 60%),
-    linear-gradient(180deg, #060a14 0%, #04070d 100%);
+    radial-gradient(ellipse 55% 50% at 80% 35%, rgba(80, 130, 200, 0.06), transparent 70%),
+    radial-gradient(ellipse 110% 85% at 50% 130%, rgba(0, 0, 0, 0.75), transparent 60%),
+    repeating-linear-gradient(0deg,  transparent 0 13px, rgba(110, 150, 200, 0.045) 13px 14px),
+    repeating-linear-gradient(90deg, transparent 0 13px, rgba(110, 150, 200, 0.045) 13px 14px),
+    linear-gradient(180deg, #07111e 0%, #050a14 100%);
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
   margin-bottom: 12px;

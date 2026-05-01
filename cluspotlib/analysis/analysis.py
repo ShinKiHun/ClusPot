@@ -22,6 +22,8 @@ Execution order:
   Pass 3: Generate total/global plots from xlsx (only if all models are complete)
 """
 
+import gc
+import math
 import pickle
 from collections import Counter
 from pathlib import Path
@@ -78,6 +80,47 @@ def _normalize_xlsx_df(df: "pd.DataFrame") -> "pd.DataFrame":
     return df.rename(columns=REVERSE_DISPLAY)
 
 
+# Columns that should never be sanitized (counts, labels, times, fwt percentages)
+SANITIZE_EXCLUDE = {
+    "model", "dataset", "element", "type",
+    "n_normal", "n_anomaly", "n_missed", "n_samples",
+    "cluster_time_med_s", "cluster_time_mean_s", "cluster_time_total_s",
+    "bulk_time_mean_s",
+}
+
+
+def _sanitize_value(val, header):
+    """Replace missing or absurd metric values with the string '-'.
+
+    Empty/None/NaN/Inf → '-'.
+    R²-style columns: extreme negatives (< -10) → '-' (model effectively useless).
+    Generic float metrics: |val| > 1e6 → '-'.
+    Counts, labels, times, and fwt columns are returned untouched.
+    """
+    if header in SANITIZE_EXCLUDE:
+        if val is None:
+            return "-"
+        return val
+    h = str(header) if header is not None else ""
+    # FwT@... columns are bounded percentages (0–100); only handle missing
+    if h.startswith("FwT@"):
+        if val is None:
+            return "-"
+        if isinstance(val, float) and (math.isnan(val) or math.isinf(val)):
+            return "-"
+        return val
+    if val is None:
+        return "-"
+    if isinstance(val, float):
+        if math.isnan(val) or math.isinf(val):
+            return "-"
+        if "R2" in h and val < -10:
+            return "-"
+        if abs(val) > 1e6:
+            return "-"
+    return val
+
+
 
 def _is_single_element(element_label: str) -> bool:
     return "-" not in element_label
@@ -120,23 +163,22 @@ class ClusterAnalysis:
         print(f"Source DBs: {list(src_db_map.keys())}")
         print(f"Detected models: {[d.name for d in model_dirs]}")
 
-        # ── Pass 1: compute metrics and update xlsx ────────────
-        # Only reads DB for models not yet in xlsx
-        done_pairs    = self._get_done_pairs()
-        new_summaries = []
-        model_total_summaries = []
-        # {mlip_name: {dataset_name: (normal_df, anomaly_df)}}
-        # Only populated for models that needed DB reading
-        model_data      = {}
-        model_elem_data = {}
-        model_fwt_data  = {}
+        done_pairs = self._get_done_pairs()
 
+        # ── Per-model loop: analyze + flush xlsx + plot, freeing memory between models ──
+        # Each iteration handles one MLIP fully (Pass 1 metrics, xlsx flush, Pass 2 plots),
+        # then releases its DataFrames so peak memory stays bounded to one model's data.
         for model_dir in model_dirs:
             mlip_name = model_dir.name
-            model_data[mlip_name]      = {}
-            model_elem_data[mlip_name] = {}
-            model_fwt_data[mlip_name]  = {}
 
+            # Per-model containers (scoped to this model only)
+            new_summaries        : list = []
+            model_total_summaries: list = []
+            model_elem_data      = {mlip_name: {}}
+            model_fwt_data       = {mlip_name: {}}
+            per_dataset_dfs      : dict = {}    # dataset → (normal_df, anomaly_df)
+
+            # ── Pass 1 (this model): compute metrics for each dataset ─────
             for result_db in sorted(model_dir.glob("*.db")):
                 dataset_name = result_db.stem
 
@@ -148,56 +190,66 @@ class ClusterAnalysis:
                     print(f"[xlsx OK] {mlip_name}/{dataset_name}: already in xlsx")
                     continue
 
-                # New or missing entry: read DB and compute metrics
-                dft_bulk, dft_cluster = self._load_dft_source(
-                    dataset_name, src_db_map[dataset_name]
+                # Cache-first: rebuild metrics from parquet if available.
+                cached_normal, cached_anomaly = self._load_df_cache(
+                    mlip_name, dataset_name
                 )
+                if cached_normal is not None and len(cached_normal) > 0:
+                    result = self._compute_metrics_from_dfs(
+                        mlip_name, cached_normal, cached_anomaly, n_missed=0
+                    )
+                    source_label = "FromCache"
+                else:
+                    # No cache: read DFT source + MLIP DB.
+                    dft_bulk, dft_cluster = self._load_dft_source(
+                        dataset_name, src_db_map[dataset_name]
+                    )
+                    mlip_db = connect(str(result_db))
+                    result = self._analyze_model(
+                        mlip_name, mlip_db, dft_bulk, dft_cluster
+                    )
+                    source_label = "Computed"
+                    if result[0] is not None:
+                        # Persist cache so future runs can skip the DB read.
+                        self._save_df_cache(
+                            mlip_name, dataset_name, result[2], result[4]
+                        )
 
-                mlip_db = connect(str(result_db))
-                (summary, normal_elem_df, normal_df,
-                 anomaly_elem_df, anomaly_df,
-                 thresholds, fwt_pct) = self._analyze_model(
-                    mlip_name, mlip_db, dft_bulk, dft_cluster
-                )
-
-                if summary is None:
+                if result[0] is None:
                     print(f"[SKIP] {mlip_name}/{dataset_name}: no matching data")
                     continue
 
+                (summary, normal_elem_df, normal_df,
+                 anomaly_elem_df, anomaly_df,
+                 thresholds, fwt_pct) = result
                 summary["dataset"] = dataset_name
                 new_summaries.append(summary)
-
-                # Save processed DataFrames to cache for future runs
-                self._save_df_cache(mlip_name, dataset_name, normal_df, anomaly_df)
-
-                model_data[mlip_name][dataset_name]      = (normal_df, anomaly_df)
                 model_elem_data[mlip_name][dataset_name] = {
                     "normal":  normal_elem_df,
                     "anomaly": anomaly_elem_df,
                 }
                 if thresholds is not None:
                     model_fwt_data[mlip_name][dataset_name] = (thresholds, fwt_pct)
+                per_dataset_dfs[dataset_name] = (normal_df, anomaly_df)
 
-                print(f"[Computed] {mlip_name} / {dataset_name}")
+                print(f"[{source_label}] {mlip_name} / {dataset_name}")
 
-            # Per-model total: only for models that had new data
-            if model_data[mlip_name]:
-                # Include cached data from already-done datasets for correct combined total
-                all_model_data = dict(model_data[mlip_name])
+            # ── Per-model total: combine new data with cached old datasets ─
+            if per_dataset_dfs:
+                all_model_data = dict(per_dataset_dfs)
                 for result_db in sorted(model_dir.glob("*.db")):
                     ds_name = result_db.stem
                     if ds_name not in src_db_map or ds_name in all_model_data:
                         continue
-                    cached_normal, cached_anomaly = self._load_df_cache(mlip_name, ds_name)
-                    if cached_normal is not None:
-                        all_model_data[ds_name] = (cached_normal, cached_anomaly)
+                    cn, ca = self._load_df_cache(mlip_name, ds_name)
+                    if cn is not None:
+                        all_model_data[ds_name] = (cn, ca)
 
                 total_result = self._build_model_total(mlip_name, all_model_data)
                 if total_result is not None:
                     (total_summary, total_normal_elem, total_anomaly_elem,
                      _, _,
                      total_thresholds, total_fwt_pct) = total_result
-
                     model_total_summaries.append(total_summary)
                     model_elem_data[mlip_name]["total"] = {
                         "normal":  total_normal_elem,
@@ -206,21 +258,18 @@ class ClusterAnalysis:
                     if total_thresholds is not None:
                         model_fwt_data[mlip_name]["total"] = (total_thresholds, total_fwt_pct)
 
-        # Write xlsx only if there are new entries
-        if new_summaries:
-            self._update_xlsx(new_summaries, model_total_summaries,
-                              model_elem_data, model_fwt_data)
-        else:
-            print("\n[xlsx] No new entries — xlsx unchanged.")
+                del all_model_data
+                gc.collect()
 
-        # ── Pass 2: generate per-model plots ──────────────────
-        # For each model/dataset: if PNGs are incomplete, read DB and plot
-        print("\n[Pass 2] Checking per-model plots...")
-        all_complete = True
+            # ── Flush xlsx for this model only ─────────────────────────────
+            # Each call merges with existing rows of OTHER models; only this
+            # model's rows are added/replaced. So progress is preserved if a
+            # later model fails.
+            if new_summaries:
+                self._update_xlsx(new_summaries, model_total_summaries,
+                                  model_elem_data, model_fwt_data)
 
-        for model_dir in model_dirs:
-            mlip_name = model_dir.name
-
+            # ── Pass 2 (this model): plots ────────────────────────────────
             for result_db in sorted(model_dir.glob("*.db")):
                 dataset_name = result_db.stem
                 if dataset_name not in src_db_map:
@@ -230,16 +279,11 @@ class ClusterAnalysis:
                     print(f"[SKIP] {mlip_name}/{dataset_name}: plots complete")
                     continue
 
-                all_complete = False
-                print(f"\n[Plotting] {mlip_name} / {dataset_name}")
-
-                # Use in-memory data if available from Pass 1, else re-read DB
-                if dataset_name in model_data.get(mlip_name, {}):
-                    normal_df, anomaly_df = model_data[mlip_name][dataset_name]
+                if dataset_name in per_dataset_dfs:
+                    normal_df, anomaly_df = per_dataset_dfs[dataset_name]
                     normal_elem_df  = model_elem_data[mlip_name][dataset_name]["normal"]
                     anomaly_elem_df = model_elem_data[mlip_name][dataset_name]["anomaly"]
                 else:
-                    # PNG incomplete but xlsx already had this entry: try cache first
                     print(f"  [Re-read] {mlip_name}/{dataset_name}: PNG incomplete")
                     normal_df, anomaly_df = self._load_df_cache(mlip_name, dataset_name)
                     if normal_df is None:
@@ -259,28 +303,24 @@ class ClusterAnalysis:
                     anomaly_elem_df = self._build_elem_df(anomaly_df) \
                         if anomaly_df is not None and len(anomaly_df) > 0 else pd.DataFrame()
 
+                print(f"\n[Plotting] {mlip_name} / {dataset_name}")
                 dataset_dir = self.analysis_root / mlip_name / dataset_name
                 dataset_dir.mkdir(parents=True, exist_ok=True)
                 self._plot_subsets(mlip_name, normal_elem_df, normal_df,
                                    anomaly_elem_df, anomaly_df, dataset_dir)
 
-            # Per-model total plot
-            # Also regenerate when new datasets were added (model_data has new entries)
-            has_new_data = bool(model_data.get(mlip_name))
+            # Per-model total plot (regenerate when new data added)
+            has_new_data = bool(per_dataset_dfs)
             if not self._has_complete_model_total(mlip_name) or self.overwrite or has_new_data:
-                all_complete = False
-                # Aggregate from all datasets for this model
                 all_normal_dfs  = []
                 all_anomaly_dfs = []
-
                 for result_db in sorted(model_dir.glob("*.db")):
                     dataset_name = result_db.stem
                     if dataset_name not in src_db_map:
                         continue
-                    if dataset_name in model_data.get(mlip_name, {}):
-                        nd, ad = model_data[mlip_name][dataset_name]
+                    if dataset_name in per_dataset_dfs:
+                        nd, ad = per_dataset_dfs[dataset_name]
                     else:
-                        # Try cache before re-reading DB
                         nd, ad = self._load_df_cache(mlip_name, dataset_name)
                         if nd is None:
                             print(f"  [Re-read DB] {mlip_name}/{dataset_name}: no cache")
@@ -292,8 +332,10 @@ class ClusterAnalysis:
                                 mlip_name, mlip_db, dft_bulk, dft_cluster
                             )
                             if nd is not None:
-                                self._save_df_cache(mlip_name, dataset_name, nd,
-                                                    ad if ad is not None else pd.DataFrame())
+                                self._save_df_cache(
+                                    mlip_name, dataset_name, nd,
+                                    ad if ad is not None else pd.DataFrame()
+                                )
                     if nd is not None and len(nd) > 0:
                         all_normal_dfs.append(nd)
                     if ad is not None and len(ad) > 0:
@@ -310,9 +352,19 @@ class ClusterAnalysis:
                     total_dir.mkdir(parents=True, exist_ok=True)
                     self._plot_subsets(mlip_name, total_normal_elem, combined_normal,
                                        total_anomaly_elem, combined_anomaly, total_dir)
+                    del combined_normal, combined_anomaly
+                    del total_normal_elem, total_anomaly_elem
+                del all_normal_dfs, all_anomaly_dfs
+
+            # ── Free this model's memory before moving on ────────────────
+            del new_summaries, model_total_summaries
+            del model_elem_data, model_fwt_data, per_dataset_dfs
+            # DFT source cache is keyed per-dataset and shared if same dataset
+            # appears across models. Drop it here so it doesn't accumulate.
+            self._dft_source_cache.clear()
+            gc.collect()
 
         # ── Pass 3: total/global plots from xlsx ───────────────
-        # Only runs when all per-model plots are confirmed complete
         print("\n[Pass 3] Checking total plots...")
         all_complete = all(
             self._has_complete_pngs(model_dir.name, result_db.stem)
@@ -395,6 +447,7 @@ class ClusterAnalysis:
 
         summary = {
             "model":                mlip_name,
+            "dataset":              "total",
             "E_form_MAE":           e_m["MAE"],
             "E_form_RMSE":          e_m["RMSE"],
             "E_form_R2":            e_m["R2"],
@@ -409,7 +462,7 @@ class ClusterAnalysis:
             "force_AFwT":           f_m["AFwT"],
             "n_normal":             int(len(combined_normal)),
             "n_anomaly":            int(len(combined_anomaly)),
-            "anomaly_rate":         float(len(combined_anomaly) / len(all_df)),
+            "anomaly_rate":         float(len(combined_anomaly) / len(all_df) * 100),
             "n_missed":             0,
             "cluster_time_med_s":   float(np.nanmedian(combined_normal["calc_time"].values)),
             "cluster_time_mean_s":  float(np.nanmean(combined_normal["calc_time"].values)),
@@ -679,11 +732,27 @@ class ClusterAnalysis:
         if len(normal_df) == 0:
             return None, None, None, None, None, None, None
 
+        return self._compute_metrics_from_dfs(mlip_name, normal_df, anomaly_df, miss)
+
+    def _compute_metrics_from_dfs(self, mlip_name, normal_df, anomaly_df, n_missed):
+        """Aggregate metrics from already-split normal/anomaly DataFrames.
+
+        Used by both _analyze_model (post-DB-read) and the Pass 1 cache-rebuild
+        branch (when xlsx is missing but cache parquet exists).
+        """
+        if normal_df is None or len(normal_df) == 0:
+            return None, None, None, None, None, None, None
+
+        if anomaly_df is None:
+            anomaly_df = pd.DataFrame()
+
         e_m = energy_metrics(normal_df["e_form_dft"].values, normal_df["e_form_mlip"].values)
         f_m = force_metrics(normal_df["dft_forces"].tolist(), normal_df["mlip_forces"].tolist())
 
+        n_total = len(normal_df) + len(anomaly_df)
         summary = {
             "model":                mlip_name,
+            "dataset":              None,
             "E_form_MAE":           e_m["MAE"],
             "E_form_RMSE":          e_m["RMSE"],
             "E_form_R2":            e_m["R2"],
@@ -698,8 +767,8 @@ class ClusterAnalysis:
             "force_AFwT":           f_m["AFwT"],
             "n_normal":             int(len(normal_df)),
             "n_anomaly":            int(len(anomaly_df)),
-            "anomaly_rate":         float(len(anomaly_df) / len(df)),
-            "n_missed":             int(miss),
+            "anomaly_rate":         float(len(anomaly_df) / n_total * 100) if n_total > 0 else 0.0,
+            "n_missed":             int(n_missed),
             "cluster_time_med_s":   float(np.nanmedian(normal_df["calc_time"].values)),
             "cluster_time_mean_s":  float(np.nanmean(normal_df["calc_time"].values)),
             "cluster_time_total_s": float(np.nansum(normal_df["calc_time"].values)),
@@ -744,12 +813,38 @@ class ClusterAnalysis:
     # ── xlsx ──────────────────────────────────────────────────
 
     def _get_done_pairs(self) -> set:
-        """Determine done (model, dataset) pairs from xlsx per-model sheets."""
+        """Determine done (model, dataset) pairs from xlsx per-model sheets.
+
+        A pair is "done" only if all of the following hold:
+          - the per-model element sheet has a row for that dataset
+          - cache parquet (or legacy pkl) exists on disk
+          - the summary sheet has a row for that (model, dataset)
+
+        Legacy xlsx without a "dataset" column in summary fails the third
+        check on every pair, so the cache-first path will backfill per-
+        dataset summary rows on the next run.
+        """
         done = set()
         if not self.xlsx_path.exists():
             return done
         try:
             xl = pd.ExcelFile(self.xlsx_path)
+
+            summary_pairs   = set()
+            summary_has_col = False
+            if "summary" in xl.sheet_names:
+                sum_df = _normalize_xlsx_df(pd.read_excel(xl, sheet_name="summary"))
+                if "model" in sum_df.columns and "dataset" in sum_df.columns:
+                    summary_has_col = True
+                    sum_df["model"] = sum_df["model"].ffill()
+                    for _, r in sum_df.iterrows():
+                        m  = r.get("model")
+                        ds = r.get("dataset")
+                        if pd.isna(m) or pd.isna(ds):
+                            continue
+                        if str(ds) != "total":
+                            summary_pairs.add((str(m), str(ds)))
+
             for sheet in xl.sheet_names:
                 if sheet in ("summary", "fwt_curves"):
                     continue
@@ -767,7 +862,10 @@ class ClusterAnalysis:
                             (cache_dir / "normal_df.parquet").exists() or
                             (cache_dir / "normal_df.pkl").exists()
                         )
-                        if cache_ok:
+                        summary_ok = (
+                            summary_has_col and (sheet, str(ds)) in summary_pairs
+                        )
+                        if cache_ok and summary_ok:
                             done.add((sheet, str(ds)))
         except Exception:
             pass
@@ -823,15 +921,18 @@ class ClusterAnalysis:
                     is_label = (col_idx == 1) or (h in ("model", "element", "dataset", "type") and col_idx <= 3)
                     cell.font      = Font(bold=is_label, size=11)
                     cell.alignment = Alignment(horizontal="center", vertical="center")
+
+                    # Replace missing or absurd metric values with "-"
+                    sanitized = _sanitize_value(cell.value, h)
+                    if sanitized == "-" and cell.value != "-":
+                        cell.value = "-"
+                        cell.number_format = "@"
+                        continue
+
                     if h in INT_COLS:
                         cell.number_format = FMT_INT
                     elif h in PCT_COLS:
                         cell.number_format = FMT_PCT
-                        if cell.value is not None:
-                            try:
-                                cell.value = float(cell.value) * 100
-                            except (TypeError, ValueError):
-                                pass
                     elif isinstance(cell.value, float):
                         cell.number_format = FMT_FLOAT
 
@@ -907,31 +1008,61 @@ class ClusterAnalysis:
                 del wb["Sheet"]
 
         # ── Summary sheet ──────────────────────────────────────
-        total_summaries = model_total_summaries or []
-        new_models = {s["model"] for s in total_summaries if "model" in s}
+        # Combine per-(model, dataset) rows + per-model "total" rows.
+        # Same row structure as fwt_curves so per-dataset comparison plots
+        # in Pass 3 can filter by dataset.
+        all_new_rows = list(new_summaries) + list(model_total_summaries or [])
+        new_pairs = {
+            (str(s.get("model", "")), str(s.get("dataset", "")))
+            for s in all_new_rows
+        }
 
         existing_summary = []
         if "summary" in wb.sheetnames:
             ws_old = wb["summary"]
             old_headers = [cell.value for cell in ws_old[1]]
-            # Normalize display-name headers back to raw keys
             raw_headers = [REVERSE_DISPLAY.get(h, h) for h in old_headers]
+            has_dataset_col = "dataset" in raw_headers
+            _last_model = None
             for row in ws_old.iter_rows(min_row=2, values_only=True):
                 r = dict(zip(raw_headers, row))
-                if str(r.get("model")) not in new_models:
+                # Forward-fill merged model cells
+                if r.get("model") is None:
+                    r["model"] = _last_model
+                else:
+                    _last_model = r["model"]
+                # Legacy migration: pre-fix summary rows were per-model totals
+                if not has_dataset_col:
+                    r["dataset"] = "total"
+                m  = str(r.get("model", ""))
+                ds = str(r.get("dataset", ""))
+                if (m, ds) not in new_pairs:
                     existing_summary.append(r)
             del wb["summary"]
 
-        all_total = existing_summary + total_summaries
-        all_total.sort(key=lambda r: str(r.get("model", "")))
+        all_total = existing_summary + all_new_rows
+        all_total.sort(key=lambda r: (
+            str(r.get("model", "")),
+            "\xff" if str(r.get("dataset", "")) == "total" else str(r.get("dataset", ""))
+        ))
         ws_sum = wb.create_sheet("summary", 0)
         if all_total:
-            headers = [h for h in all_total[0].keys() if h not in EXCLUDE_COLS]
+            # Build headers: model, dataset first, then everything else (union over rows)
+            seen_keys = []
+            for r in all_total:
+                for k in r.keys():
+                    if k not in seen_keys:
+                        seen_keys.append(k)
+            headers = ["model", "dataset"] + [
+                k for k in seen_keys
+                if k not in ("model", "dataset") and k not in EXCLUDE_COLS
+            ]
             ws_sum.append(headers)
             for row in all_total:
                 ws_sum.append([row.get(h, None) for h in headers])
             _apply_sheet_style(ws_sum, headers)
-            _apply_borders(ws_sum, group_col=None)
+            _merge_first_col(ws_sum)
+            _apply_borders(ws_sum, group_col=1)
 
         # ── Per-model element sheets ───────────────────────────
         models_to_update = {s.get("model") for s in new_summaries if s.get("model")}
@@ -1060,9 +1191,16 @@ class ClusterAnalysis:
                 for col_idx, cell in enumerate(row, 1):
                     h = fwt_headers[col_idx - 1]
                     cell.alignment = Alignment(
-                        horizontal="center" if h not in ("model", "dataset") else "left",
+                        horizontal="left" if h == "model" else "center",
                         vertical="center"
                     )
+
+                    sanitized = _sanitize_value(cell.value, h)
+                    if sanitized == "-" and cell.value != "-":
+                        cell.value = "-"
+                        cell.number_format = "@"
+                        continue
+
                     if h not in ("model", "dataset"):
                         cell.number_format = "0.00"
             _merge_first_col(ws_fwt)
@@ -1174,6 +1312,8 @@ class ClusterAnalysis:
             )
             if summary_df.empty or "model" not in summary_df.columns:
                 return
+            # merged cells leave Model as NaN on secondary rows — restore
+            summary_df["model"] = summary_df["model"].ffill()
 
             fwt_df = pd.DataFrame()
             xl = pd.ExcelFile(self.xlsx_path)
@@ -1210,30 +1350,48 @@ class ClusterAnalysis:
                                    dataset_filter, out_dir: Path):
         """
         Bar/pareto/FwT comparison plots across models, reading from xlsx only.
-        summary_df: the 'summary' sheet (total-level per model)
-        fwt_df    : the 'fwt_curves' sheet
-        dataset_filter: dataset name or None for total
+        summary_df: the 'summary' sheet — (model, dataset) rows + total per model
+        fwt_df    : the 'fwt_curves' sheet — same row structure
+        dataset_filter: dataset name, or None for the per-model total comparison
         """
         try:
-            # summary sheet has one row per model (total level)
-            # use it directly for bar/pareto metrics
             df = summary_df.copy()
+            df = df.replace("-", np.nan)
             df["model"] = df["model"].astype(str)
-            df = df[df["model"].isin(model_names)].reset_index(drop=True)
+
+            dataset_key = dataset_filter or "total"
+
+            # Filter summary rows by dataset. Legacy summaries lacking the
+            # dataset column can only support the "total" view.
+            if "dataset" in df.columns:
+                df["dataset"] = df["dataset"].astype(str)
+                df = df[df["dataset"] == dataset_key]
+            elif dataset_key != "total":
+                return
+
+            df = df.drop_duplicates(subset=["model"], keep="last").reset_index(drop=True)
+            if df.empty:
+                return
+
+            # Models that actually have data for this dataset
+            ds_model_names = df["model"].unique().tolist()
+
+            if not fwt_df.empty:
+                fwt_df = fwt_df.replace("-", np.nan)
 
             time_col = "cluster_time_med_s"
             time_per_step = (
-                df.set_index("model")[time_col].reindex(model_names).astype(float).tolist()
-                if time_col in df.columns else [float("nan")] * len(model_names)
+                df.set_index("model")[time_col].reindex(ds_model_names).astype(float).tolist()
+                if time_col in df.columns else [float("nan")] * len(ds_model_names)
             )
 
             if "n_normal" in df.columns and "n_anomaly" in df.columns:
                 idx = df.set_index("model")
-                nn = idx["n_normal"].reindex(model_names).astype(float).values
-                na = idx["n_anomaly"].reindex(model_names).astype(float).values
+                nn = idx["n_normal"].reindex(ds_model_names).astype(float).values
+                na = idx["n_anomaly"].reindex(ds_model_names).astype(float).values
                 normal_rate = (nn / (nn + na + 1e-12)).tolist()
             else:
-                normal_rate = [float("nan")] * len(model_names)
+                normal_rate = [float("nan")] * len(ds_model_names)
 
             metrics = [
                 ("E_form_MAE",      "E_form MAE (eV/atom)"),
@@ -1256,26 +1414,26 @@ class ClusterAnalysis:
                 if col not in df.columns:
                     continue
                 idx = df.set_index("model")
-                values = idx[col].reindex(model_names).astype(float).tolist()
+                values = idx[col].reindex(ds_model_names).astype(float).tolist()
                 ascending = not any(kw in col for kw in ("R2", "Pearson", "Spearman", "cosine"))
                 plot_total_bar(
-                    model_names=model_names,
+                    model_names=ds_model_names,
                     values=values,
-                    metric_name=f"{dataset_filter or 'total'}_{col}",
+                    metric_name=f"{dataset_key}_{col}",
                     ylabel=ylabel,
                     save_path=subset_dir / f"{col}.png",
                     dpi=self.dpi,
                     ascending=ascending,
                 )
 
-            acc_vals = df.set_index("model")["E_form_MAE"].reindex(model_names).astype(float).tolist() \
-                if "E_form_MAE" in df.columns else [float("nan")] * len(model_names)
+            acc_vals = df.set_index("model")["E_form_MAE"].reindex(ds_model_names).astype(float).tolist() \
+                if "E_form_MAE" in df.columns else [float("nan")] * len(ds_model_names)
 
             plot_pareto(
-                model_names=model_names,
+                model_names=ds_model_names,
                 x_vals=time_per_step,
                 y_vals=acc_vals,
-                title=f"{dataset_filter or 'total'} —Accuracy-Efficiency",
+                title=f"{dataset_key} —Accuracy-Efficiency",
                 xlabel="Time per step (s)",
                 ylabel="E_form MAE (eV/atom)",
                 save_path=subset_dir / "pareto_accuracy_efficiency.png",
@@ -1283,10 +1441,10 @@ class ClusterAnalysis:
                 maximize_y=False,
             )
             plot_pareto(
-                model_names=model_names,
+                model_names=ds_model_names,
                 x_vals=time_per_step,
                 y_vals=normal_rate,
-                title=f"{dataset_filter or 'total'} —Robustness-Efficiency",
+                title=f"{dataset_key} —Robustness-Efficiency",
                 xlabel="Time per step (s)",
                 ylabel="Normal rate",
                 save_path=subset_dir / "pareto_robustness_efficiency.png",
@@ -1296,7 +1454,6 @@ class ClusterAnalysis:
 
             # FwT curve comparison from fwt_curves sheet
             if not fwt_df.empty:
-                dataset_key = dataset_filter or "total"
                 fwt_sub = fwt_df[fwt_df["dataset"].astype(str) == dataset_key]
                 fwt_cols = [c for c in fwt_df.columns if c.startswith("FwT@")]
                 thresholds_key = np.array([float(c.replace("FwT@", "")) for c in fwt_cols])
@@ -1304,7 +1461,7 @@ class ClusterAnalysis:
                 model_curves = {}
                 for _, row in fwt_sub.iterrows():
                     mn = str(row.get("model", ""))
-                    if mn not in model_names:
+                    if mn not in ds_model_names:
                         continue
                     fwt_vals = np.array([float(row[c]) for c in fwt_cols])
                     model_curves[mn] = (thresholds_key, fwt_vals)

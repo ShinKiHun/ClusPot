@@ -222,7 +222,7 @@
             <ul>
               <li>For each DFT trajectory step, the MLIP performs a <b>single-point evaluation</b> on the same nuclear configuration.</li>
               <li>Energy and forces are compared to DFT directly — no MLIP relaxation, no atom-by-atom bias correction.</li>
-              <li>Configurations whose MLIP energy or forces explode (catastrophic failure) are split out as <b>anomaly</b> and reported separately from the <b>normal</b> regime.</li>
+              <li>A configuration is flagged as <b>anomaly</b> when the per-atom formation-energy error is catastrophic — specifically when <code>|E<sub>form</sub><sup>DFT</sup> − E<sub>form</sub><sup>MLIP</sup>| ≥ 5 eV/atom</code>. All other steps form the <b>normal</b> regime, and the two are reported separately.</li>
             </ul>
           </div>
 
@@ -242,7 +242,7 @@
             <ul>
               <li><b>FwT@ε</b> — fraction of force components within threshold ε (eV/Å).</li>
               <li><b>AFwT</b> — area / mean of FwT across the threshold sweep ε ∈ [0, 1] eV/Å. One number summarizing force fidelity.</li>
-              <li><b>Anomaly rate</b> — share of trajectory steps flagged as catastrophic relative to the full sample set.</li>
+              <li><b>Anomaly rate</b> — share of trajectory steps where <code>|ΔE<sub>form</sub>| ≥ 5 eV/atom</code>, relative to the full sample set. Lower is better.</li>
             </ul>
           </div>
 

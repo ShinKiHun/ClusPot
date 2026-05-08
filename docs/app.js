@@ -154,7 +154,59 @@ function plotlyLayout(extra = {}) {
     hoverlabel: { bgcolor: PALETTE.cardHi, bordercolor: PALETTE.orange, font: { color: PALETTE.text, family: "JetBrains Mono, monospace", size: 12 } },
   }, extra);
 }
-const PLOTLY_CFG = { displaylogo: false, responsive: true, modeBarButtonsToRemove: ["lasso2d", "select2d", "autoScale2d"] };
+// Plotly's built-in "Download plot as png" only captures the chart canvas —
+// the section's H2 / tag / metric+dataset selectors are above the plot in
+// the surrounding HTML and get cropped out. We replace the camera button
+// with one that html2canvas-captures the whole <section>, so the exported
+// PNG matches what the user sees on the page (title + controls + chart).
+function downloadSectionAsPng(gd) {
+  const section = gd.closest("section[id]") || gd.closest(".chart-panel") || gd.closest(".panel") || gd.parentElement;
+  const titleEl = section.querySelector("h2");
+  const filename = (titleEl?.textContent.trim().toLowerCase()
+    .replace(/[()]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9_-]/g, "") || "cluspot") + ".png";
+
+  // Fallback: if html2canvas didn't load, use Plotly's native PNG.
+  if (typeof html2canvas !== "function") {
+    Plotly.downloadImage(gd, { format: "png", filename, width: 1600, height: 900 });
+    return;
+  }
+
+  // Hide every Plotly modebar inside the section while capturing — they're
+  // visible on hover and would otherwise show up in the exported image.
+  const bars = section.querySelectorAll(".modebar-container, .modebar");
+  const prev = [];
+  bars.forEach(b => { prev.push(b.style.visibility); b.style.visibility = "hidden"; });
+
+  html2canvas(section, {
+    backgroundColor: "#0d1525",
+    scale: 2,
+    logging: false,
+    useCORS: true,
+  }).then(canvas => {
+    const link = document.createElement("a");
+    link.download = filename;
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+  }).catch(err => {
+    console.warn("html2canvas capture failed, falling back to Plotly PNG", err);
+    Plotly.downloadImage(gd, { format: "png", filename, width: 1600, height: 900 });
+  }).finally(() => {
+    bars.forEach((b, i) => { b.style.visibility = prev[i] || ""; });
+  });
+}
+
+const PLOTLY_CFG = {
+  displaylogo: false,
+  responsive: true,
+  modeBarButtonsToRemove: ["lasso2d", "select2d", "autoScale2d", "toImage"],
+  modeBarButtonsToAdd: [{
+    name: "Download as PNG (with title & controls)",
+    icon: { width: 857.1, height: 1000, path: "m214-7h429v214h-429v-214z m500 0h72v500q0 8-6 21t-11 20l-157 156q-5 6-19 12t-22 5v-232q0-22-15-38t-38-16h-322q-22 0-37 16t-16 38v232h-72v-714h72v232q0 22 16 38t37 16h465q22 0 38-16t15-38v-232z m-214 518v178q0 8-5 13t-13 5h-107q-7 0-13-5t-5-13v-178q0-8 5-13t13-5h107q7 0 13 5t5 13z m357-18v-518q0-22-15-38t-38-16h-750q-22 0-37 16t-16 38v750q0 22 16 38t37 16h518q14 0 36-9t34-21l139-139q12-12 21-34t10-36z" },
+    click: downloadSectionAsPng,
+  }],
+};
 
 function makeSeg(container, options, current, onChange) {
   container.innerHTML = "";

@@ -286,51 +286,57 @@
       </header>
 
       <section id="mono-compare">
-        <div class="s-head">
-          <h2>Leaderboard</h2>
-          <span class="tag">ranking</span>
-          <span class="desc">Pick a metric. Models sorted best→worst, with sample counts annotated on each bar.</span>
+        <div class="panel chart-panel">
+          <div class="s-head">
+            <h2>Model Comparison</h2>
+            <span class="tag">ranking</span>
+            <span class="desc">Pick a metric. Models sorted best→worst with sample-count labels.</span>
+          </div>
+          <div class="controls">
+            <label>Metric</label>
+            <select id="mono-cmp-metric"></select>
+            <label style="margin-left:14px">Dataset</label>
+            <span class="seg" id="mono-cmp-ds-seg"></span>
+          </div>
+          <div id="mono-cmp-plot" class="plot plot-tall"></div>
         </div>
-        <div class="controls">
-          <label>Metric</label>
-          <select id="mono-cmp-metric"></select>
-          <label style="margin-left:14px">Dataset</label>
-          <span class="seg" id="mono-cmp-ds-seg"></span>
-        </div>
-        <div class="panel"><div id="mono-cmp-plot" class="plot plot-tall"></div></div>
       </section>
 
       <section id="mono-pareto">
-        <div class="s-head">
-          <h2>Pareto Frontier</h2>
-          <span class="tag">accuracy ⇄ speed</span>
-          <span class="desc">Lower-left is best. Pareto-optimal models highlighted in orange.</span>
+        <div class="panel chart-panel">
+          <div class="s-head">
+            <h2>Pareto Frontier</h2>
+            <span class="tag">accuracy ⇄ speed</span>
+            <span class="desc">Lower-left is best. Pareto-optimal models highlighted in orange.</span>
+          </div>
+          <div class="controls">
+            <label>Y-axis</label>
+            <select id="mono-par-metric"></select>
+            <label style="margin-left:14px">X-axis</label>
+            <select id="mono-par-xmetric">
+              <option value="Time_med">Time / step (median, s)</option>
+              <option value="Time_mean">Time / step (mean, s)</option>
+            </select>
+            <label style="margin-left:14px">Dataset</label>
+            <span class="seg" id="mono-par-ds-seg"></span>
+          </div>
+          <div id="mono-par-plot" class="plot plot-tall"></div>
         </div>
-        <div class="controls">
-          <label>Y-axis</label>
-          <select id="mono-par-metric"></select>
-          <label style="margin-left:14px">X-axis</label>
-          <select id="mono-par-xmetric">
-            <option value="Time_med">Time / step (median, s)</option>
-            <option value="Time_mean">Time / step (mean, s)</option>
-          </select>
-          <label style="margin-left:14px">Dataset</label>
-          <span class="seg" id="mono-par-ds-seg"></span>
-        </div>
-        <div class="panel"><div id="mono-par-plot" class="plot plot-tall"></div></div>
       </section>
 
       <section id="mono-fwt">
-        <div class="s-head">
-          <h2>Force within Threshold (FwT)</h2>
-          <span class="tag">robustness</span>
-          <span class="desc">Fraction of force components within ε. Click legend entries to toggle.</span>
+        <div class="panel chart-panel">
+          <div class="s-head">
+            <h2>Force within Threshold (FwT)</h2>
+            <span class="tag">robustness</span>
+            <span class="desc">Fraction of force components within ε. Click legend entries to toggle.</span>
+          </div>
+          <div class="controls">
+            <label>Dataset</label>
+            <span class="seg" id="mono-fwt-ds-seg"></span>
+          </div>
+          <div id="mono-fwt-plot" class="plot plot-tall"></div>
         </div>
-        <div class="controls">
-          <label>Dataset</label>
-          <span class="seg" id="mono-fwt-ds-seg"></span>
-        </div>
-        <div class="panel"><div id="mono-fwt-plot" class="plot plot-tall"></div></div>
       </section>
 
       <section id="mono-periodic">
@@ -378,51 +384,57 @@
       </header>
 
       <section id="bi-compare">
-        <div class="s-head">
-          <h2>Leaderboard</h2>
-          <span class="tag">ranking</span>
-          <span class="desc">Pick a metric. Models sorted best→worst, with sample counts annotated on each bar.</span>
+        <div class="panel chart-panel">
+          <div class="s-head">
+            <h2>Model Comparison</h2>
+            <span class="tag">ranking</span>
+            <span class="desc">Pick a metric. Models sorted best→worst with sample-count labels.</span>
+          </div>
+          <div class="controls">
+            <label>Metric</label>
+            <select id="bi-cmp-metric"></select>
+            <label style="margin-left:14px">Dataset</label>
+            <span class="seg" id="bi-cmp-ds-seg"></span>
+          </div>
+          <div id="bi-cmp-plot" class="plot plot-tall"></div>
         </div>
-        <div class="controls">
-          <label>Metric</label>
-          <select id="bi-cmp-metric"></select>
-          <label style="margin-left:14px">Dataset</label>
-          <span class="seg" id="bi-cmp-ds-seg"></span>
-        </div>
-        <div class="panel"><div id="bi-cmp-plot" class="plot plot-tall"></div></div>
       </section>
 
       <section id="bi-pareto">
-        <div class="s-head">
-          <h2>Pareto Frontier</h2>
-          <span class="tag">accuracy ⇄ speed</span>
-          <span class="desc">Lower-left is best. Pareto-optimal models highlighted in orange.</span>
+        <div class="panel chart-panel">
+          <div class="s-head">
+            <h2>Pareto Frontier</h2>
+            <span class="tag">accuracy ⇄ speed</span>
+            <span class="desc">Lower-left is best. Pareto-optimal models highlighted in orange.</span>
+          </div>
+          <div class="controls">
+            <label>Y-axis</label>
+            <select id="bi-par-metric"></select>
+            <label style="margin-left:14px">X-axis</label>
+            <select id="bi-par-xmetric">
+              <option value="Time_med">Time / step (median, s)</option>
+              <option value="Time_mean">Time / step (mean, s)</option>
+            </select>
+            <label style="margin-left:14px">Dataset</label>
+            <span class="seg" id="bi-par-ds-seg"></span>
+          </div>
+          <div id="bi-par-plot" class="plot plot-tall"></div>
         </div>
-        <div class="controls">
-          <label>Y-axis</label>
-          <select id="bi-par-metric"></select>
-          <label style="margin-left:14px">X-axis</label>
-          <select id="bi-par-xmetric">
-            <option value="Time_med">Time / step (median, s)</option>
-            <option value="Time_mean">Time / step (mean, s)</option>
-          </select>
-          <label style="margin-left:14px">Dataset</label>
-          <span class="seg" id="bi-par-ds-seg"></span>
-        </div>
-        <div class="panel"><div id="bi-par-plot" class="plot plot-tall"></div></div>
       </section>
 
       <section id="bi-fwt">
-        <div class="s-head">
-          <h2>Force within Threshold (FwT)</h2>
-          <span class="tag">robustness</span>
-          <span class="desc">Fraction of force components within ε. Click legend entries to toggle.</span>
+        <div class="panel chart-panel">
+          <div class="s-head">
+            <h2>Force within Threshold (FwT)</h2>
+            <span class="tag">robustness</span>
+            <span class="desc">Fraction of force components within ε. Click legend entries to toggle.</span>
+          </div>
+          <div class="controls">
+            <label>Dataset</label>
+            <span class="seg" id="bi-fwt-ds-seg"></span>
+          </div>
+          <div id="bi-fwt-plot" class="plot plot-tall"></div>
         </div>
-        <div class="controls">
-          <label>Dataset</label>
-          <span class="seg" id="bi-fwt-ds-seg"></span>
-        </div>
-        <div class="panel"><div id="bi-fwt-plot" class="plot plot-tall"></div></div>
       </section>
 
       <!-- ─── Pair matrix (NxN) ─── -->

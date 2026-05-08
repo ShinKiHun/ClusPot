@@ -752,8 +752,8 @@ function renderMonoPeriodicSide(prefix, sys, sym) {
       html += `
         <div class="row">
           <span class="name" title="${r.model}">${k + 1}. ${r.model}</span>
-          <span class="v">${fmt(r.v, 4)}</span>
           <div class="bar"><span style="width:${pct.toFixed(1)}%; background: linear-gradient(90deg, ${color}, ${color} 60%, transparent);"></span></div>
+          <span class="v">${fmt(r.v, 4)}</span>
         </div>`;
     });
     html += `</div>`;
@@ -885,8 +885,8 @@ function renderPairMatrixSide(prefix, sys, pairKey) {
       html += `
         <div class="row">
           <span class="name" title="${r.model}">${k + 1}. ${r.model}</span>
-          <span class="v">${fmt(r.v, 4)}</span>
           <div class="bar"><span style="width:${pct.toFixed(1)}%; background: linear-gradient(90deg, ${color}, ${color} 60%, transparent);"></span></div>
+          <span class="v">${fmt(r.v, 4)}</span>
         </div>`;
     });
     html += `</div>`;
@@ -1125,8 +1125,8 @@ function renderBiPairSide(prefix, sys, pairKey) {
       html += `
         <div class="row">
           <span class="name" title="${r.model}">${k + 1}. ${r.model}</span>
-          <span class="v">${fmt(r.v, 4)}</span>
           <div class="bar"><span style="width:${pct.toFixed(1)}%; background: linear-gradient(90deg, ${color}, ${color} 60%, transparent);"></span></div>
+          <span class="v">${fmt(r.v, 4)}</span>
         </div>`;
     });
     html += `</div>`;

@@ -146,7 +146,7 @@
     <section class="page page--active" id="page-home">
 
       <div class="hero">
-        <h1>Benchmarking MLIPs<br>on Metal Clusters</h1>
+        <h1>ClusPot</h1>
         <p class="lead">
           ClusPot evaluates machine-learning interatomic potentials against DFT references
           on metal clusters across composition space — monometallic, bimetallic, and high-entropy.
@@ -229,7 +229,13 @@
           <div class="method-card">
             <h3>Formation energy</h3>
             <p>Per-atom formation energy referenced to the model's own bulk:</p>
-            <pre><code>E_form = ( E_cluster − Σ<sub>i</sub> n<sub>i</sub> · E<sub>bulk,i</sub><sup>(per atom)</sup> ) / N<sub>atoms</sub></code></pre>
+            <div class="formula">
+              <span class="lhs"><i>E</i><sub>form</sub>&nbsp;=</span>
+              <span class="frac">
+                <span class="num"><i>E</i><sub>cluster</sub> − Σ<sub>i</sub> <i>n</i><sub>i</sub> · <i>E</i><sub>bulk,i</sub><sup>(per&nbsp;atom)</sup></span>
+                <span class="den"><i>N</i><sub>atoms</sub></span>
+              </span>
+            </div>
             <ul>
               <li>Monometallic: <code>n<sub>i</sub> = N</code> (single element).</li>
               <li>Bimetallic: weighted by composition (<code>n<sub>A</sub></code>, <code>n<sub>B</sub></code>).</li>

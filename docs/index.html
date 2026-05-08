@@ -285,26 +285,11 @@
         <p>Single-element clusters benchmarked across the periodic table. Click any element on the heatmap for a per-model breakdown.</p>
       </header>
 
-      <section id="mono-leaderboard">
-        <div class="s-head">
-          <h2>Leaderboard</h2>
-          <span class="tag">summary</span>
-          <span class="desc">Click column headers to sort. Best value highlighted.</span>
-        </div>
-        <div class="controls">
-          <label>Dataset</label>
-          <span class="seg" id="mono-lb-ds-seg"></span>
-        </div>
-        <div class="lb-wrap">
-          <table class="lb" id="mono-lb-table"><thead></thead><tbody></tbody></table>
-        </div>
-      </section>
-
       <section id="mono-compare">
         <div class="s-head">
-          <h2>Model Comparison</h2>
-          <span class="tag">bar chart</span>
-          <span class="desc">Pick a metric. Models sorted best→worst with an orange→navy gradient.</span>
+          <h2>Leaderboard</h2>
+          <span class="tag">ranking</span>
+          <span class="desc">Pick a metric. Models sorted best→worst, with sample counts annotated on each bar.</span>
         </div>
         <div class="controls">
           <label>Metric</label>
@@ -375,20 +360,8 @@
             </div>
           </div>
           <aside class="pt-side" id="mono-pt-side">
-            <div class="empty-note">Click an active element on the table to see its values across all models.</div>
+            <div class="empty-note">Loading…</div>
           </aside>
-        </div>
-      </section>
-
-      <section id="mono-models">
-        <div class="s-head">
-          <h2>Per-Model Detail</h2>
-          <span class="tag">deep dive</span>
-          <span class="desc">Browse each MLIP's metrics and per-element breakdown.</span>
-        </div>
-        <div class="mdl-grid">
-          <div class="mdl-list" id="mono-mdl-list"></div>
-          <div class="mdl-card" id="mono-mdl-card"></div>
         </div>
       </section>
     </section>
@@ -404,26 +377,11 @@
         <p>Binary alloy clusters spanning the transition-metal block. Inspect any pair via the matrix view, or click two elements on the periodic table.</p>
       </header>
 
-      <section id="bi-leaderboard">
-        <div class="s-head">
-          <h2>Leaderboard</h2>
-          <span class="tag">summary</span>
-          <span class="desc">Click column headers to sort. Best value highlighted.</span>
-        </div>
-        <div class="controls">
-          <label>Dataset</label>
-          <span class="seg" id="bi-lb-ds-seg"></span>
-        </div>
-        <div class="lb-wrap">
-          <table class="lb" id="bi-lb-table"><thead></thead><tbody></tbody></table>
-        </div>
-      </section>
-
       <section id="bi-compare">
         <div class="s-head">
-          <h2>Model Comparison</h2>
-          <span class="tag">bar chart</span>
-          <span class="desc">Pick a metric. Models sorted best→worst with an orange→navy gradient.</span>
+          <h2>Leaderboard</h2>
+          <span class="tag">ranking</span>
+          <span class="desc">Pick a metric. Models sorted best→worst, with sample counts annotated on each bar.</span>
         </div>
         <div class="controls">
           <label>Metric</label>
@@ -485,7 +443,7 @@
         <div class="pm-wrap">
           <div class="panel"><div id="bi-pm-plot" class="plot" style="min-height:560px"></div></div>
           <aside class="pt-side" id="bi-pm-side">
-            <div class="empty-note">Click any cell to see all models' performance on that pair.</div>
+            <div class="empty-note">Loading…</div>
           </aside>
         </div>
       </section>
@@ -517,18 +475,6 @@
           <aside class="pt-side" id="bi-pt-side">
             <div class="empty-note">Pick two elements above to see their pair's metrics across all models.</div>
           </aside>
-        </div>
-      </section>
-
-      <section id="bi-models">
-        <div class="s-head">
-          <h2>Per-Model Detail</h2>
-          <span class="tag">deep dive</span>
-          <span class="desc">Browse each MLIP's metrics and top pairs by sample count.</span>
-        </div>
-        <div class="mdl-grid">
-          <div class="mdl-list" id="bi-mdl-list"></div>
-          <div class="mdl-card" id="bi-mdl-card"></div>
         </div>
       </section>
     </section>

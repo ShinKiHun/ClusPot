@@ -420,7 +420,6 @@ function renderHomeLeaderboard() {
 //  Per-System page initializer (mono + bi share most sub-sections)
 // ════════════════════════════════════════════════════════════════════════════
 function initSystemPage(prefix, sys) {
-  initLeaderboard(prefix, sys);
   initCompare(prefix, sys);
   initPareto(prefix, sys);
   initFwt(prefix, sys);
@@ -430,87 +429,9 @@ function initSystemPage(prefix, sys) {
     initPairMatrix(prefix, sys);
     initBiPeriodic(prefix, sys);
   }
-  initModels(prefix, sys);
 }
 
-// ─── 1. Leaderboard (per-system) ───────────────────────────────────────────
-const LB_KEYS = [
-  "AFwT", "E_form_MAE", "E_form_RMSE", "E_form_R2",
-  "Force_MAE", "Force_RMSE", "Force_cosine",
-  "Anomaly_pct", "Time_med",
-];
-
-function initLeaderboard(prefix, sys) {
-  const seg = document.querySelector(`#${prefix}-lb-ds-seg`);
-  makeSeg(seg, sys.datasets.map(d => ({ value: d, label: d })),
-    STATE[prefix].lb_dataset, v => {
-      STATE[prefix].lb_dataset = v;
-      renderLeaderboard(prefix, sys);
-    });
-  renderLeaderboard(prefix, sys);
-}
-function renderLeaderboard(prefix, sys) {
-  const ds = STATE[prefix].lb_dataset;
-  const sort = STATE[prefix].lb_sort;
-  const sortMeta = METRIC_BY_KEY[sort.key];
-  const tbl = document.querySelector(`#${prefix}-lb-table`);
-
-  let thead = `<tr><th class="sticky-l" data-k="model">Model</th><th data-k="rank">#</th>`;
-  LB_KEYS.forEach(k => {
-    const m = METRIC_BY_KEY[k];
-    const arrow = sort.key === k ? `<span class="arrow">${sort.asc ? "▲" : "▼"}</span>` : "";
-    thead += `<th data-k="${k}">${metricLabel(m)}${arrow}</th>`;
-  });
-  thead += `</tr>`;
-  tbl.querySelector("thead").innerHTML = thead;
-
-  const bestIdx = {};
-  LB_KEYS.forEach(k => {
-    const m = METRIC_BY_KEY[k];
-    const vals = sys.models.map(mn => sys.summary[mn]?.[ds]?.[k]);
-    const ranked = vals.map((v, i) => [i, v]).filter(([, v]) => v != null);
-    if (ranked.length) {
-      ranked.sort((a, b) => m.lower_better ? a[1] - b[1] : b[1] - a[1]);
-      bestIdx[k] = ranked[0][0];
-    }
-  });
-
-  const order = sys.models.map((mn, i) => [i, sys.summary[mn]?.[ds]?.[sort.key]])
-    .sort((a, b) => {
-      if (a[1] == null) return 1;
-      if (b[1] == null) return -1;
-      const cmp = a[1] - b[1];
-      const wantAsc = sort.asc !== undefined ? sort.asc : sortMeta?.lower_better;
-      return wantAsc ? cmp : -cmp;
-    })
-    .map(([i]) => i);
-
-  let body = "";
-  order.forEach((i, rk) => {
-    const mn = sys.models[i];
-    let row = `<tr><td class="name">${mn}</td><td class="rank">${rk + 1}</td>`;
-    LB_KEYS.forEach(k => {
-      const v = sys.summary[mn]?.[ds]?.[k];
-      const cls = bestIdx[k] === i ? "best" : "";
-      row += `<td class="${cls}">${fmt(v, 4)}</td>`;
-    });
-    row += `</tr>`;
-    body += row;
-  });
-  tbl.querySelector("tbody").innerHTML = body;
-
-  tbl.querySelectorAll("thead th").forEach(th => {
-    const k = th.dataset.k;
-    if (k === "model" || k === "rank") return;
-    th.addEventListener("click", () => {
-      if (sort.key === k) sort.asc = !sort.asc;
-      else { sort.key = k; sort.asc = METRIC_BY_KEY[k]?.lower_better ?? false; }
-      renderLeaderboard(prefix, sys);
-    }, { once: true });
-  });
-}
-
-// ─── 2. Comparison (per-system) ────────────────────────────────────────────
+// ─── 1. Per-system leaderboard (bar chart, metric-selectable) ──────────────
 function initCompare(prefix, sys) {
   const sel = document.querySelector(`#${prefix}-cmp-metric`);
   fillMetricSelect(sel, m => m.group !== "efficiency" || m.key === "Time_med");
@@ -528,23 +449,28 @@ function renderCompare(prefix, sys) {
   const ds = STATE[prefix].cmp_dataset;
   const vals = metricValsFor(sys, m.key, ds);
   const order = rankIdx(vals, m.lower_better);
-  const names  = order.map(i => sys.models[i]);
-  const series = order.map(i => vals[i]);
+  const names   = order.map(i => sys.models[i]);
+  const series  = order.map(i => vals[i]);
+  const samples = order.map(i => {
+    const s = sys.summary[sys.models[i]]?.[ds];
+    return (s?.N_normal || 0) + (s?.N_anomaly || 0);
+  });
   const colors = order.map((_, k) => modelColor(k, order.length));
 
   const trace = {
     type: "bar", orientation: "h",
     x: series, y: names,
     marker: { color: colors, line: { color: PALETTE.border, width: 0.5 } },
-    text: series.map(v => fmt(v, 4)),
+    text: series.map((v, k) => `${fmt(v, 4)}  ·  n=${fmtInt(samples[k])}`),
     textposition: "outside",
     textfont: { color: PALETTE.text, family: "JetBrains Mono", size: 11 },
-    hovertemplate: "<b>%{y}</b><br>" + metricLabel(m) + ": %{x:.4f}<extra></extra>",
+    customdata: samples,
+    hovertemplate: "<b>%{y}</b><br>" + metricLabel(m) + ": %{x:.4f}<br>N samples: %{customdata:,}<extra></extra>",
     cliponaxis: false,
   };
   const layout = plotlyLayout({
     height: Math.max(380, 30 * names.length + 120),
-    margin: { l: 200, r: 80, t: 30, b: 60 },
+    margin: { l: 200, r: 140, t: 30, b: 60 },
     yaxis: { autorange: "reversed", gridcolor: PALETTE.bg, color: PALETTE.text, tickfont: { color: PALETTE.text, size: 11 } },
     xaxis: { title: metricLabel(m), gridcolor: PALETTE.grid, zerolinecolor: PALETTE.border, color: PALETTE.subtext },
     showlegend: false,
@@ -768,7 +694,11 @@ function renderMonoPeriodic(prefix, sys) {
   const legend = document.querySelector(`#${prefix}-pt-legend`);
   legend.classList.toggle("reverse", m.lower_better);
 
-  if (STATE[prefix].pt_selected) renderMonoPeriodicSide(prefix, sys, STATE[prefix].pt_selected);
+  if (STATE[prefix].pt_selected) {
+    renderMonoPeriodicSide(prefix, sys, STATE[prefix].pt_selected);
+  } else {
+    renderModelSummarySide(`#${prefix}-pt-side`, sys, STATE[prefix].pt_model, STATE[prefix].pt_dataset);
+  }
 }
 function onMonoCellHover(prefix, sys, cell, el) {
   const m = METRIC_BY_KEY[STATE[prefix].pt_metric];
@@ -921,7 +851,11 @@ function renderPairMatrix(prefix, sys) {
     renderPairMatrixSide(prefix, sys, pk);
   });
 
-  if (STATE[prefix].pm_selected) renderPairMatrixSide(prefix, sys, STATE[prefix].pm_selected);
+  if (STATE[prefix].pm_selected) {
+    renderPairMatrixSide(prefix, sys, STATE[prefix].pm_selected);
+  } else {
+    renderModelSummarySide(`#${prefix}-pm-side`, sys, STATE[prefix].pm_model, STATE[prefix].pm_dataset);
+  }
 }
 
 function renderPairMatrixSide(prefix, sys, pairKey) {
@@ -1208,119 +1142,35 @@ function moveTip(e) {
 }
 function hideTip() { TIP.classList.remove("show"); }
 
-// ─── 6. Per-Model (per-system) ─────────────────────────────────────────────
-function initModels(prefix, sys) {
-  const list = document.querySelector(`#${prefix}-mdl-list`);
-  const afwt = metricValsFor(sys, "AFwT", "total");
-  const order = rankIdx(afwt, false);
-  list.innerHTML = "";
-  order.forEach((i, k) => {
-    const mn = sys.models[i];
-    const b = document.createElement("button");
-    b.dataset.m = mn;
-    b.innerHTML = `<span>${mn}</span><span class="rk">#${k + 1}</span>`;
-    if (mn === STATE[prefix].mdl) b.classList.add("on");
-    b.addEventListener("click", () => {
-      list.querySelectorAll("button").forEach(x => x.classList.remove("on"));
-      b.classList.add("on");
-      STATE[prefix].mdl = mn;
-      renderModelCard(prefix, sys);
-    });
-    list.appendChild(b);
-  });
-  renderModelCard(prefix, sys);
-}
-
-function renderModelCard(prefix, sys) {
-  const mn = STATE[prefix].mdl;
-  const card = document.querySelector(`#${prefix}-mdl-card`);
-  const s = sys.summary[mn]?.["total"] || {};
-
+// ─── Per-model summary (used as the heatmap side-panel default state) ─────
+//   When no element/cell is clicked, the side panel shows the currently-
+//   selected model's headline stats — replaces the dropped Per-Model Detail
+//   section while keeping the info one click away.
+function renderModelSummarySide(containerSel, sys, modelName, dataset) {
+  const container = document.querySelector(containerSel);
+  if (!container) return;
+  if (!modelName) {
+    container.innerHTML = `<div class="empty-note">Pick a model above to see its headline stats.</div>`;
+    return;
+  }
+  const s = sys.summary[modelName]?.[dataset] || sys.summary[modelName]?.["total"] || {};
+  const dsLabel = sys.summary[modelName]?.[dataset] ? dataset : "total";
   const stats = [
-    { k: "AFwT (%)",                 v: fmt(s.AFwT, 2) },
-    { k: "MAE (E_form, eV/atom)",    v: fmt(s.E_form_MAE, 4) },
-    { k: "MAE (Force, eV/Å)",        v: fmt(s.Force_MAE, 4) },
-    { k: "Anomaly rate (%)",         v: fmt(s.Anomaly_pct, 2) },
-    { k: "R² (E_form)",              v: fmt(s.E_form_R2, 3) },
-    { k: "Cosine (Force)",           v: fmt(s.Force_cosine, 3) },
-    { k: "Time / step (median, s)",  v: fmt(s.Time_med, 4) },
-    { k: "N samples",                v: fmtInt((s.N_normal || 0) + (s.N_anomaly || 0)) },
+    { k: "AFwT (%)",                v: fmt(s.AFwT, 2) },
+    { k: "MAE (E_form, eV/atom)",   v: fmt(s.E_form_MAE, 4) },
+    { k: "MAE (Force, eV/Å)",       v: fmt(s.Force_MAE, 4) },
+    { k: "Anomaly rate (%)",        v: fmt(s.Anomaly_pct, 2) },
+    { k: "R² (E_form)",             v: fmt(s.E_form_R2, 3) },
+    { k: "Cosine (Force)",          v: fmt(s.Force_cosine, 3) },
+    { k: "Time / step (s, median)", v: fmt(s.Time_med, 4) },
+    { k: "N samples",               v: fmtInt((s.N_normal || 0) + (s.N_anomaly || 0)) },
   ];
-
-  const detailLabel = sys.kind === "pair" ? "Per-pair MAE (E_form) — top 25 by sample count" : "Per-element MAE (E_form) — top 25 by sample count";
-  card.innerHTML = `
-    <div class="mdl-name">${mn}</div>
-    <div class="mdl-stats">
+  container.innerHTML = `
+    <h3>${modelName}</h3>
+    <div class="el-name">Dataset · ${dsLabel}</div>
+    <div class="mdl-stats compact">
       ${stats.map(b => `<div class="b"><div class="k">${b.k}</div><div class="v">${b.v}</div></div>`).join("")}
     </div>
-    <div id="${prefix}-mdl-fwt" class="plot" style="min-height:320px"></div>
-    <div style="margin-top:24px">
-      <h4 style="color:${PALETTE.subtext}; font-size:12px; text-transform:uppercase; letter-spacing:0.6px; margin:0 0 10px;">${detailLabel}</h4>
-      <div id="${prefix}-mdl-elements" class="plot" style="min-height:660px"></div>
-    </div>
+    <div class="empty-note" style="margin-top:14px">Click a cell on the heatmap to compare this metric across all models.</div>
   `;
-
-  // mini fwt
-  const pts = sys.fwt[mn]?.["total"] || [];
-  if (pts.length) {
-    Plotly.react(`${prefix}-mdl-fwt`,
-      [{
-        type: "scatter", mode: "lines+markers",
-        x: pts.map(p => p.threshold), y: pts.map(p => p.pct),
-        line: { color: PALETTE.orange, width: 2.5 },
-        marker: { color: PALETTE.orange, size: 7 },
-        fill: "tozeroy", fillcolor: "rgba(255,107,53,0.12)",
-        hovertemplate: "ε=%{x}<br>%{y:.2f}%<extra></extra>",
-      }],
-      plotlyLayout({
-        height: 320,
-        xaxis: { title: "ε (eV/Å)", range: [0, 1.05], color: PALETTE.text, gridcolor: PALETTE.grid },
-        yaxis: { title: "FwT (%)",  range: [0, 101],  color: PALETTE.text, gridcolor: PALETTE.grid },
-        showlegend: false,
-        margin: { l: 60, r: 30, t: 20, b: 50 },
-      }),
-      PLOTLY_CFG);
-  }
-
-  // top 25 by sample count
-  const detail = sys.kind === "pair" ? sys.pairs?.[mn]?.["total"] : sys.elements?.[mn]?.["total"];
-  const block = detail || {};
-  const rows = Object.entries(block).map(([key, byType]) => {
-    const slot = byType.normal || {};
-    return { key, mae: slot.E_form_MAE, n: slot.N_samples || 0 };
-  }).filter(r => r.mae != null && isFinite(r.mae));
-  rows.sort((a, b) => b.n - a.n);
-  const top = rows.slice(0, 25);
-
-  if (top.length) {
-    const order = top.map((_, i) => i).sort((a, b) => top[a].mae - top[b].mae);
-    const sorted = order.map(i => top[i]);
-    Plotly.react(`${prefix}-mdl-elements`,
-      [{
-        type: "bar", orientation: "h",
-        x: sorted.map(r => r.mae),
-        y: sorted.map(r => r.key),
-        marker: { color: sorted.map((_, k) => modelColor(k, sorted.length)) },
-        text: sorted.map(r => `${fmt(r.mae, 3)}  (n=${fmtInt(r.n)})`),
-        textposition: "outside",
-        textfont: { color: PALETTE.subtext, size: 10 },
-        hovertemplate: "<b>%{y}</b><br>MAE (E_form): %{x:.4f} eV/atom<extra></extra>",
-        cliponaxis: false,
-      }],
-      plotlyLayout({
-        height: Math.max(640, 24 * sorted.length + 80),
-        margin: { l: 80, r: 110, t: 10, b: 50 },
-        yaxis: {
-          autorange: "reversed", color: PALETTE.text,
-          tickmode: "array",
-          tickvals: sorted.map(r => r.key),
-          ticktext: sorted.map(r => r.key),
-          tickfont: { color: PALETTE.text, size: 11 },
-          automargin: true,
-        },
-        xaxis: { title: "MAE (E_form, eV/atom)", color: PALETTE.text, gridcolor: PALETTE.grid },
-        showlegend: false,
-      }),
-      PLOTLY_CFG);
-  }
 }

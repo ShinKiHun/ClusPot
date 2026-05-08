@@ -917,6 +917,17 @@ table.lb td.rank {
   font-weight: 600;
   color: var(--text);
 }
+/* Compact variant — used inside the heatmap side panel where the column
+   is narrow. Two columns instead of four, slightly smaller value text. */
+.mdl-stats.compact {
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-bottom: 0;
+  margin-top: 12px;
+}
+.mdl-stats.compact .b { padding: 10px 12px; }
+.mdl-stats.compact .b .v { font-size: 15px; }
+.mdl-stats.compact .b .k { font-size: 9.5px; }
 
 /* ── Footer ────────────────────────────────────────────── */
 .footer {

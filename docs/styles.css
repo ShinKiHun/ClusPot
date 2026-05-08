@@ -509,34 +509,29 @@ section {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-/* When a download button follows .desc, .desc keeps margin-left:auto but
-   doesn't push the button off the row. */
-.s-head .desc + .download-btn { margin-left: 10px; }
-.s-head > .download-btn:first-of-type { margin-left: auto; }
-
-.download-btn {
+/* Floating camera button — mirrors Plotly modebar's hover-only camera so
+   sections without a Plotly chart (Home leaderboard, periodic heatmap)
+   get the same download UX. Hidden until the panel is hovered. */
+.chart-panel { position: relative; }
+.dl-camera {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  z-index: 5;
   background: transparent;
+  border: none;
   color: var(--subtext);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 5px 10px;
   cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 11.5px;
-  font-family: inherit;
-  font-weight: 500;
-  letter-spacing: 0.4px;
-  text-transform: uppercase;
-  transition: color 0.15s, border-color 0.15s, background 0.15s;
+  padding: 5px 6px;
+  border-radius: 4px;
+  opacity: 0;
+  transition: opacity 0.18s, color 0.15s, background 0.15s;
+  line-height: 0;
 }
-.download-btn:hover {
-  color: var(--orange);
-  border-color: var(--orange);
-  background: var(--orange-soft);
-}
-.download-btn svg { width: 13px; height: 13px; fill: currentColor; }
+.chart-panel:hover .dl-camera,
+.dl-camera:focus-visible { opacity: 0.55; }
+.chart-panel .dl-camera:hover { opacity: 1; color: var(--orange); background: var(--orange-soft); }
+.dl-camera svg { width: 18px; height: 18px; fill: currentColor; display: block; }
 
 /* ── Cards / Panels ────────────────────────────────────── */
 .panel {

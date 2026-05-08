@@ -187,16 +187,21 @@
 
       <!-- ── Global leaderboard ──────────────────── -->
       <section id="home-leaderboard">
-        <div class="s-head">
-          <h2>Global Leaderboard</h2>
-          <span class="tag">all systems combined</span>
-          <span class="desc">One row per MLIP, aggregated across every cluster system it has been evaluated on.</span>
-        </div>
-        <div class="lb-wrap">
-          <table class="lb" id="home-lb-table">
-            <thead></thead>
-            <tbody></tbody>
-          </table>
+        <div class="panel chart-panel">
+          <button class="dl-camera" type="button" data-dl-section title="Download as PNG" aria-label="Download as PNG">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3l1.5-2h3L15 3h4a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4zm3 14a5 5 0 1 0 0-10 5 5 0 0 0 0 10zm0-2a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/></svg>
+          </button>
+          <div class="s-head">
+            <h2>Global Leaderboard</h2>
+            <span class="tag">all systems combined</span>
+            <span class="desc">One row per MLIP, aggregated across every cluster system it has been evaluated on.</span>
+          </div>
+          <div class="lb-wrap">
+            <table class="lb" id="home-lb-table">
+              <thead></thead>
+              <tbody></tbody>
+            </table>
+          </div>
         </div>
       </section>
 
@@ -342,14 +347,13 @@
 
       <section id="mono-periodic">
         <div class="panel chart-panel">
+          <button class="dl-camera" type="button" data-dl-section title="Download as PNG" aria-label="Download as PNG">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3l1.5-2h3L15 3h4a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4zm3 14a5 5 0 1 0 0-10 5 5 0 0 0 0 10zm0-2a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/></svg>
+          </button>
           <div class="s-head">
             <h2>Periodic Heatmap</h2>
             <span class="tag">per-element</span>
             <span class="desc">Colored by the chosen metric. Click an element for the full model breakdown.</span>
-            <button class="download-btn" type="button" data-dl-section title="Download section as PNG">
-              <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5a.75.75 0 0 1 .75.75v6.69l2.22-2.22a.75.75 0 1 1 1.06 1.06l-3.5 3.5a.75.75 0 0 1-1.06 0l-3.5-3.5a.75.75 0 1 1 1.06-1.06l2.22 2.22V2.25A.75.75 0 0 1 8 1.5zM2.75 12a.75.75 0 0 1 .75.75v.75c0 .14.11.25.25.25h8.5a.25.25 0 0 0 .25-.25v-.75a.75.75 0 0 1 1.5 0v.75A1.75 1.75 0 0 1 12.25 15h-8.5A1.75 1.75 0 0 1 2 13.5v-.75a.75.75 0 0 1 .75-.75z"/></svg>
-              <span>PNG</span>
-            </button>
           </div>
           <div class="controls">
             <label>Metric</label>
@@ -447,14 +451,13 @@
       <!-- ─── Two-click periodic table ─── -->
       <section id="bi-periodic">
         <div class="panel chart-panel">
+          <button class="dl-camera" type="button" data-dl-section title="Download as PNG" aria-label="Download as PNG">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3l1.5-2h3L15 3h4a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4zm3 14a5 5 0 1 0 0-10 5 5 0 0 0 0 10zm0-2a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/></svg>
+          </button>
           <div class="s-head">
             <h2>Two-Click Periodic Table</h2>
             <span class="tag">pick A, then B</span>
             <span class="desc">Click element A first → eligible B partners highlight → click B for the pair detail.</span>
-            <button class="download-btn" type="button" data-dl-section title="Download section as PNG">
-              <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5a.75.75 0 0 1 .75.75v6.69l2.22-2.22a.75.75 0 1 1 1.06 1.06l-3.5 3.5a.75.75 0 0 1-1.06 0l-3.5-3.5a.75.75 0 1 1 1.06-1.06l2.22 2.22V2.25A.75.75 0 0 1 8 1.5zM2.75 12a.75.75 0 0 1 .75.75v.75c0 .14.11.25.25.25h8.5a.25.25 0 0 0 .25-.25v-.75a.75.75 0 0 1 1.5 0v.75A1.75 1.75 0 0 1 12.25 15h-8.5A1.75 1.75 0 0 1 2 13.5v-.75a.75.75 0 0 1 .75-.75z"/></svg>
-              <span>PNG</span>
-            </button>
           </div>
           <div class="controls">
             <label>Metric</label>

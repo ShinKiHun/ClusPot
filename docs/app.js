@@ -171,9 +171,9 @@ function captureSectionAsPng(section, fallbackPlotly) {
     return;
   }
 
-  // Plotly modebars are visible on hover and would show up in the capture.
-  // Also hide other transient overlays (cell tooltip).
-  const hiders = section.querySelectorAll(".modebar-container, .modebar");
+  // Hide transient hover-only UI (Plotly modebars, our floating camera
+   // button) so they don't end up in the captured image.
+  const hiders = section.querySelectorAll(".modebar-container, .modebar, .dl-camera");
   const prev = [];
   hiders.forEach(b => { prev.push(b.style.visibility); b.style.visibility = "hidden"; });
 

@@ -511,8 +511,16 @@ section {
 }
 /* Floating camera button — mirrors Plotly modebar's hover-only camera so
    sections without a Plotly chart (Home leaderboard, periodic heatmap)
-   get the same download UX. Hidden until the panel is hovered. */
-.chart-panel { position: relative; }
+   get the same download UX. Works inside any container with the button as
+   a direct child — chart-panel for per-system pages, the section itself
+   for the bare Home leaderboard (so it stays left-right aligned with the
+   Methodology section below, no extra panel inset). */
+.chart-panel,
+section:has(> .dl-camera) { position: relative; }
+/* Reserve right-side space on the section header so the hover-revealed
+   camera button doesn't crash into the .desc text. */
+.chart-panel:has(> .dl-camera) > .s-head,
+section:has(> .dl-camera) > .s-head { padding-right: 40px; }
 .dl-camera {
   position: absolute;
   top: 12px;
@@ -528,10 +536,14 @@ section {
   transition: opacity 0.18s, color 0.15s, background 0.15s;
   line-height: 0;
 }
-.chart-panel:hover .dl-camera,
+.chart-panel:hover > .dl-camera,
+section:has(> .dl-camera):hover > .dl-camera,
 .dl-camera:focus-visible { opacity: 0.55; }
-.chart-panel .dl-camera:hover { opacity: 1; color: var(--orange); background: var(--orange-soft); }
+.dl-camera:hover { opacity: 1 !important; color: var(--orange); background: var(--orange-soft); }
 .dl-camera svg { width: 18px; height: 18px; fill: currentColor; display: block; }
+/* When the camera is at section level (no chart-panel padding), nudge it
+   inward slightly so it doesn't sit flush with the section's right edge. */
+section > .dl-camera { top: 4px; right: 0; }
 
 /* ── Cards / Panels ────────────────────────────────────── */
 .panel {

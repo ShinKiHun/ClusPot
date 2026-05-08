@@ -182,7 +182,7 @@ a:hover { color: var(--orange-hi); }
 
 .main {
   padding: 48px 32px 80px;
-  max-width: 1280px;
+  max-width: 1480px;
   margin: 0 auto;
   width: 100%;
 }
@@ -1040,7 +1040,7 @@ table.lb td.rank {
 /* ── Home methodology ──────────────────────────────────── */
 .method-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
 }
 .method-card {
@@ -1233,7 +1233,7 @@ table.lb td.n-cell {
   .nav { flex-wrap: wrap; gap: 2px; margin: 0; }
   .nav a { padding: 6px 10px; font-size: 12.5px; }
   .meta-right { display: none; }
-  .pt-wrap, .mdl-grid { grid-template-columns: 1fr; }
+  .pt-wrap, .mdl-grid, .method-grid { grid-template-columns: 1fr; }
   .page-head h1 { font-size: 26px; }
   .pt-side { position: static; }
   .main { padding: 24px 16px 60px; }

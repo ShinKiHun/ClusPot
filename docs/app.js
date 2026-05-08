@@ -36,7 +36,6 @@ const STATE = {
     cmp_metric: "E_form_MAE", cmp_dataset: "total",
     par_metric: "E_form_MAE", par_xmetric: "Time_med", par_dataset: "total",
     fwt_dataset: "total",
-    pm_metric: "E_form_MAE", pm_model: null, pm_dataset: "bimetallic", pm_selected: null,
     pt_metric: "E_form_MAE", pt_model: null, pt_dataset: "bimetallic",
     pt_a: null, pt_b: null,
     mdl: null,
@@ -61,7 +60,7 @@ function main() {
   const mono = DATA.systems.mono;
   const bi   = DATA.systems.bi;
   if (mono) STATE.mono.pt_model  = STATE.mono.mdl  = mono.models[0];
-  if (bi)   STATE.bi.pm_model    = STATE.bi.pt_model = STATE.bi.mdl = bi.models[0];
+  if (bi)   STATE.bi.pt_model    = STATE.bi.mdl = bi.models[0];
 
   initMetaBar();
   initRouter();
@@ -491,7 +490,6 @@ function initSystemPage(prefix, sys) {
   if (sys.kind === "single") {
     initPeriodic(prefix, sys);
   } else if (sys.kind === "pair") {
-    initPairMatrix(prefix, sys);
     initBiPeriodic(prefix, sys);
   }
 }
@@ -826,140 +824,18 @@ function renderMonoPeriodicSide(prefix, sys, sym) {
   document.querySelector(`#${prefix}-pt-side`).innerHTML = html;
 }
 
-// ─── 5b. Pair Matrix — BI ──────────────────────────────────────────────────
+// ─── Bi-system pair lookups (used by the two-click periodic table) ────────
 function pairValueAcross(sys, dataset, pairKey, metricKey, type = "normal") {
-  // collect per-model values for this pair
-  const rows = sys.models.map(m => {
+  return sys.models.map(m => {
     const slot = sys.pairs?.[m]?.[dataset]?.[pairKey]?.[type];
     return { model: m, v: slot?.[metricKey] ?? null, n: slot?.N_samples ?? null };
   });
-  return rows;
 }
 function pairValueForModel(sys, model, dataset, pairKey, metricKey, type = "normal") {
   return sys.pairs?.[model]?.[dataset]?.[pairKey]?.[type]?.[metricKey] ?? null;
 }
 
-function initPairMatrix(prefix, sys) {
-  const sel = document.querySelector(`#${prefix}-pm-metric`);
-  fillMetricSelect(sel, m => ["energy", "force"].includes(m.group));
-  sel.value = STATE[prefix].pm_metric;
-  sel.addEventListener("change", () => { STATE[prefix].pm_metric = sel.value; renderPairMatrix(prefix, sys); });
-
-  const mSel = document.querySelector(`#${prefix}-pm-model`);
-  mSel.innerHTML = sys.models.map(m => `<option>${m}</option>`).join("");
-  mSel.value = STATE[prefix].pm_model;
-  mSel.addEventListener("change", () => { STATE[prefix].pm_model = mSel.value; renderPairMatrix(prefix, sys); });
-
-  makeSeg(document.querySelector(`#${prefix}-pm-ds-seg`),
-    sys.datasets.map(d => ({ value: d, label: d })),
-    STATE[prefix].pm_dataset, v => { STATE[prefix].pm_dataset = v; renderPairMatrix(prefix, sys); });
-  renderPairMatrix(prefix, sys);
-}
-
-function renderPairMatrix(prefix, sys) {
-  const m = METRIC_BY_KEY[STATE[prefix].pm_metric];
-  const model = STATE[prefix].pm_model;
-  const ds = STATE[prefix].pm_dataset;
-  const els = sys.active_elements;     // sorted list of elements
-  const lower = m.lower_better;
-
-  // assemble symmetric matrix
-  const Z = els.map(() => els.map(() => null));
-  sys.active_pairs.forEach(pk => {
-    const [a, b] = pk.split("-");
-    const v = pairValueForModel(sys, model, ds, pk, m.key, "normal");
-    if (v == null || !isFinite(v)) return;
-    const ia = els.indexOf(a);
-    const ib = els.indexOf(b);
-    if (ia < 0 || ib < 0) return;
-    Z[ia][ib] = v;
-    Z[ib][ia] = v;
-  });
-
-  const colorscale = (lower ? [...HEAT].reverse() : HEAT).map((c, i, arr) => [i / (arr.length - 1), c]);
-
-  const trace = {
-    type: "heatmap",
-    x: els, y: els, z: Z,
-    colorscale,
-    hoverongaps: false,
-    hovertemplate: `<b>%{y}-%{x}</b><br>${metricLabel(m)}: %{z:.4f}<extra></extra>`,
-    xgap: 1, ygap: 1,
-    colorbar: {
-      title: { text: metricLabel(m, false), font: { color: PALETTE.text, size: 11 }, side: "right" },
-      tickfont: { color: PALETTE.text, size: 10 },
-      bgcolor: "rgba(0,0,0,0)",
-      thickness: 14,
-      len: 0.85,
-    },
-  };
-  const layout = plotlyLayout({
-    height: 560,
-    xaxis: { side: "top", tickfont: { color: PALETTE.text, size: 10 }, gridcolor: PALETTE.bg, color: PALETTE.text, fixedrange: true },
-    yaxis: { autorange: "reversed", tickfont: { color: PALETTE.text, size: 10 }, gridcolor: PALETTE.bg, color: PALETTE.text, fixedrange: true, scaleanchor: "x", scaleratio: 1 },
-    margin: { l: 70, r: 90, t: 70, b: 30 },
-  });
-  Plotly.react(`${prefix}-pm-plot`, [trace], layout, PLOTLY_CFG);
-
-  // attach click handler (re-bind safely each render)
-  const plotEl = document.getElementById(`${prefix}-pm-plot`);
-  plotEl.removeAllListeners?.("plotly_click");
-  plotEl.on("plotly_click", evt => {
-    const pt = evt.points && evt.points[0];
-    if (!pt) return;
-    const a = String(pt.y), b = String(pt.x);
-    if (a === b) return;
-    const sorted = [a, b].sort();
-    const pk = `${sorted[0]}-${sorted[1]}`;
-    if (!sys.active_pairs.includes(pk)) return;
-    STATE[prefix].pm_selected = pk;
-    renderPairMatrixSide(prefix, sys, pk);
-  });
-
-  if (STATE[prefix].pm_selected) {
-    renderPairMatrixSide(prefix, sys, STATE[prefix].pm_selected);
-  } else {
-    renderModelSummarySide(`#${prefix}-pm-side`, sys, STATE[prefix].pm_model, STATE[prefix].pm_dataset);
-  }
-}
-
-function renderPairMatrixSide(prefix, sys, pairKey) {
-  const m = METRIC_BY_KEY[STATE[prefix].pm_metric];
-  const ds = STATE[prefix].pm_dataset;
-  const rows = pairValueAcross(sys, ds, pairKey, m.key, "normal");
-  const valid = rows.filter(r => r.v != null && isFinite(r.v));
-  valid.sort((a, b) => m.lower_better ? a.v - b.v : b.v - a.v);
-  const samples = valid.length ? valid[0].n : null;
-  const [a, b] = pairKey.split("-");
-
-  let html = `
-    <h3>${a}–${b}</h3>
-    <div class="el-name">Bimetallic pair</div>
-    <div class="meta-row"><span class="k">Metric</span><span class="v">${metricLabel(m)}</span></div>
-    <div class="meta-row"><span class="k">Dataset</span><span class="v">${ds}</span></div>
-    <div class="meta-row"><span class="k">N samples</span><span class="v">${samples != null ? fmtInt(samples) : "—"}</span></div>
-  `;
-  if (valid.length === 0) {
-    html += `<div class="empty-note">No model has data for ${pairKey}.</div>`;
-  } else {
-    const max = Math.max(...valid.map(r => Math.abs(r.v)));
-    html += `<div class="breakdown"><h4>Models · sorted best→worst</h4>`;
-    valid.forEach((r, k) => {
-      const pct = max > 0 ? Math.abs(r.v) / max * 100 : 0;
-      const color = modelColor(k, valid.length);
-      html += `
-        <div class="row">
-          <span class="name" title="${r.model}">${k + 1}. ${r.model}</span>
-          <div class="bar"><span style="width:${pct.toFixed(1)}%; background: linear-gradient(90deg, ${color}, ${color} 60%, transparent);"></span></div>
-          <span class="v">${fmt(r.v, 4)}</span>
-        </div>`;
-    });
-    html += `</div>`;
-  }
-  document.querySelector(`#${prefix}-pm-side`).innerHTML = html;
-}
-
-// ─── 5c. Two-click periodic table — BI ─────────────────────────────────────
+// ─── Two-click periodic table — BI ─────────────────────────────────────────
 function initBiPeriodic(prefix, sys) {
   const grid = document.querySelector(`#${prefix}-pt-grid`);
   grid.innerHTML = "";

@@ -260,14 +260,6 @@ section {
   border-top: 1px dashed var(--border);
 }
 
-/* ── Pair-matrix layout (bi page) ──────────────────────── */
-.pm-wrap {
-  display: grid;
-  grid-template-columns: 1fr 360px;
-  gap: 22px;
-  align-items: start;
-}
-
 /* ── Reset button (bi periodic table) ──────────────────── */
 .reset-btn {
   background: var(--card);
@@ -1234,7 +1226,7 @@ table.lb td.n-cell {
   .nav { flex-wrap: wrap; gap: 2px; margin: 0; }
   .nav a { padding: 6px 10px; font-size: 12.5px; }
   .meta-right { display: none; }
-  .pt-wrap, .pm-wrap, .mdl-grid { grid-template-columns: 1fr; }
+  .pt-wrap, .mdl-grid { grid-template-columns: 1fr; }
   .page-head h1 { font-size: 26px; }
   .pt-side { position: static; }
   .main { padding: 24px 16px 60px; }

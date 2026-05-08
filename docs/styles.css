@@ -517,6 +517,34 @@ section {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+/* When a download button follows .desc, .desc keeps margin-left:auto but
+   doesn't push the button off the row. */
+.s-head .desc + .download-btn { margin-left: 10px; }
+.s-head > .download-btn:first-of-type { margin-left: auto; }
+
+.download-btn {
+  background: transparent;
+  color: var(--subtext);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 5px 10px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  font-family: inherit;
+  font-weight: 500;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+.download-btn:hover {
+  color: var(--orange);
+  border-color: var(--orange);
+  background: var(--orange-soft);
+}
+.download-btn svg { width: 13px; height: 13px; fill: currentColor; }
 
 /* ── Cards / Panels ────────────────────────────────────── */
 .panel {
@@ -674,6 +702,13 @@ table.lb td.rank {
   gap: 22px;
   align-items: start;
 }
+/* Vertical layout: heatmap on top, comparison panel below. Heatmap gets
+   the full panel width (cells stay readable at high model counts) and
+   the side panel becomes a richer full-width breakdown. */
+.pt-wrap.pt-stack {
+  grid-template-columns: 1fr;
+  gap: 18px;
+}
 .pt {
   display: grid;
   grid-template-columns: repeat(18, 1fr);
@@ -754,6 +789,27 @@ table.lb td.rank {
 }
 .pt-side::-webkit-scrollbar { width: 8px; }
 .pt-side::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 4px; }
+
+/* Stacked variant — full-width breakdown below the heatmap. No need to
+   stay in view via sticky/scroll because the heatmap is right above it. */
+.pt-stack .pt-side {
+  position: static;
+  max-height: none;
+  overflow-y: visible;
+  padding: 20px 24px;
+}
+/* In a wide stacked panel, expand the model-summary stat grid to 4 cols
+   so the cards aren't oversized at full width. */
+.pt-stack .pt-side .mdl-stats.compact { grid-template-columns: repeat(4, 1fr); }
+/* Two-column model-breakdown when stacked — uses CSS columns so models
+   flow top-to-bottom within each column (rank 1-N/2 left, then N/2+1-N
+   right), not left-to-right which would look odd for a ranked list. */
+.pt-stack .pt-side .breakdown {
+  column-count: 2;
+  column-gap: 32px;
+}
+.pt-stack .pt-side .breakdown h4 { column-span: all; margin-bottom: 10px; }
+.pt-stack .pt-side .breakdown .row { break-inside: avoid; }
 .pt-side h3 {
   margin: 0 0 2px;
   font-size: 22px;

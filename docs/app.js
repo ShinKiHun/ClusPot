@@ -154,30 +154,29 @@ function plotlyLayout(extra = {}) {
     hoverlabel: { bgcolor: PALETTE.cardHi, bordercolor: PALETTE.orange, font: { color: PALETTE.text, family: "JetBrains Mono, monospace", size: 12 } },
   }, extra);
 }
-// Plotly's built-in "Download plot as png" only captures the chart canvas —
-// the section's H2 / tag / metric+dataset selectors are above the plot in
-// the surrounding HTML and get cropped out. We replace the camera button
-// with one that html2canvas-captures the whole <section>, so the exported
-// PNG matches what the user sees on the page (title + controls + chart).
-function downloadSectionAsPng(gd) {
-  const section = gd.closest("section[id]") || gd.closest(".chart-panel") || gd.closest(".panel") || gd.parentElement;
+// Capture a whole <section> (title + controls + chart) as a PNG so the
+// exported image matches what the user sees, instead of just the bare
+// Plotly canvas. Used both as the modebar camera-button click handler and
+// from standalone download buttons (e.g. on the periodic heatmap, which
+// has no Plotly modebar of its own).
+function captureSectionAsPng(section, fallbackPlotly) {
+  if (!section) return;
   const titleEl = section.querySelector("h2");
   const filename = (titleEl?.textContent.trim().toLowerCase()
     .replace(/[()]/g, "")
     .replace(/\s+/g, "-")
     .replace(/[^a-z0-9_-]/g, "") || "cluspot") + ".png";
 
-  // Fallback: if html2canvas didn't load, use Plotly's native PNG.
   if (typeof html2canvas !== "function") {
-    Plotly.downloadImage(gd, { format: "png", filename, width: 1600, height: 900 });
+    if (fallbackPlotly) Plotly.downloadImage(fallbackPlotly, { format: "png", filename, width: 1600, height: 900 });
     return;
   }
 
-  // Hide every Plotly modebar inside the section while capturing — they're
-  // visible on hover and would otherwise show up in the exported image.
-  const bars = section.querySelectorAll(".modebar-container, .modebar");
+  // Plotly modebars are visible on hover and would show up in the capture.
+  // Also hide other transient overlays (cell tooltip).
+  const hiders = section.querySelectorAll(".modebar-container, .modebar");
   const prev = [];
-  bars.forEach(b => { prev.push(b.style.visibility); b.style.visibility = "hidden"; });
+  hiders.forEach(b => { prev.push(b.style.visibility); b.style.visibility = "hidden"; });
 
   html2canvas(section, {
     backgroundColor: "#0d1525",
@@ -190,12 +189,26 @@ function downloadSectionAsPng(gd) {
     link.href = canvas.toDataURL("image/png");
     link.click();
   }).catch(err => {
-    console.warn("html2canvas capture failed, falling back to Plotly PNG", err);
-    Plotly.downloadImage(gd, { format: "png", filename, width: 1600, height: 900 });
+    console.warn("html2canvas capture failed", err);
+    if (fallbackPlotly) Plotly.downloadImage(fallbackPlotly, { format: "png", filename, width: 1600, height: 900 });
   }).finally(() => {
-    bars.forEach((b, i) => { b.style.visibility = prev[i] || ""; });
+    hiders.forEach((b, i) => { b.style.visibility = prev[i] || ""; });
   });
 }
+
+function downloadSectionAsPng(gd) {
+  const section = gd.closest("section[id]") || gd.closest(".chart-panel") || gd.closest(".panel") || gd.parentElement;
+  captureSectionAsPng(section, gd);
+}
+
+// Standalone download buttons (used on sections without a Plotly modebar,
+// e.g. the periodic heatmap which is plain HTML/CSS grid).
+document.addEventListener("click", e => {
+  const btn = e.target.closest("[data-dl-section]");
+  if (!btn) return;
+  e.preventDefault();
+  captureSectionAsPng(btn.closest("section[id]"));
+});
 
 const PLOTLY_CFG = {
   displaylogo: false,

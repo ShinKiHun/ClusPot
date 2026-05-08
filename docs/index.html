@@ -341,34 +341,40 @@
       </section>
 
       <section id="mono-periodic">
-        <div class="s-head">
-          <h2>Periodic Heatmap</h2>
-          <span class="tag">per-element</span>
-          <span class="desc">Colored by the chosen metric. Click an element for the full model breakdown.</span>
-        </div>
-        <div class="controls">
-          <label>Metric</label>
-          <select id="mono-pt-metric"></select>
-          <label style="margin-left:14px">Model</label>
-          <select id="mono-pt-model"></select>
-          <label style="margin-left:14px">Dataset</label>
-          <span class="seg" id="mono-pt-ds-seg"></span>
-          <label style="margin-left:14px">Type</label>
-          <span class="seg" id="mono-pt-type-seg">
-            <button class="on" data-v="normal">normal</button>
-            <button data-v="anomaly">anomaly</button>
-          </span>
-        </div>
-        <div class="pt-wrap">
-          <div>
-            <div class="pt" id="mono-pt-grid"></div>
-            <div class="legend-bar" id="mono-pt-legend">
-              <span id="mono-pt-min">—</span><div class="bar"></div><span id="mono-pt-max">—</span>
-            </div>
+        <div class="panel chart-panel">
+          <div class="s-head">
+            <h2>Periodic Heatmap</h2>
+            <span class="tag">per-element</span>
+            <span class="desc">Colored by the chosen metric. Click an element for the full model breakdown.</span>
+            <button class="download-btn" type="button" data-dl-section title="Download section as PNG">
+              <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5a.75.75 0 0 1 .75.75v6.69l2.22-2.22a.75.75 0 1 1 1.06 1.06l-3.5 3.5a.75.75 0 0 1-1.06 0l-3.5-3.5a.75.75 0 1 1 1.06-1.06l2.22 2.22V2.25A.75.75 0 0 1 8 1.5zM2.75 12a.75.75 0 0 1 .75.75v.75c0 .14.11.25.25.25h8.5a.25.25 0 0 0 .25-.25v-.75a.75.75 0 0 1 1.5 0v.75A1.75 1.75 0 0 1 12.25 15h-8.5A1.75 1.75 0 0 1 2 13.5v-.75a.75.75 0 0 1 .75-.75z"/></svg>
+              <span>PNG</span>
+            </button>
           </div>
-          <aside class="pt-side" id="mono-pt-side">
-            <div class="empty-note">Loading…</div>
-          </aside>
+          <div class="controls">
+            <label>Metric</label>
+            <select id="mono-pt-metric"></select>
+            <label style="margin-left:14px">Model</label>
+            <select id="mono-pt-model"></select>
+            <label style="margin-left:14px">Dataset</label>
+            <span class="seg" id="mono-pt-ds-seg"></span>
+            <label style="margin-left:14px">Type</label>
+            <span class="seg" id="mono-pt-type-seg">
+              <button class="on" data-v="normal">normal</button>
+              <button data-v="anomaly">anomaly</button>
+            </span>
+          </div>
+          <div class="pt-wrap pt-stack">
+            <div>
+              <div class="pt" id="mono-pt-grid"></div>
+              <div class="legend-bar" id="mono-pt-legend">
+                <span id="mono-pt-min">—</span><div class="bar"></div><span id="mono-pt-max">—</span>
+              </div>
+            </div>
+            <aside class="pt-side" id="mono-pt-side">
+              <div class="empty-note">Loading…</div>
+            </aside>
+          </div>
         </div>
       </section>
     </section>
@@ -463,31 +469,37 @@
 
       <!-- ─── Two-click periodic table ─── -->
       <section id="bi-periodic">
-        <div class="s-head">
-          <h2>Two-Click Periodic Table</h2>
-          <span class="tag">pick A, then B</span>
-          <span class="desc">Click element A first → eligible B partners highlight → click B for the pair detail.</span>
-        </div>
-        <div class="controls">
-          <label>Metric</label>
-          <select id="bi-pt-metric"></select>
-          <label style="margin-left:14px">Model</label>
-          <select id="bi-pt-model"></select>
-          <label style="margin-left:14px">Dataset</label>
-          <span class="seg" id="bi-pt-ds-seg"></span>
-          <button id="bi-pt-reset" class="reset-btn" style="margin-left:auto">Reset selection</button>
-        </div>
-        <div class="pt-wrap">
-          <div>
-            <div class="pt" id="bi-pt-grid"></div>
-            <div class="pt-status" id="bi-pt-status">Click any element to start.</div>
-            <div class="legend-bar" id="bi-pt-legend">
-              <span id="bi-pt-min">—</span><div class="bar"></div><span id="bi-pt-max">—</span>
-            </div>
+        <div class="panel chart-panel">
+          <div class="s-head">
+            <h2>Two-Click Periodic Table</h2>
+            <span class="tag">pick A, then B</span>
+            <span class="desc">Click element A first → eligible B partners highlight → click B for the pair detail.</span>
+            <button class="download-btn" type="button" data-dl-section title="Download section as PNG">
+              <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5a.75.75 0 0 1 .75.75v6.69l2.22-2.22a.75.75 0 1 1 1.06 1.06l-3.5 3.5a.75.75 0 0 1-1.06 0l-3.5-3.5a.75.75 0 1 1 1.06-1.06l2.22 2.22V2.25A.75.75 0 0 1 8 1.5zM2.75 12a.75.75 0 0 1 .75.75v.75c0 .14.11.25.25.25h8.5a.25.25 0 0 0 .25-.25v-.75a.75.75 0 0 1 1.5 0v.75A1.75 1.75 0 0 1 12.25 15h-8.5A1.75 1.75 0 0 1 2 13.5v-.75a.75.75 0 0 1 .75-.75z"/></svg>
+              <span>PNG</span>
+            </button>
           </div>
-          <aside class="pt-side" id="bi-pt-side">
-            <div class="empty-note">Pick two elements above to see their pair's metrics across all models.</div>
-          </aside>
+          <div class="controls">
+            <label>Metric</label>
+            <select id="bi-pt-metric"></select>
+            <label style="margin-left:14px">Model</label>
+            <select id="bi-pt-model"></select>
+            <label style="margin-left:14px">Dataset</label>
+            <span class="seg" id="bi-pt-ds-seg"></span>
+            <button id="bi-pt-reset" class="reset-btn" style="margin-left:auto">Reset selection</button>
+          </div>
+          <div class="pt-wrap pt-stack">
+            <div>
+              <div class="pt" id="bi-pt-grid"></div>
+              <div class="pt-status" id="bi-pt-status">Click any element to start.</div>
+              <div class="legend-bar" id="bi-pt-legend">
+                <span id="bi-pt-min">—</span><div class="bar"></div><span id="bi-pt-max">—</span>
+              </div>
+            </div>
+            <aside class="pt-side" id="bi-pt-side">
+              <div class="empty-note">Pick two elements above to see their pair's metrics across all models.</div>
+            </aside>
+          </div>
         </div>
       </section>
     </section>

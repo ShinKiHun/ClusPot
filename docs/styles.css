@@ -1126,8 +1126,7 @@ table.lb td.rank {
   align-items: center;
   justify-content: center;
   text-align: center;
-  min-width: 0;
-  flex: 1 1 auto;
+  flex: 0 0 auto;
 }
 .method-card .formula .num,
 .method-card .formula .den {

@@ -8,7 +8,7 @@ const PALETTE = {
   card:     "#131640",
   cardHi:   "#1c2052",
   orange:   "#FA901E",
-  navy:     "#3a3ab8",
+  navy:     "#3d4f7a",
   text:     "#ECEEF8",
   subtext:  "#9298c2",
   grid:     "#171a44",
@@ -16,9 +16,9 @@ const PALETTE = {
 };
 /* best→worst model gradient: CCEL orange → SNU gold → beige → silver →
    gray → brightened SNU blue (visible on the dark ground). */
-const GRADIENT = ["#FA901E", "#C5A86F", "#DCDAB2", "#B5B6B6", "#888888", "#3a3ab8"];
+const GRADIENT = ["#FA901E", "#C5A86F", "#DCDAB2", "#B5B6B6", "#888888", "#3d4f7a"];
 /* heatmap low→high (navy→orange) using the same brand anchors */
-const HEAT     = ["#3a3ab8", "#888888", "#B5B6B6", "#DCDAB2", "#C5A86F", "#FA901E"];
+const HEAT     = ["#3d4f7a", "#888888", "#B5B6B6", "#DCDAB2", "#C5A86F", "#FA901E"];
 const SYSTEM_COLORS = { mono: "#FA901E", bi: "#B5B6B6", hea: "#C5A86F" };
 
 let DATA = null;

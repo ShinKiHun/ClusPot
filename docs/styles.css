@@ -2,7 +2,7 @@
   /* ── Theme B — 미소디/CCEL brand palette on a deepened sci-fi navy ──
      Backgrounds pulled toward SNU navy (#0F0F70) for a "mission control"
      depth; accents use CCEL orange (#FA901E) + SNU blue. Worst-end navy is
-     brightened (#3a3ab8) so bars/elements survive on the dark ground. */
+     brightened (#3d4f7a) so bars/elements survive on the dark ground. */
   --bg: #05061a;
   --panel: #0b0d2e;
   --card: #131640;
@@ -10,15 +10,15 @@
   --orange: #FA901E;
   --orange-hi: #FFB04D;
   --orange-soft: rgba(250, 144, 30, 0.13);
-  --navy: #1c1d7a;          /* SNU blue, lifted for UI visibility */
-  --navy-soft: #3a3ab8;     /* hybrid bright navy (chart worst-end tone) */
+  --navy: #243a5e;          /* steel navy, lifted for UI visibility */
+  --navy-soft: #3d4f7a;     /* hybrid steel navy (chart worst-end tone) */
   --text: #ECEEF8;
   --subtext: #9298c2;
   --grid: #171a44;
   --border: #2a2c64;
   --border-hi: #3c3f86;
   --good: #FA901E;
-  --bad: #3a3ab8;
+  --bad: #3d4f7a;
   --shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
   --radius: 12px;
   --radius-sm: 8px;
@@ -76,8 +76,8 @@ html, body {
 body {
   background:
     radial-gradient(ellipse 1200px 600px at 50% -200px, rgba(250, 144, 30, 0.09), transparent 70%),
-    radial-gradient(ellipse 900px 600px at 100% 25%, rgba(35, 38, 122, 0.32), transparent 70%),
-    radial-gradient(ellipse 1000px 700px at 0% 80%, rgba(20, 22, 90, 0.28), transparent 72%),
+    radial-gradient(ellipse 900px 600px at 100% 25%, rgba(45, 64, 110, 0.34), transparent 70%),
+    radial-gradient(ellipse 1000px 700px at 0% 80%, rgba(30, 44, 80, 0.30), transparent 72%),
     var(--bg);
   background-attachment: fixed;
   min-height: 100vh;
@@ -558,7 +558,7 @@ section > .dl-camera { top: 4px; right: 0; }
   /* sci-fi glow: a soft navy light blooms from the upper-center, sitting
      on the flat panel fill — reads like a back-lit console surface. */
   background:
-    radial-gradient(ellipse 80% 120% at 50% -10%, rgba(58, 58, 184, 0.16), transparent 60%),
+    radial-gradient(ellipse 80% 120% at 50% -10%, rgba(61, 79, 122, 0.18), transparent 60%),
     var(--panel);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -917,10 +917,10 @@ table.lb td.rank {
   flex: 1;
   height: 8px;
   border-radius: 2px;
-  background: linear-gradient(90deg, #3a3ab8, #888888, #B5B6B6, #DCDAB2, #C5A86F, #FA901E);
+  background: linear-gradient(90deg, #3d4f7a, #888888, #B5B6B6, #DCDAB2, #C5A86F, #FA901E);
 }
 .legend-bar.reverse .bar {
-  background: linear-gradient(90deg, #FA901E, #C5A86F, #DCDAB2, #B5B6B6, #888888, #3a3ab8);
+  background: linear-gradient(90deg, #FA901E, #C5A86F, #DCDAB2, #B5B6B6, #888888, #3d4f7a);
 }
 
 /* ── Per-model ─────────────────────────────────────────── */

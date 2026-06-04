@@ -110,13 +110,15 @@ a:hover { color: var(--orange-hi); }
   text-decoration: none;
 }
 .brand:hover { color: var(--text); }
-.brand .square {
-  width: 14px;
-  height: 14px;
-  background: var(--orange);
-  border-radius: 3px;
-  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.18);
+.brand-logo {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+  transition: transform 0.18s ease;
 }
+.brand:hover .brand-logo { transform: scale(1.08) rotate(-3deg); }
 .brand-text { line-height: 1.15; }
 .brand-name { font-size: 17px; }
 .brand-sub {

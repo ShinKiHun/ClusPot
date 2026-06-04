@@ -1,20 +1,25 @@
 /* ClusPot — interactive site (multi-system: Home / Mono / Bi / HEA) */
 
+/* Theme B — 미소디/CCEL brand palette on a deepened sci-fi navy.
+   Keep these in sync with the :root tokens in styles.css. */
 const PALETTE = {
-  bg:       "#080c14",
-  panel:    "#0d1525",
-  card:     "#131e30",
-  cardHi:   "#1a2740",
-  orange:   "#FF6B35",
-  navy:     "#1A3A6E",
-  text:     "#E8EAF0",
-  subtext:  "#7A8FAA",
-  grid:     "#192840",
-  border:   "#253550",
+  bg:       "#05061a",
+  panel:    "#0b0d2e",
+  card:     "#131640",
+  cardHi:   "#1c2052",
+  orange:   "#FA901E",
+  navy:     "#3a3ab8",
+  text:     "#ECEEF8",
+  subtext:  "#9298c2",
+  grid:     "#171a44",
+  border:   "#2a2c64",
 };
-const GRADIENT = ["#FF6B35", "#FF9560", "#D4A870", "#7A9EC8", "#3266AA", "#1A3A6E"];
-const HEAT     = ["#1A3A6E", "#2A5CA8", "#5888C0", "#B8A060", "#E87840", "#FF6B35"];
-const SYSTEM_COLORS = { mono: "#FF6B35", bi: "#7A9EC8", hea: "#D4A870" };
+/* best→worst model gradient: CCEL orange → SNU gold → beige → silver →
+   gray → brightened SNU blue (visible on the dark ground). */
+const GRADIENT = ["#FA901E", "#C5A86F", "#DCDAB2", "#B5B6B6", "#888888", "#3a3ab8"];
+/* heatmap low→high (navy→orange) using the same brand anchors */
+const HEAT     = ["#3a3ab8", "#888888", "#B5B6B6", "#DCDAB2", "#C5A86F", "#FA901E"];
+const SYSTEM_COLORS = { mono: "#FA901E", bi: "#B5B6B6", hea: "#C5A86F" };
 
 let DATA = null;
 let METRIC_BY_KEY = {};
@@ -149,7 +154,7 @@ function plotlyLayout(extra = {}) {
       linecolor: PALETTE.border, tickcolor: PALETTE.border,
       title: { font: { size: 13, color: PALETTE.text } },
     },
-    legend: { font: { color: PALETTE.text, size: 11 }, bgcolor: "rgba(19,30,48,0.8)", bordercolor: PALETTE.border, borderwidth: 1 },
+    legend: { font: { color: PALETTE.text, size: 11 }, bgcolor: "rgba(19,22,64,0.85)", bordercolor: PALETTE.border, borderwidth: 1 },
     hoverlabel: { bgcolor: PALETTE.cardHi, bordercolor: PALETTE.orange, font: { color: PALETTE.text, family: "JetBrains Mono, monospace", size: 12 } },
   }, extra);
 }
@@ -205,7 +210,7 @@ function captureSectionAsPng(section, fallbackPlotly) {
   }
 
   html2canvas(section, {
-    backgroundColor: "#0d1525",
+    backgroundColor: "#0b0d2e",
     scale: 2,
     logging: false,
     useCORS: true,
@@ -626,7 +631,7 @@ function renderPareto(prefix, sys) {
     x: sys.models.map((_, i) => (!mask[i] && valid[i]) ? xs[i] : null),
     y: sys.models.map((_, i) => (!mask[i] && valid[i]) ? ys[i] : null),
     text: sys.models,
-    marker: { color: "#2A5CAA", size: 11, line: { color: PALETTE.border, width: 1 } },
+    marker: { color: "#6a6fb0", size: 11, line: { color: PALETTE.border, width: 1 } },
     hovertemplate: "<b>%{text}</b><br>x=%{x:.4f}<br>y=%{y:.4f}<extra></extra>",
   };
   const front = sys.models.map((_, i) => mask[i] ? [xs[i], ys[i]] : null).filter(Boolean).sort((a, b) => a[0] - b[0]);
@@ -685,7 +690,7 @@ function renderFwt(prefix, sys) {
     height: 580,
     xaxis: { title: "Force threshold ε (eV/Å)", range: [0, 1.05], gridcolor: PALETTE.grid, color: PALETTE.text },
     yaxis: { title: "Forces within threshold (%)", range: [0, 101], gridcolor: PALETTE.grid, color: PALETTE.text },
-    legend: { x: 1.02, y: 1, font: { size: 11, color: PALETTE.text }, bgcolor: "rgba(19,30,48,0.9)", bordercolor: PALETTE.border, borderwidth: 1 },
+    legend: { x: 1.02, y: 1, font: { size: 11, color: PALETTE.text }, bgcolor: "rgba(19,22,64,0.9)", bordercolor: PALETTE.border, borderwidth: 1 },
     margin: { l: 70, r: 280, t: 30, b: 60 },
   });
   Plotly.react(`${prefix}-fwt-plot`, traces, layout, PLOTLY_CFG);

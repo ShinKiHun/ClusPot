@@ -1,21 +1,25 @@
 :root {
-  --bg: #080c14;
-  --panel: #0d1525;
-  --card: #131e30;
-  --card-hi: #1a2740;
-  --orange: #FF6B35;
-  --orange-hi: #FF8C5C;
-  --orange-soft: rgba(255, 107, 53, 0.12);
-  --navy: #1A3A6E;
-  --navy-soft: #2A5CA8;
-  --text: #E8EAF0;
-  --subtext: #7A8FAA;
-  --grid: #192840;
-  --border: #253550;
-  --border-hi: #324666;
-  --good: #FF6B35;
-  --bad: #1A3A6E;
-  --shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  /* ── Theme B — 미소디/CCEL brand palette on a deepened sci-fi navy ──
+     Backgrounds pulled toward SNU navy (#0F0F70) for a "mission control"
+     depth; accents use CCEL orange (#FA901E) + SNU blue. Worst-end navy is
+     brightened (#3a3ab8) so bars/elements survive on the dark ground. */
+  --bg: #05061a;
+  --panel: #0b0d2e;
+  --card: #131640;
+  --card-hi: #1c2052;
+  --orange: #FA901E;
+  --orange-hi: #FFB04D;
+  --orange-soft: rgba(250, 144, 30, 0.13);
+  --navy: #1c1d7a;          /* SNU blue, lifted for UI visibility */
+  --navy-soft: #3a3ab8;     /* hybrid bright navy (chart worst-end tone) */
+  --text: #ECEEF8;
+  --subtext: #9298c2;
+  --grid: #171a44;
+  --border: #2a2c64;
+  --border-hi: #3c3f86;
+  --good: #FA901E;
+  --bad: #3a3ab8;
+  --shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
   --radius: 12px;
   --radius-sm: 8px;
   --mono: ui-monospace, "JetBrains Mono", "SF Mono", Consolas, monospace;
@@ -71,9 +75,11 @@ html, body {
 
 body {
   background:
-    radial-gradient(ellipse 1200px 600px at 50% -200px, rgba(255, 107, 53, 0.08), transparent 70%),
-    radial-gradient(ellipse 800px 500px at 100% 30%, rgba(26, 58, 110, 0.18), transparent 70%),
+    radial-gradient(ellipse 1200px 600px at 50% -200px, rgba(250, 144, 30, 0.09), transparent 70%),
+    radial-gradient(ellipse 900px 600px at 100% 25%, rgba(35, 38, 122, 0.32), transparent 70%),
+    radial-gradient(ellipse 1000px 700px at 0% 80%, rgba(20, 22, 90, 0.28), transparent 72%),
     var(--bg);
+  background-attachment: fixed;
   min-height: 100vh;
 }
 
@@ -95,7 +101,7 @@ a:hover { color: var(--orange-hi); }
   align-items: center;
   gap: 28px;
   padding: 14px 32px;
-  background: rgba(8, 12, 20, 0.78);
+  background: rgba(5, 6, 26, 0.8);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
 }
@@ -210,7 +216,7 @@ section {
   margin: 0 0 6px;
   font-weight: 800;
   letter-spacing: -0.5px;
-  background: linear-gradient(135deg, #FF6B35 0%, #FF9560 50%, #D4A870 100%);
+  background: linear-gradient(135deg, #FA901E 0%, #FFB04D 50%, #C5A86F 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -302,7 +308,7 @@ section {
   filter: grayscale(0.8);
 }
 .cell.eligible {
-  outline: 2px dashed rgba(255, 107, 53, 0.6);
+  outline: 2px dashed rgba(250, 144, 30, 0.6);
   outline-offset: -2px;
   cursor: pointer;
 }
@@ -310,7 +316,7 @@ section {
   outline: 2px solid var(--orange);
   outline-offset: 1px;
   z-index: 4;
-  box-shadow: 0 0 18px rgba(255, 107, 53, 0.45);
+  box-shadow: 0 0 18px rgba(250, 144, 30, 0.45);
 }
 
 /* ── Hero ──────────────────────────────────────────────── */
@@ -368,8 +374,8 @@ section {
   color: var(--text);
 }
 .cluster-card.active {
-  border-color: rgba(255, 107, 53, 0.35);
-  background: linear-gradient(180deg, rgba(255, 107, 53, 0.06), var(--card) 60%);
+  border-color: rgba(250, 144, 30, 0.35);
+  background: linear-gradient(180deg, rgba(250, 144, 30, 0.06), var(--card) 60%);
 }
 .cluster-svg {
   width: 100%;
@@ -432,7 +438,7 @@ section {
   text-transform: uppercase;
   margin-bottom: 8px;
 }
-.cluster-card .badge.active   { background: rgba(255, 107, 53, 0.15); color: var(--orange); }
+.cluster-card .badge.active   { background: rgba(250, 144, 30, 0.15); color: var(--orange); }
 .cluster-card .badge.coming   { background: var(--card-hi); color: var(--subtext); }
 .cluster-card p {
   margin: 0;
@@ -549,11 +555,15 @@ section > .dl-camera { top: 4px; right: 0; }
 
 /* ── Cards / Panels ────────────────────────────────────── */
 .panel {
-  background: var(--panel);
+  /* sci-fi glow: a soft navy light blooms from the upper-center, sitting
+     on the flat panel fill — reads like a back-lit console surface. */
+  background:
+    radial-gradient(ellipse 80% 120% at 50% -10%, rgba(58, 58, 184, 0.16), transparent 60%),
+    var(--panel);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 22px;
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow), inset 0 1px 0 rgba(120, 130, 220, 0.05);
 }
 
 /* Chart-panel — one bordered frame containing s-head, controls, and the
@@ -883,7 +893,7 @@ table.lb td.rank {
 .pt-side .row .bar > span {
   position: absolute;
   inset: 0 auto 0 0;
-  background: linear-gradient(90deg, var(--orange), #D4A870 80%);
+  background: linear-gradient(90deg, var(--orange), #C5A86F 80%);
   border-radius: 3px;
 }
 .pt-side .row .v {
@@ -907,10 +917,10 @@ table.lb td.rank {
   flex: 1;
   height: 8px;
   border-radius: 2px;
-  background: linear-gradient(90deg, #1A3A6E, #2A5CA8, #5888C0, #B8A060, #E87840, #FF6B35);
+  background: linear-gradient(90deg, #3a3ab8, #888888, #B5B6B6, #DCDAB2, #C5A86F, #FA901E);
 }
 .legend-bar.reverse .bar {
-  background: linear-gradient(90deg, #FF6B35, #E87840, #B8A060, #5888C0, #2A5CA8, #1A3A6E);
+  background: linear-gradient(90deg, #FA901E, #C5A86F, #DCDAB2, #B5B6B6, #888888, #3a3ab8);
 }
 
 /* ── Per-model ─────────────────────────────────────────── */

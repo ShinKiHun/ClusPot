@@ -1,18 +1,19 @@
 /* ClusPot — interactive site (multi-system: Home / Mono / Bi / HEA) */
 
-/* Theme B — 미소디/CCEL brand palette on a deepened sci-fi navy.
+/* Theme B — 미소디/CCEL brand palette on a steel-navy sci-fi ground.
+   Surfaces keep green slightly above red to avoid a purplish indigo cast.
    Keep these in sync with the :root tokens in styles.css. */
 const PALETTE = {
-  bg:       "#05061a",
-  panel:    "#0b0d2e",
-  card:     "#131640",
-  cardHi:   "#1c2052",
+  bg:       "#060d18",
+  panel:    "#0c1426",
+  card:     "#142036",
+  cardHi:   "#1d2c48",
   orange:   "#FA901E",
   navy:     "#3d4f7a",
   text:     "#ECEEF8",
-  subtext:  "#9298c2",
-  grid:     "#171a44",
-  border:   "#2a2c64",
+  subtext:  "#93a0bc",
+  grid:     "#16213c",
+  border:   "#283a5a",
 };
 /* best→worst model gradient: CCEL orange → SNU gold → beige → silver →
    gray → brightened SNU blue (visible on the dark ground). */
@@ -154,7 +155,7 @@ function plotlyLayout(extra = {}) {
       linecolor: PALETTE.border, tickcolor: PALETTE.border,
       title: { font: { size: 13, color: PALETTE.text } },
     },
-    legend: { font: { color: PALETTE.text, size: 11 }, bgcolor: "rgba(19,22,64,0.85)", bordercolor: PALETTE.border, borderwidth: 1 },
+    legend: { font: { color: PALETTE.text, size: 11 }, bgcolor: "rgba(20,32,54,0.85)", bordercolor: PALETTE.border, borderwidth: 1 },
     hoverlabel: { bgcolor: PALETTE.cardHi, bordercolor: PALETTE.orange, font: { color: PALETTE.text, family: "JetBrains Mono, monospace", size: 12 } },
   }, extra);
 }
@@ -210,7 +211,7 @@ function captureSectionAsPng(section, fallbackPlotly) {
   }
 
   html2canvas(section, {
-    backgroundColor: "#0b0d2e",
+    backgroundColor: "#0c1426",
     scale: 2,
     logging: false,
     useCORS: true,
@@ -690,7 +691,7 @@ function renderFwt(prefix, sys) {
     height: 580,
     xaxis: { title: "Force threshold ε (eV/Å)", range: [0, 1.05], gridcolor: PALETTE.grid, color: PALETTE.text },
     yaxis: { title: "Forces within threshold (%)", range: [0, 101], gridcolor: PALETTE.grid, color: PALETTE.text },
-    legend: { x: 1.02, y: 1, font: { size: 11, color: PALETTE.text }, bgcolor: "rgba(19,22,64,0.9)", bordercolor: PALETTE.border, borderwidth: 1 },
+    legend: { x: 1.02, y: 1, font: { size: 11, color: PALETTE.text }, bgcolor: "rgba(20,32,54,0.9)", bordercolor: PALETTE.border, borderwidth: 1 },
     margin: { l: 70, r: 280, t: 30, b: 60 },
   });
   Plotly.react(`${prefix}-fwt-plot`, traces, layout, PLOTLY_CFG);

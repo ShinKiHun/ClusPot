@@ -1,22 +1,23 @@
 :root {
-  /* ── Theme B — 미소디/CCEL brand palette on a deepened sci-fi navy ──
-     Backgrounds pulled toward SNU navy (#0F0F70) for a "mission control"
-     depth; accents use CCEL orange (#FA901E) + SNU blue. Worst-end navy is
-     brightened (#3d4f7a) so bars/elements survive on the dark ground. */
-  --bg: #05061a;
-  --panel: #0b0d2e;
-  --card: #131640;
-  --card-hi: #1c2052;
+  /* ── Theme B — 미소디/CCEL brand palette on a steel-navy sci-fi ground ──
+     Surfaces are steel navy (green channel kept above red) so they read as a
+     clean cool navy, NOT the purplish indigo that the literal SNU blue
+     (#0F0F70, R=G) produces. Accents: CCEL orange (#FA901E). Worst-end bar
+     tone #3d4f7a (de-purpled steel) survives on the dark ground. */
+  --bg: #060d18;
+  --panel: #0c1426;
+  --card: #142036;
+  --card-hi: #1d2c48;
   --orange: #FA901E;
   --orange-hi: #FFB04D;
   --orange-soft: rgba(250, 144, 30, 0.13);
   --navy: #243a5e;          /* steel navy, lifted for UI visibility */
-  --navy-soft: #3d4f7a;     /* hybrid steel navy (chart worst-end tone) */
+  --navy-soft: #3d4f7a;     /* steel navy (chart worst-end tone) */
   --text: #ECEEF8;
-  --subtext: #9298c2;
-  --grid: #171a44;
-  --border: #2a2c64;
-  --border-hi: #3c3f86;
+  --subtext: #93a0bc;
+  --grid: #16213c;
+  --border: #283a5a;
+  --border-hi: #38507a;
   --good: #FA901E;
   --bad: #3d4f7a;
   --shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
@@ -101,7 +102,7 @@ a:hover { color: var(--orange-hi); }
   align-items: center;
   gap: 28px;
   padding: 14px 32px;
-  background: rgba(5, 6, 26, 0.8);
+  background: rgba(6, 13, 24, 0.82);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
 }

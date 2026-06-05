@@ -213,10 +213,10 @@ section {
   border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 28px;
+  justify-content: flex-start;
+  gap: 20px;
 }
-.page-head-text { flex: 1 1 auto; min-width: 0; }
+.page-head-text { flex: 0 1 auto; min-width: 0; }
 .page-head-cluster {
   flex: 0 0 auto;
   height: 72px;

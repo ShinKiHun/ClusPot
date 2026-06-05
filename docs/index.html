@@ -188,6 +188,35 @@
         </div>
       </div>
 
+      <!-- ── Key findings ────────────────────────── -->
+      <section id="home-findings">
+        <div class="s-head">
+          <h2>Key findings</h2>
+          <span class="tag">monometallic · QCD</span>
+          <span class="desc">What the benchmark says so far, across 26 MLIPs and 55 elements.</span>
+        </div>
+        <div class="findings-grid">
+          <div class="finding-card">
+            <div class="finding-num">01</div>
+            <h3>Performance splits by chemistry</h3>
+            <p>Refractory transition metals — <b>Mo, Cr, W, V, Mn</b> — are universally the hardest (Mo is ~30× harder than sulfur), and model-to-model disagreement is concentrated there too. Across the <b>p-block</b> (S, Se, Sb, Bi, Sn…) almost any MLIP does well.</p>
+            <span class="finding-tag">→ pick the model that matters only where the chemistry is hard</span>
+          </div>
+          <div class="finding-card">
+            <div class="finding-num">02</div>
+            <h3>Accuracy ≠ robustness</h3>
+            <p>The best model on formation-energy MAE is <b>not</b> the best on force robustness (AFwT) or on catastrophic-failure rate. Ranking MLIPs by a single number is misleading — the leaders change with the metric.</p>
+            <span class="finding-tag">→ read the multi-metric leaderboard, not one column</span>
+          </div>
+          <div class="finding-card">
+            <div class="finding-num">03</div>
+            <h3>Training data &gt; model name</h3>
+            <p>Within a single model family, performance swings enormously with the training-data variant — the worst variant lands last on accuracy and has a catastrophic-failure rate <b>~35×</b> the shared floor, while another variant of the same model ranks near the top.</p>
+            <span class="finding-tag">→ what a model was trained on drives cluster transferability</span>
+          </div>
+        </div>
+      </section>
+
       <!-- ── Global leaderboard ──────────────────── -->
       <section id="home-leaderboard">
         <button class="dl-camera" type="button" data-dl-section title="Download as PNG" aria-label="Download as PNG">
@@ -295,6 +324,43 @@
         </div>
       </header>
 
+      <section id="mono-periodic">
+        <div class="panel chart-panel">
+          <button class="dl-camera" type="button" data-dl-section title="Download as PNG" aria-label="Download as PNG">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3l1.5-2h3L15 3h4a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4zm3 14a5 5 0 1 0 0-10 5 5 0 0 0 0 10zm0-2a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/></svg>
+          </button>
+          <div class="s-head">
+            <h2>Periodic Heatmap</h2>
+            <span class="tag">per-element</span>
+            <span class="desc">Colored by the chosen metric. Click an element for the full model breakdown.</span>
+          </div>
+          <div class="controls">
+            <label>Metric</label>
+            <select id="mono-pt-metric"></select>
+            <label style="margin-left:14px">Model</label>
+            <select id="mono-pt-model"></select>
+            <label style="margin-left:14px">Dataset</label>
+            <span class="seg" id="mono-pt-ds-seg"></span>
+            <label style="margin-left:14px">Type</label>
+            <span class="seg" id="mono-pt-type-seg">
+              <button class="on" data-v="normal">normal</button>
+              <button data-v="anomaly">anomaly</button>
+            </span>
+          </div>
+          <div class="pt-wrap pt-stack">
+            <div>
+              <div class="pt" id="mono-pt-grid"></div>
+              <div class="legend-bar" id="mono-pt-legend">
+                <span id="mono-pt-min">—</span><div class="bar"></div><span id="mono-pt-max">—</span>
+              </div>
+            </div>
+            <aside class="pt-side" id="mono-pt-side">
+              <div class="empty-note">Loading…</div>
+            </aside>
+          </div>
+        </div>
+      </section>
+
       <section id="mono-compare">
         <div class="panel chart-panel">
           <div class="s-head">
@@ -349,42 +415,6 @@
         </div>
       </section>
 
-      <section id="mono-periodic">
-        <div class="panel chart-panel">
-          <button class="dl-camera" type="button" data-dl-section title="Download as PNG" aria-label="Download as PNG">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3l1.5-2h3L15 3h4a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4zm3 14a5 5 0 1 0 0-10 5 5 0 0 0 0 10zm0-2a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/></svg>
-          </button>
-          <div class="s-head">
-            <h2>Periodic Heatmap</h2>
-            <span class="tag">per-element</span>
-            <span class="desc">Colored by the chosen metric. Click an element for the full model breakdown.</span>
-          </div>
-          <div class="controls">
-            <label>Metric</label>
-            <select id="mono-pt-metric"></select>
-            <label style="margin-left:14px">Model</label>
-            <select id="mono-pt-model"></select>
-            <label style="margin-left:14px">Dataset</label>
-            <span class="seg" id="mono-pt-ds-seg"></span>
-            <label style="margin-left:14px">Type</label>
-            <span class="seg" id="mono-pt-type-seg">
-              <button class="on" data-v="normal">normal</button>
-              <button data-v="anomaly">anomaly</button>
-            </span>
-          </div>
-          <div class="pt-wrap pt-stack">
-            <div>
-              <div class="pt" id="mono-pt-grid"></div>
-              <div class="legend-bar" id="mono-pt-legend">
-                <span id="mono-pt-min">—</span><div class="bar"></div><span id="mono-pt-max">—</span>
-              </div>
-            </div>
-            <aside class="pt-side" id="mono-pt-side">
-              <div class="empty-note">Loading…</div>
-            </aside>
-          </div>
-        </div>
-      </section>
     </section>
 
 

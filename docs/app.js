@@ -65,7 +65,13 @@ function main() {
 
   const mono = DATA.systems.mono;
   const bi   = DATA.systems.bi;
-  if (mono) STATE.mono.pt_model  = STATE.mono.mdl  = mono.models[0];
+  // Mono heatmap leads the page — open it on the most accurate model
+  // (lowest E_form MAE) so the "even the best model struggles on the
+  // refractory TMs" story is visible on first load, not alphabetical Allegro.
+  if (mono) {
+    STATE.mono.mdl = mono.models[0];
+    STATE.mono.pt_model = bestModelByMetric(mono, "E_form_MAE", true) || mono.models[0];
+  }
   if (bi)   STATE.bi.pt_model    = STATE.bi.mdl = bi.models[0];
 
   initMetaBar();
@@ -110,6 +116,16 @@ function rankIdx(values, lowerBetter) {
   const idx = values.map((v, i) => [i, v]).filter(([, v]) => v != null && isFinite(v));
   idx.sort((a, b) => lowerBetter ? a[1] - b[1] : b[1] - a[1]);
   return idx.map(([i]) => i);
+}
+// Best model in a system by a summary metric on the "total" dataset.
+function bestModelByMetric(sys, key, lowerBetter = true) {
+  let best = null, bestV = null;
+  (sys.models || []).forEach(m => {
+    const v = sys.summary?.[m]?.["total"]?.[key];
+    if (v == null || !isFinite(v)) return;
+    if (bestV == null || (lowerBetter ? v < bestV : v > bestV)) { bestV = v; best = m; }
+  });
+  return best;
 }
 function modelColor(rank, total) {
   if (total <= 1) return GRADIENT[0];

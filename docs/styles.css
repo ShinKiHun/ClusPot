@@ -101,7 +101,7 @@ a:hover { color: var(--orange-hi); }
   display: flex;
   align-items: center;
   gap: 28px;
-  padding: 14px 32px;
+  padding: 22px 32px;
   background: rgba(6, 13, 24, 0.82);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
@@ -219,11 +219,11 @@ section {
 .page-head-text { flex: 1 1 auto; min-width: 0; }
 .page-head-cluster {
   flex: 0 0 auto;
-  height: 124px;
+  height: 72px;
   width: auto;
   object-fit: contain;
   filter:
-    drop-shadow(0 8px 18px rgba(0, 0, 0, 0.6))
+    drop-shadow(0 5px 12px rgba(0, 0, 0, 0.55))
     drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
 }
 .page-head h1 {
@@ -1262,7 +1262,7 @@ table.lb td.n-cell {
   .meta-right { display: none; }
   .pt-wrap, .mdl-grid, .method-grid { grid-template-columns: 1fr; }
   .page-head h1 { font-size: 26px; }
-  .page-head-cluster { height: 84px; }
+  .page-head-cluster { height: 56px; }
   .pt-side { position: static; }
   .main { padding: 24px 16px 60px; }
   .hero { padding: 28px 0 16px; }

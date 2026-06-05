@@ -1087,11 +1087,17 @@ table.lb td.rank {
   gap: 10px;
   transition: border-color 0.18s ease, transform 0.18s ease, background 0.18s ease;
 }
+.finding-card[data-jump] { cursor: pointer; }
 .finding-card:hover {
   border-color: var(--border-hi);
   border-left-color: var(--orange-hi);
   transform: translateY(-2px);
 }
+.finding-card[data-jump]:focus-visible {
+  outline: 2px solid var(--orange);
+  outline-offset: 2px;
+}
+.finding-card[data-jump]:hover .finding-tag { color: var(--orange-hi); text-decoration: underline; }
 .finding-num {
   font-family: var(--mono);
   font-size: 13px;
@@ -1122,6 +1128,29 @@ table.lb td.rank {
   color: var(--orange);
   line-height: 1.4;
 }
+
+/* Collapsible methodology — default closed so it doesn't wall off the page
+   below the leaderboard; one click expands the full 6-card detail. */
+.method-details > summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+}
+.method-details > summary::-webkit-details-marker { display: none; }
+.method-details > summary .s-head { margin-bottom: 0; flex: 1 1 auto; }
+.method-toggle {
+  flex: 0 0 auto;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--subtext);
+  white-space: nowrap;
+}
+.method-toggle::after { content: "  ▾  expand"; color: var(--orange); }
+.method-details[open] > summary .method-toggle::after { content: "  ▴  collapse"; }
+.method-details[open] > summary { margin-bottom: 18px; }
+.method-details > summary:hover .method-toggle { color: var(--text); }
 
 .method-grid {
   display: grid;
@@ -1328,4 +1357,18 @@ table.lb td.n-cell {
   .cluster-cards { grid-template-columns: 1fr; }
   .mdl-stats { grid-template-columns: repeat(2, 1fr); }
   .s-head .desc { display: none; }
+  .method-toggle { display: none; }
+}
+
+/* Narrow screens: the 18-column periodic table can't shrink legibly, so let
+   it scroll horizontally inside its column instead of squishing the cells. */
+@media (max-width: 760px) {
+  .pt-stack > div:first-child,
+  .pt-wrap > div:first-child { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .pt { min-width: 620px; }
+  .chart-panel { padding: 16px; }
+  .controls { gap: 8px; padding: 8px 10px; }
+  .controls label { margin-right: 2px; }
+  .hero h1 { font-size: 38px; }
+  .finding-card { padding: 16px 18px; }
 }

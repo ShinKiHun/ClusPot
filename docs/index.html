@@ -196,23 +196,23 @@
           <span class="desc">What the benchmark says so far, across 26 MLIPs and 55 elements.</span>
         </div>
         <div class="findings-grid">
-          <div class="finding-card">
+          <div class="finding-card" data-jump="mono" role="link" tabindex="0">
             <div class="finding-num">01</div>
             <h3>Performance splits by chemistry</h3>
             <p>Refractory transition metals — <b>Mo, Cr, W, V, Mn</b> — are universally the hardest (Mo is ~30× harder than sulfur), and model-to-model disagreement is concentrated there too. Across the <b>p-block</b> (S, Se, Sb, Bi, Sn…) almost any MLIP does well.</p>
-            <span class="finding-tag">→ pick the model that matters only where the chemistry is hard</span>
+            <span class="finding-tag">→ open the periodic heatmap</span>
           </div>
-          <div class="finding-card">
+          <div class="finding-card" data-jump="#home-leaderboard" role="link" tabindex="0">
             <div class="finding-num">02</div>
             <h3>Accuracy ≠ robustness</h3>
             <p>The best model on formation-energy MAE is <b>not</b> the best on force robustness (AFwT) or on catastrophic-failure rate. Ranking MLIPs by a single number is misleading — the leaders change with the metric.</p>
-            <span class="finding-tag">→ read the multi-metric leaderboard, not one column</span>
+            <span class="finding-tag">→ read the multi-metric leaderboard</span>
           </div>
-          <div class="finding-card">
+          <div class="finding-card" data-jump="#home-leaderboard" role="link" tabindex="0">
             <div class="finding-num">03</div>
             <h3>Training data &gt; model name</h3>
             <p>Within a single model family, performance swings enormously with the training-data variant — the worst variant lands last on accuracy and has a catastrophic-failure rate <b>~35×</b> the shared floor, while another variant of the same model ranks near the top.</p>
-            <span class="finding-tag">→ what a model was trained on drives cluster transferability</span>
+            <span class="finding-tag">→ compare the variants in the leaderboard</span>
           </div>
         </div>
       </section>
@@ -237,12 +237,15 @@
 
       <!-- ── Methodology ────────────────────────── -->
       <section id="home-methodology">
-        <div class="s-head">
-          <h2>Methodology</h2>
-          <span class="tag">how we benchmark</span>
-          <span class="desc">DFT-referenced single-point evaluation across every cluster ionic step.</span>
-        </div>
-
+        <details class="method-details">
+          <summary>
+            <div class="s-head">
+              <h2>Methodology</h2>
+              <span class="tag">how we benchmark</span>
+              <span class="desc">DFT-referenced single-point evaluation across every cluster ionic step.</span>
+            </div>
+            <span class="method-toggle">reference data · formation energy · metrics · aggregation</span>
+          </summary>
         <div class="method-grid">
           <div class="method-card">
             <h3>Reference data</h3>
@@ -306,6 +309,7 @@
             </ul>
           </div>
         </div>
+        </details>
       </section>
 
     </section>

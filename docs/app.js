@@ -260,6 +260,28 @@ document.addEventListener("click", e => {
   captureSectionAsPng(btn.closest("section[id]"));
 });
 
+// Key-findings cards jump to the supporting view: a page name navigates
+// (hash router scrolls to top → that page's lead chart), a "#id" scrolls to
+// that section on the current page.
+function jumpTo(dest) {
+  if (!dest) return;
+  if (dest.startsWith("#")) {
+    const el = document.querySelector(dest);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  } else {
+    location.hash = dest;
+  }
+}
+document.addEventListener("click", e => {
+  const card = e.target.closest(".finding-card[data-jump]");
+  if (card) jumpTo(card.dataset.jump);
+});
+document.addEventListener("keydown", e => {
+  if (e.key !== "Enter" && e.key !== " ") return;
+  const card = e.target.closest?.(".finding-card[data-jump]");
+  if (card) { e.preventDefault(); jumpTo(card.dataset.jump); }
+});
+
 const PLOTLY_CFG = {
   displaylogo: false,
   responsive: true,

@@ -502,8 +502,11 @@ function renderHomeLeaderboard() {
   let body = "";
   order.forEach((i, rk) => {
     const r = rows[i];
+    // Top-3 get a gold / silver / bronze rank badge (on-brand: SNU gold,
+    // SNU silver, copper). Reflects the current sort metric.
+    const rankCell = rk < 3 ? `<span class="medal m${rk + 1}">${rk + 1}</span>` : (rk + 1);
     let row = `<tr>
-      <td class="rank">${rk + 1}</td>
+      <td class="rank">${rankCell}</td>
       <td class="name">${r.model}</td>`;
     HOME_LB_KEYS.forEach(k => {
       const v = r[k];

@@ -754,6 +754,23 @@ table.lb td.rank {
   color: var(--subtext);
   text-align: center;
 }
+/* Gold / silver / bronze rank badges for the current top 3. Colors drawn from
+   the SNU brand palette (gold #C5A86F, silver #B5B6B6) + copper for bronze. */
+.medal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 23px;
+  height: 23px;
+  border-radius: 50%;
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 12px;
+  border: 1.5px solid;
+}
+.medal.m1 { color: #1c1407; background: #C5A86F; border-color: #e0c790; box-shadow: 0 0 11px rgba(197, 168, 111, 0.55); }
+.medal.m2 { color: #161719; background: #B5B6B6; border-color: #d6d7d7; box-shadow: 0 0 10px rgba(181, 182, 182, 0.45); }
+.medal.m3 { color: #1d0f05; background: #B87333; border-color: #d4894a; box-shadow: 0 0 10px rgba(184, 115, 51, 0.5); }
 
 .sys-pill {
   display: inline-block;

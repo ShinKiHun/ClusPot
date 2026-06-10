@@ -748,13 +748,18 @@ function renderPareto(prefix, sys) {
   const valid = sys.models.map((_, i) => xs[i] != null && ys[i] != null);
   const mask  = paretoMask(xs, ys, m.lower_better);
 
+  // Hover labels: name the axes instead of bare x= / y=.
+  const xLabel = metricLabel(METRIC_BY_KEY[xKey]);
+  const yLabel = metricLabel(m);
+  const hover = tail => `<b>%{text}</b><br>${xLabel}: %{x:.4f}<br>${yLabel}: %{y:.4f}<extra>${tail}</extra>`;
+
   const tracePareto = {
     type: "scatter", mode: "markers", name: "Pareto-optimal",
     x: sys.models.map((_, i) => mask[i] ? xs[i] : null),
     y: sys.models.map((_, i) => mask[i] ? ys[i] : null),
     text: sys.models,
     marker: { color: PALETTE.orange, size: 16, line: { color: "white", width: 1.5 } },
-    hovertemplate: "<b>%{text}</b><br>x=%{x:.4f}<br>y=%{y:.4f}<extra>★ Pareto</extra>",
+    hovertemplate: hover("★ Pareto"),
   };
   const traceOther = {
     type: "scatter", mode: "markers", name: "Dominated",
@@ -762,7 +767,7 @@ function renderPareto(prefix, sys) {
     y: sys.models.map((_, i) => (!mask[i] && valid[i]) ? ys[i] : null),
     text: sys.models,
     marker: { color: "#6a6fb0", size: 11, line: { color: PALETTE.border, width: 1 } },
-    hovertemplate: "<b>%{text}</b><br>x=%{x:.4f}<br>y=%{y:.4f}<extra></extra>",
+    hovertemplate: hover(""),
   };
   const front = sys.models.map((_, i) => mask[i] ? [xs[i], ys[i]] : null).filter(Boolean).sort((a, b) => a[0] - b[0]);
   const traceLine = {

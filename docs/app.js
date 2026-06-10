@@ -199,39 +199,15 @@ function captureSectionAsPng(section, fallbackPlotly) {
   const prevVis = [];
   hiders.forEach(b => { prevVis.push(b.style.visibility); b.style.visibility = "hidden"; });
 
-  // Tables inside .lb-wrap scroll horizontally on screen. For the capture
-  // we want the *whole* table — temporarily release the scroll, expand
-  // the wrap and the enclosing panel/section to the table's natural width,
-  // snapshot, then restore.
-  const restore = [];
-  const scrollers = section.querySelectorAll(".lb-wrap");
-  let needsExpand = false;
-  scrollers.forEach(s => {
-    if (s.scrollWidth > s.clientWidth + 1) {
-      needsExpand = true;
-      restore.push({ el: s, prop: "overflowX", val: s.style.overflowX });
-      restore.push({ el: s, prop: "width",     val: s.style.width });
-      s.style.overflowX = "visible";
-      s.style.width = s.scrollWidth + "px";
-    }
-  });
-  if (needsExpand) {
-    [section, section.querySelector(".chart-panel"), section.querySelector(".panel")]
-      .filter(Boolean)
-      .forEach(el => {
-        restore.push({ el, prop: "maxWidth", val: el.style.maxWidth });
-        restore.push({ el, prop: "width",    val: el.style.width });
-        el.style.maxWidth = "none";
-        el.style.width = "max-content";
-      });
-  }
-
+  // Capture the section exactly as it sits at rest — no width-expansion of the
+  // wide leaderboard table. (Expanding it offset the sticky Model column into
+  // the middle of the shot.) A table wider than the viewport is captured as
+  // currently scrolled.
   html2canvas(section, {
     backgroundColor: "#0c1426",
     scale: 2,
     logging: false,
     useCORS: true,
-    windowWidth: Math.max(document.documentElement.scrollWidth, section.scrollWidth + 80),
   }).then(canvas => {
     const link = document.createElement("a");
     link.download = filename;
@@ -242,7 +218,6 @@ function captureSectionAsPng(section, fallbackPlotly) {
     if (fallbackPlotly) Plotly.downloadImage(fallbackPlotly, { format: "png", filename, width: 1600, height: 900 });
   }).finally(() => {
     hiders.forEach((b, i) => { b.style.visibility = prevVis[i] || ""; });
-    restore.forEach(r => { r.el.style[r.prop] = r.val; });
   });
 }
 

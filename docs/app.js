@@ -32,6 +32,7 @@ const STATE = {
     cmp_metric: "E_form_MAE", cmp_dataset: "total",
     par_metric: "E_form_MAE", par_xmetric: "Time_med", par_dataset: "total",
     fwt_dataset: "total",
+    size_model: null,
     pt_metric: "E_form_MAE", pt_model: null, pt_dataset: "total",
     pt_type: "normal", pt_selected: null,
     mdl: null,
@@ -654,6 +655,7 @@ function initSystemPage(prefix, sys) {
   initCompare(prefix, sys);
   initPareto(prefix, sys);
   initFwt(prefix, sys);
+  if (sys.size) initSize(prefix, sys);
   if (sys.kind === "single") {
     initPeriodic(prefix, sys);
   } else if (sys.kind === "pair") {
@@ -832,6 +834,53 @@ function renderFwt(prefix, sys) {
     margin: { l: 70, r: 280, t: 30, b: 60 },
   });
   Plotly.react(`${prefix}-fwt-plot`, traces, layout, PLOTLY_CFG);
+}
+
+// ─── 4b. Size dependence (per-system) ──────────────────────────────────────
+// One model at a time: median |ΔE_form| vs cluster size, with the IQR band.
+// Overlaying every model's band turns to mush, so we keep it single-model and
+// let the selector switch — the band (spread) is the real story here.
+function initSize(prefix, sys) {
+  const sel = document.querySelector(`#${prefix}-size-model`);
+  if (!sel || !sys.size) return;
+  const have = sys.models.filter(m => sys.size.models[m]);
+  sel.innerHTML = have.map(m => `<option value="${m}">${m}</option>`).join("");
+  // default to the most accurate model — "even the best struggles when small"
+  const def = bestModelByMetric(sys, "E_form_MAE", true);
+  STATE[prefix].size_model = (def && sys.size.models[def]) ? def : have[0];
+  sel.value = STATE[prefix].size_model;
+  sel.addEventListener("change", () => { STATE[prefix].size_model = sel.value; renderSize(prefix, sys); });
+  renderSize(prefix, sys);
+}
+function renderSize(prefix, sys) {
+  const model = STATE[prefix].size_model;
+  const sizes = sys.size.sizes;
+  const d = sys.size.models[model];
+  if (!d) return;
+
+  const band = {
+    type: "scatter", mode: "lines", name: "IQR (Q1–Q3)",
+    x: sizes.concat(sizes.slice().reverse()),
+    y: d.q3.concat(d.q1.slice().reverse()),
+    fill: "toself", fillcolor: "rgba(250,144,30,0.16)",
+    line: { color: "rgba(0,0,0,0)" }, hoverinfo: "skip",
+  };
+  const median = {
+    type: "scatter", mode: "lines+markers", name: "Median |ΔE_form|",
+    x: sizes, y: d.median,
+    line: { color: PALETTE.orange, width: 2.6 },
+    marker: { color: PALETTE.orange, size: 5, line: { color: "white", width: 0.5 } },
+    customdata: d.count,
+    hovertemplate: "N = %{x} atoms<br>median: %{y:.0f} meV/atom<br>%{customdata:,} samples<extra></extra>",
+  };
+  const layout = plotlyLayout({
+    height: 560,
+    xaxis: { title: "Cluster size (number of atoms)", gridcolor: PALETTE.grid, color: PALETTE.text },
+    yaxis: { title: "E_form abs. error (meV/atom)", rangemode: "tozero", gridcolor: PALETTE.grid, color: PALETTE.text },
+    legend: { x: 0.98, y: 0.98, xanchor: "right", yanchor: "top", font: { size: 11, color: PALETTE.text }, bgcolor: "rgba(20,32,54,0.9)", bordercolor: PALETTE.border, borderwidth: 1 },
+    margin: { l: 70, r: 30, t: 30, b: 60 },
+  });
+  Plotly.react(`${prefix}-size-plot`, [band, median], layout, PLOTLY_CFG);
 }
 
 // ─── 5a. Periodic table — MONO (single click) ──────────────────────────────

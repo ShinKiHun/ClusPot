@@ -202,13 +202,29 @@ def build_system(system_key: str, xlsx: Path, kind: str) -> dict:
     return out
 
 
+def _load_size_dependence() -> dict:
+    """Size-dependence summaries precomputed by build_size_dependence.py."""
+    p = ROOT / "site" / "size_dependence.json"
+    if not p.exists():
+        print("  (no size_dependence.json — run build_size_dependence.py to add it)")
+        return {}
+    return json.loads(p.read_text())
+
+
 def main() -> None:
+    size_block = _load_size_dependence()
     systems_block: dict = {}
     for key, label, xlsx, kind in SYSTEMS:
         sys_data = build_system(key, xlsx, kind)
         if sys_data is None:
             continue
         sys_data["label"] = label
+        # Fold in size-dependence (only models that also appear in the xlsx).
+        sd = size_block.get(key)
+        if sd:
+            models = {m: v for m, v in sd["models"].items() if m in sys_data.get("models", [])}
+            sys_data["size"] = {"sizes": sd["sizes"], "models": models}
+            print(f"  · {key}: size-dependence for {len(models)} models")
         systems_block[key] = sys_data
 
     # HEA placeholder so the front-end can render a "coming soon" page

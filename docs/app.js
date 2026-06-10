@@ -862,7 +862,7 @@ function renderSize(prefix, sys) {
     type: "scatter", mode: "lines", name: "IQR (Q1–Q3)",
     x: sizes.concat(sizes.slice().reverse()),
     y: d.q3.concat(d.q1.slice().reverse()),
-    fill: "toself", fillcolor: "rgba(250,144,30,0.16)",
+    fill: "toself", fillcolor: "rgba(250,144,30,0.22)",
     line: { width: 0, color: "rgba(250,144,30,0)" }, hoverinfo: "skip",
   };
   const median = {
@@ -880,7 +880,9 @@ function renderSize(prefix, sys) {
     legend: { x: 0.98, y: 0.98, xanchor: "right", yanchor: "top", font: { size: 11, color: PALETTE.text }, bgcolor: "rgba(20,32,54,0.9)", bordercolor: PALETTE.border, borderwidth: 1 },
     margin: { l: 70, r: 30, t: 30, b: 60 },
   });
-  Plotly.react(`${prefix}-size-plot`, [band, median], layout, PLOTLY_CFG);
+  // newPlot (not react): a fresh redraw each switch, so the previous model's
+  // fill:toself polygon can't linger as a dark residual band.
+  Plotly.newPlot(`${prefix}-size-plot`, [band, median], layout, PLOTLY_CFG);
 }
 
 // ─── 5a. Periodic table — MONO (single click) ──────────────────────────────

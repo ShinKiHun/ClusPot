@@ -874,7 +874,7 @@ function renderSize(prefix, sys) {
     hovertemplate: "N = %{x} atoms<br>median: %{y:.0f} meV/atom<br>%{customdata:,} samples<extra></extra>",
   };
   const layout = plotlyLayout({
-    height: 560,
+    height: 600,  // match .plot-tall min-height so the dark .plot bg can't show below the chart
     xaxis: { title: "Cluster size (number of atoms)", gridcolor: PALETTE.grid, color: PALETTE.text },
     yaxis: { title: "E_form abs. error (meV/atom)", rangemode: "tozero", gridcolor: PALETTE.grid, color: PALETTE.text },
     legend: { x: 0.98, y: 0.98, xanchor: "right", yanchor: "top", font: { size: 11, color: PALETTE.text }, bgcolor: "rgba(20,32,54,0.9)", bordercolor: PALETTE.border, borderwidth: 1 },

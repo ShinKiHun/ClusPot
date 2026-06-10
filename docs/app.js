@@ -863,7 +863,7 @@ function renderSize(prefix, sys) {
     x: sizes.concat(sizes.slice().reverse()),
     y: d.q3.concat(d.q1.slice().reverse()),
     fill: "toself", fillcolor: "rgba(250,144,30,0.16)",
-    line: { color: "rgba(0,0,0,0)" }, hoverinfo: "skip",
+    line: { width: 0, color: "rgba(250,144,30,0)" }, hoverinfo: "skip",
   };
   const median = {
     type: "scatter", mode: "lines+markers", name: "Median |ΔE_form|",

@@ -195,7 +195,7 @@ function captureSectionAsPng(section, fallbackPlotly) {
 
   // Hide transient hover-only UI (Plotly modebars, our floating camera
   // button) so they don't end up in the captured image.
-  const hiders = section.querySelectorAll(".modebar-container, .modebar, .dl-camera");
+  const hiders = section.querySelectorAll(".modebar-container, .modebar, .dl-camera, .lb-sticky-scroll");
   const prevVis = [];
   hiders.forEach(b => { prevVis.push(b.style.visibility); b.style.visibility = "hidden"; });
 
@@ -551,6 +551,44 @@ function renderHomeLeaderboard() {
       renderHomeLeaderboard();
     }, { once: true });
   });
+
+  syncStickyScroll();
+}
+
+// Floating horizontal scrollbar for the Home leaderboard. A proxy bar
+// (.lb-sticky-scroll) sticks to the viewport bottom while the section is on
+// screen; we mirror its scroll position to/from the real .lb-wrap so you can
+// pan the wide table left/right without scrolling down to its bottom edge.
+let _stickyScrollWired = false;
+function syncStickyScroll() {
+  const wrap = document.querySelector("#home-leaderboard .lb-wrap");
+  const bar = document.querySelector("#home-leaderboard .lb-sticky-scroll");
+  if (!wrap || !bar) return;
+  const track = bar.querySelector(".lb-sticky-track");
+
+  const refresh = () => {
+    const overflow = wrap.scrollWidth - wrap.clientWidth > 1;
+    bar.style.display = overflow ? "block" : "none";
+    if (!overflow) return;
+    bar.style.width = wrap.clientWidth + "px";
+    track.style.width = wrap.scrollWidth + "px";
+    bar.scrollLeft = wrap.scrollLeft;
+  };
+
+  if (!_stickyScrollWired) {
+    let lock = false;
+    bar.addEventListener("scroll", () => {
+      if (lock) return;
+      lock = true; wrap.scrollLeft = bar.scrollLeft; lock = false;
+    });
+    wrap.addEventListener("scroll", () => {
+      if (lock) return;
+      lock = true; bar.scrollLeft = wrap.scrollLeft; lock = false;
+    });
+    window.addEventListener("resize", refresh);
+    _stickyScrollWired = true;
+  }
+  refresh();
 }
 
 // ════════════════════════════════════════════════════════════════════════════

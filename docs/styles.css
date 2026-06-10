@@ -654,6 +654,36 @@ section > .dl-camera { top: 4px; right: 0; }
   border-radius: var(--radius);
   border: 1px solid var(--border);
 }
+/* The real horizontal scrollbar lives in the floating .lb-sticky-scroll proxy
+   below, so hide the native one on the table wrap to avoid a double bar. */
+.lb-wrap::-webkit-scrollbar { height: 0; }
+.lb-wrap { scrollbar-width: none; }
+
+/* Floating horizontal scrollbar — sticks to the bottom of the viewport while
+   the leaderboard section is on screen, so you can pan left/right without
+   scrolling down to the table's bottom edge. Width/track set by JS. */
+.lb-sticky-scroll {
+  position: sticky;
+  bottom: 0;
+  z-index: 6;
+  overflow-x: auto;
+  overflow-y: hidden;
+  margin-top: 6px;
+  border-radius: 8px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  box-shadow: 0 -6px 16px rgba(0, 0, 0, 0.45);
+  display: none; /* shown by JS only when the table overflows */
+}
+.lb-sticky-track { height: 1px; }
+.lb-sticky-scroll::-webkit-scrollbar { height: 12px; }
+.lb-sticky-scroll::-webkit-scrollbar-thumb {
+  background: var(--navy-soft);
+  border: 2px solid var(--panel);
+  border-radius: 8px;
+}
+.lb-sticky-scroll::-webkit-scrollbar-thumb:hover { background: var(--orange); }
+.lb-sticky-scroll { scrollbar-color: var(--navy-soft) transparent; }
 table.lb {
   width: 100%;
   border-collapse: collapse;

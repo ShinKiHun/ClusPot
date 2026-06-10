@@ -195,7 +195,7 @@ function captureSectionAsPng(section, fallbackPlotly) {
 
   // Hide transient hover-only UI (Plotly modebars, our floating camera
   // button) so they don't end up in the captured image.
-  const hiders = section.querySelectorAll(".modebar-container, .modebar, .dl-camera, .lb-sticky-scroll");
+  const hiders = section.querySelectorAll(".modebar-container, .modebar, .dl-camera, .lb-sticky-scroll, .lb-sticky-head");
   const prevVis = [];
   hiders.forEach(b => { prevVis.push(b.style.visibility); b.style.visibility = "hidden"; });
 
@@ -545,14 +545,18 @@ function renderHomeLeaderboard() {
   tbl.querySelectorAll("thead th").forEach(th => {
     const k = th.dataset.k;
     if (!METRIC_BY_KEY[k]) return;
-    th.addEventListener("click", () => {
-      if (STATE.home.lb_sort.key === k) STATE.home.lb_sort.asc = !STATE.home.lb_sort.asc;
-      else STATE.home.lb_sort = { key: k, asc: METRIC_BY_KEY[k]?.lower_better ?? false };
-      renderHomeLeaderboard();
-    }, { once: true });
+    th.addEventListener("click", () => sortHomeBy(k), { once: true });
   });
 
   syncStickyScroll();
+  syncStickyHead();
+}
+
+function sortHomeBy(k) {
+  if (!METRIC_BY_KEY[k]) return;
+  if (STATE.home.lb_sort.key === k) STATE.home.lb_sort.asc = !STATE.home.lb_sort.asc;
+  else STATE.home.lb_sort = { key: k, asc: METRIC_BY_KEY[k]?.lower_better ?? false };
+  renderHomeLeaderboard();
 }
 
 // Floating horizontal scrollbar for the Home leaderboard. A proxy bar
@@ -587,6 +591,80 @@ function syncStickyScroll() {
     });
     window.addEventListener("resize", refresh);
     _stickyScrollWired = true;
+  }
+  refresh();
+}
+
+// Floating header for the Home leaderboard. The real <thead> has
+// `position: sticky` but is trapped inside .lb-wrap's horizontal scroll
+// context, so it can't stick to the page. Instead we keep a fixed clone of the
+// header row just below the topbar; it appears once the real header scrolls
+// out of view and mirrors the table's horizontal scroll. Rebuilt on every
+// render so the sort arrows / column widths stay in sync.
+let _stickyHeadWired = false;
+function syncStickyHead() {
+  const section = document.querySelector("#home-leaderboard");
+  const wrap = section && section.querySelector(".lb-wrap");
+  const table = document.querySelector("#home-lb-table");
+  if (!section || !wrap || !table) return;
+
+  let overlay = section.querySelector(".lb-sticky-head");
+  if (!overlay) {
+    overlay = document.createElement("div");
+    overlay.className = "lb-sticky-head";
+    overlay.setAttribute("aria-hidden", "true");
+    overlay.innerHTML = `<div class="lb-sticky-head-inner"><table class="lb"><thead></thead></table></div>`;
+    section.appendChild(overlay);
+  }
+  const inner = overlay.querySelector(".lb-sticky-head-inner");
+  const cloneThead = overlay.querySelector("thead");
+
+  // Rebuild the cloned header row (mirrors arrows / column order) and wire
+  // clicks back through the same sort path as the real header.
+  cloneThead.innerHTML = table.querySelector("thead").innerHTML;
+  cloneThead.querySelectorAll("th").forEach(th => {
+    const k = th.dataset.k;
+    if (!METRIC_BY_KEY[k]) return;
+    th.style.cursor = "pointer";
+    th.addEventListener("click", () => sortHomeBy(k), { once: true });
+  });
+
+  const topbar = document.querySelector(".topbar");
+
+  const refresh = () => {
+    const overflowH = wrap.scrollWidth - wrap.clientWidth > 1;
+    const realThead = table.querySelector("thead");
+    const topbarBottom = topbar ? topbar.getBoundingClientRect().bottom : 0;
+    const headRect = realThead.getBoundingClientRect();
+    const wrapRect = wrap.getBoundingClientRect();
+
+    // Show while the real header has scrolled under the topbar but the table
+    // body is still on screen below it.
+    const show = headRect.bottom <= topbarBottom + 1 && wrapRect.bottom > topbarBottom + 8;
+    if (!show) { overlay.style.display = "none"; return; }
+
+    // Match the real table's column widths so the clone lines up exactly.
+    const realThs = table.querySelectorAll("thead th");
+    const cloneThs = cloneThead.querySelectorAll("th");
+    overlay.querySelector("table").style.width = table.offsetWidth + "px";
+    overlay.querySelector("table").style.tableLayout = "fixed";
+    realThs.forEach((rth, i) => {
+      if (cloneThs[i]) cloneThs[i].style.width = rth.getBoundingClientRect().width + "px";
+    });
+
+    overlay.style.display = "block";
+    overlay.style.top = topbarBottom + "px";
+    overlay.style.left = wrapRect.left + "px";
+    overlay.style.width = wrapRect.width + "px";
+    inner.style.width = (overflowH ? wrap.scrollWidth : wrap.clientWidth) + "px";
+    inner.style.transform = `translateX(${-wrap.scrollLeft}px)`;
+  };
+
+  if (!_stickyHeadWired) {
+    window.addEventListener("scroll", refresh, { passive: true });
+    window.addEventListener("resize", refresh);
+    wrap.addEventListener("scroll", refresh, { passive: true });
+    _stickyHeadWired = true;
   }
   refresh();
 }

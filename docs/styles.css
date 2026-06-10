@@ -676,6 +676,22 @@ section > .dl-camera { top: 4px; right: 0; }
   display: none; /* shown by JS only when the table overflows */
 }
 .lb-sticky-track { height: 1px; }
+
+/* Floating header — a fixed clone of the leaderboard's header row that drops in
+   just below the topbar while you scroll down through the model rows, so the
+   column labels stay readable. Synced horizontally to .lb-wrap by JS. */
+.lb-sticky-head {
+  position: fixed;
+  z-index: 40; /* under the topbar (50), over the table */
+  overflow: hidden;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.5);
+  display: none; /* shown by JS only while the real header is out of view */
+  pointer-events: auto;
+}
+.lb-sticky-head table.lb { background: transparent; }
+.lb-sticky-head-inner { will-change: transform; }
 .lb-sticky-scroll::-webkit-scrollbar { height: 12px; }
 .lb-sticky-scroll::-webkit-scrollbar-thumb {
   background: var(--navy-soft);

@@ -181,6 +181,9 @@ def build_system(system_key: str, xlsx: Path, kind: str) -> dict:
                 if col in df.columns:
                     slot[COL_TO_KEY.get(col, col)] = _num(row[col])
 
+    # ── size-dependence block (emitted by ClusterAnalysis as its own sheet) ──
+    size_block = _size_from_sheet(xlsx, sheets, models)
+
     out = {
         "kind":            kind,
         "models":          models,
@@ -191,6 +194,8 @@ def build_system(system_key: str, xlsx: Path, kind: str) -> dict:
         "fwt":             fwt_block,
         "fwt_thresholds":  fwt_thresholds,
     }
+    if size_block:
+        out["size"] = size_block
     if kind == "pair":
         out["active_pairs"] = sorted(active_keys)
         out["pairs"]        = detail_block
@@ -202,29 +207,71 @@ def build_system(system_key: str, xlsx: Path, kind: str) -> dict:
     return out
 
 
-def _load_size_dependence() -> dict:
-    """Size-dependence summaries precomputed by build_size_dependence.py."""
-    p = ROOT / "site" / "size_dependence.json"
-    if not p.exists():
-        print("  (no size_dependence.json — run build_size_dependence.py to add it)")
-        return {}
-    return json.loads(p.read_text())
+# size_dependence sheet columns (emitted by ClusterAnalysis)
+_SIZE_COLS = {
+    "n":      "Cluster size (n_atoms)",
+    "median": "Median |ΔE_form| (meV/atom)",
+    "q1":     "Q1 |ΔE_form| (meV/atom)",
+    "q3":     "Q3 |ΔE_form| (meV/atom)",
+    "count":  "Count",
+}
+
+
+def _size_from_sheet(xlsx: Path, sheets, models) -> dict | None:
+    """Build the size-dependence block straight from the ``size_dependence``
+    sheet that ClusterAnalysis now emits (median/Q1/Q3/count per n_atoms,
+    meV/atom). Returns {"sizes": [...], "models": {model: {median,q1,q3,count}}}
+    or None if the sheet is absent."""
+    if "size_dependence" not in sheets:
+        return None
+    df = pd.read_excel(xlsx, sheet_name="size_dependence")
+    df["Model"] = df["Model"].ffill()
+    model_set = set(models)
+
+    per_model: dict = {}
+    sizes_seen: set = set()
+    for _, row in df.iterrows():
+        m = row.get("Model")
+        n = _num(row.get(_SIZE_COLS["n"]))
+        if pd.isna(m) or m not in model_set or n is None:
+            continue
+        n = int(n)
+        sizes_seen.add(n)
+        per_model.setdefault(m, {})[n] = (
+            _num(row.get(_SIZE_COLS["median"])),
+            _num(row.get(_SIZE_COLS["q1"])),
+            _num(row.get(_SIZE_COLS["q3"])),
+            _num(row.get(_SIZE_COLS["count"])),
+        )
+    if not per_model:
+        return None
+
+    sizes = sorted(sizes_seen)
+    idx = {n: i for i, n in enumerate(sizes)}
+    out_models: dict = {}
+    for m, by_n in per_model.items():
+        med = [None] * len(sizes)
+        q1  = [None] * len(sizes)
+        q3  = [None] * len(sizes)
+        cnt = [0]    * len(sizes)
+        for n, (a, b, c, d) in by_n.items():
+            i = idx[n]
+            med[i] = round(a, 2) if a is not None else None
+            q1[i]  = round(b, 2) if b is not None else None
+            q3[i]  = round(c, 2) if c is not None else None
+            cnt[i] = int(d) if d is not None else 0
+        out_models[m] = {"median": med, "q1": q1, "q3": q3, "count": cnt}
+    print(f"  · size-dependence: {len(out_models)} models, sizes {sizes[0]}–{sizes[-1]}")
+    return {"sizes": sizes, "models": out_models}
 
 
 def main() -> None:
-    size_block = _load_size_dependence()
     systems_block: dict = {}
     for key, label, xlsx, kind in SYSTEMS:
         sys_data = build_system(key, xlsx, kind)
         if sys_data is None:
             continue
         sys_data["label"] = label
-        # Fold in size-dependence (only models that also appear in the xlsx).
-        sd = size_block.get(key)
-        if sd:
-            models = {m: v for m, v in sd["models"].items() if m in sys_data.get("models", [])}
-            sys_data["size"] = {"sizes": sd["sizes"], "models": models}
-            print(f"  · {key}: size-dependence for {len(models)} models")
         systems_block[key] = sys_data
 
     # HEA placeholder so the front-end can render a "coming soon" page

@@ -161,7 +161,7 @@
         "AlphaNet-OMA-v1",
         "CHGNetv0.3.0",
         "DPA-3.1-3M",
-        "EqNrom-MPtrj",
+        "EqNorm-MPtrj",
         "GRACE-2L-OAM",
         "MACE-MH-1-OC20",
         "MACE-MP",
@@ -173,7 +173,7 @@
         "PET-OAM-XL",
         "SevenNet-MF-ompa",
         "SevenNet-Omni",
-        "UMA-1p2-OMAT",
+        "UMA-S-1p2-OMAT",
         "UMA-M-1p1-OC20",
         "UMA-M-1p1-OMAT",
         "UMA-S-1p1-OC20",
@@ -423,7 +423,7 @@
             "N_missed": 0.0
           }
         },
-        "EqNrom-MPtrj": {
+        "EqNorm-MPtrj": {
           "qcd_cluster": {
             "E_form_MAE": 0.1686409010643533,
             "E_form_RMSE": 0.3322078632820768,
@@ -951,7 +951,7 @@
             "N_missed": 0.0
           }
         },
-        "UMA-1p2-OMAT": {
+        "UMA-S-1p2-OMAT": {
           "qcd_cluster": {
             "E_form_MAE": 0.1102438403095045,
             "E_form_RMSE": 0.209577156797016,
@@ -1673,7 +1673,7 @@
             }
           ]
         },
-        "EqNrom-MPtrj": {
+        "EqNorm-MPtrj": {
           "qcd_cluster": [
             {
               "threshold": 0.05,
@@ -2513,7 +2513,7 @@
             }
           ]
         },
-        "UMA-1p2-OMAT": {
+        "UMA-S-1p2-OMAT": {
           "qcd_cluster": [
             {
               "threshold": 0.05,
@@ -4169,7 +4169,7 @@
               24659
             ]
           },
-          "EqNrom-MPtrj": {
+          "EqNorm-MPtrj": {
             "median": [
               116.75,
               122.68,
@@ -6833,7 +6833,7 @@
               24658
             ]
           },
-          "UMA-1p2-OMAT": {
+          "UMA-S-1p2-OMAT": {
             "median": [
               83.43,
               103.86,
@@ -19208,7 +19208,7 @@
             }
           }
         },
-        "EqNrom-MPtrj": {
+        "EqNorm-MPtrj": {
           "qcd_cluster": {
             "Ag": {
               "normal": {
@@ -49920,7 +49920,7 @@
             }
           }
         },
-        "UMA-1p2-OMAT": {
+        "UMA-S-1p2-OMAT": {
           "qcd_cluster": {
             "Ag": {
               "normal": {
@@ -76670,7 +76670,7 @@
         "AlphaNet-OMA-v1",
         "CHGNetv0.3.0",
         "DPA-3.1-3M",
-        "EqNrom-MPtrj",
+        "EqNorm-MPtrj",
         "GRACE-2L-OAM",
         "MACE-MH-1-OC20",
         "MACE-MP",
@@ -76682,7 +76682,7 @@
         "PET-OAM-XL",
         "SevenNet-MF-ompa",
         "SevenNet-Omni",
-        "UMA-1p2-OMAT",
+        "UMA-S-1p2-OMAT",
         "UMA-M-1p1-OC20",
         "UMA-M-1p1-OMAT",
         "UMA-S-1p1-OC20",
@@ -76889,7 +76889,7 @@
             "N_missed": 0.0
           }
         },
-        "EqNrom-MPtrj": {
+        "EqNorm-MPtrj": {
           "bimetallic": {
             "E_form_MAE": 0.2246625496224059,
             "E_form_RMSE": 0.2881492383590593,
@@ -77417,7 +77417,7 @@
             "N_missed": 0.0
           }
         },
-        "UMA-1p2-OMAT": {
+        "UMA-S-1p2-OMAT": {
           "bimetallic": {
             "E_form_MAE": 0.07463484820803452,
             "E_form_RMSE": 0.1432501322979646,
@@ -78139,7 +78139,7 @@
             }
           ]
         },
-        "EqNrom-MPtrj": {
+        "EqNorm-MPtrj": {
           "bimetallic": [
             {
               "threshold": 0.05,
@@ -78979,7 +78979,7 @@
             }
           ]
         },
-        "UMA-1p2-OMAT": {
+        "UMA-S-1p2-OMAT": {
           "bimetallic": [
             {
               "threshold": 0.05,
@@ -89287,7 +89287,7 @@
             }
           }
         },
-        "EqNrom-MPtrj": {
+        "EqNorm-MPtrj": {
           "bimetallic": {
             "Ag-Au": {
               "normal": {
@@ -117871,7 +117871,7 @@
             }
           }
         },
-        "UMA-1p2-OMAT": {
+        "UMA-S-1p2-OMAT": {
           "bimetallic": {
             "Ag-Au": {
               "normal": {

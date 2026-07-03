@@ -261,6 +261,7 @@ section {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 50%;
+  overflow: hidden;   /* clip the square mp4-fallback video to the circle */
 }
 .coming-soon-panel .cs-icon svg { width: 80%; height: 80%; }
 .coming-soon-panel h2 {
@@ -441,7 +442,8 @@ section {
 }
 /* Coming-soon HEA icon gets the same treatment so the placeholder matches */
 .coming-soon-panel .cs-icon svg,
-.coming-soon-panel .cs-icon img {
+.coming-soon-panel .cs-icon img,
+.coming-soon-panel .cs-icon video {
   width: 100%;
   height: 100%;
   object-fit: contain;

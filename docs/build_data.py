@@ -50,6 +50,9 @@ METRICS = [
     ("Time_med",       "Time_med (s)",          "Time / step (median)", "s", True, "efficiency", ""),
     ("Time_mean",      "Time_mean (s)",         "Time / step (mean)",   "s", True, "efficiency", ""),
     ("Time_total",     "Time_total (s)",        "Total time",           "s", True, "efficiency", ""),
+    # derived diagnosis metrics (injected from paper/scripts jsons, not xlsx)
+    ("E_eff",          "E_eff (eV/atom)",       "E_eff (E + force cost)", "eV/atom", True, "diagnosis", ""),
+    ("Offset_share",   "Removable offset (%)",  "Removable offset share", "%",      True, "diagnosis", ""),
 ]
 COL_TO_KEY = {col: key for key, col, *_ in METRICS}
 
@@ -265,6 +268,38 @@ def _size_from_sheet(xlsx: Path, sheets, models) -> dict | None:
     return {"sizes": sizes, "models": out_models}
 
 
+def _inject_diagnosis_metrics(mono: dict) -> None:
+    """E_eff = E_MAE + ||dF||_vec_MAE^2/(2k) and removable-offset share, from
+    the paper-grade jsons (anchor_curve_strict / force_structure / kmeas).
+    Values verified against data sources at analysis time; here we only join."""
+    base = Path("/home/khshin/ClusPot_analysis/paper/scripts")
+    try:
+        anchor = json.loads((base / "out_anchor_curve_strict.json").read_text())["per_model"]
+        force = json.loads((base / "out_force_structure.json").read_text())
+        k = json.loads((base / "out_kmeas.json").read_text())["k_global"]
+    except FileNotFoundError as e:
+        print(f"  ! diagnosis metrics skipped ({e})")
+        return
+    n = 0
+    for m, buckets in mono.get("summary", {}).items():
+        qcd = buckets.get("qcd_cluster")
+        if not qcd or m not in anchor or m not in force:
+            continue
+        emae = qcd.get("E_form_MAE")
+        raw, ref = anchor[m]["raw"], anchor[m]["ref_evenodd"]
+        if emae is None or abs(raw - emae) > 2e-3:
+            print(f"  ! diagnosis skip {m}: anchor raw {raw} vs xlsx {emae}")
+            continue
+        e_eff = emae + force[m]["vec_mae"] ** 2 / (2 * k)
+        share = (raw - ref) / raw * 100
+        for ds in ("qcd_cluster", "total"):
+            if ds in buckets:
+                buckets[ds]["E_eff"] = round(e_eff, 4)
+                buckets[ds]["Offset_share"] = round(share, 1)
+        n += 1
+    print(f"  · diagnosis metrics injected for {n} models (k={k:.3f})")
+
+
 def main() -> None:
     systems_block: dict = {}
     for key, label, xlsx, kind in SYSTEMS:
@@ -273,6 +308,9 @@ def main() -> None:
             continue
         sys_data["label"] = label
         systems_block[key] = sys_data
+
+    if "mono" in systems_block:
+        _inject_diagnosis_metrics(systems_block["mono"])
 
     # HEA placeholder so the front-end can render a "coming soon" page
     systems_block["hea"] = {

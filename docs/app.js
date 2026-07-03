@@ -284,6 +284,12 @@ function makeSeg(container, options, current, onChange) {
     container.appendChild(b);
   });
 }
+function sysHasMetric(sys, key) {
+  return sys.models.some(m => {
+    const buckets = sys.summary[m] || {};
+    return Object.values(buckets).some(b => b && b[key] != null);
+  });
+}
 function fillMetricSelect(sel, filter = () => true) {
   sel.innerHTML = "";
   DATA.meta.metrics.filter(filter).forEach(m => {
@@ -666,7 +672,7 @@ function initSystemPage(prefix, sys) {
 // ─── 1. Per-system leaderboard (bar chart, metric-selectable) ──────────────
 function initCompare(prefix, sys) {
   const sel = document.querySelector(`#${prefix}-cmp-metric`);
-  fillMetricSelect(sel, m => m.group !== "efficiency" || m.key === "Time_med");
+  fillMetricSelect(sel, m => (m.group !== "efficiency" || m.key === "Time_med") && sysHasMetric(sys, m.key));
   sel.value = STATE[prefix].cmp_metric;
   sel.addEventListener("change", () => { STATE[prefix].cmp_metric = sel.value; renderCompare(prefix, sys); });
 
@@ -713,7 +719,7 @@ function renderCompare(prefix, sys) {
 // ─── 3. Pareto (per-system) ────────────────────────────────────────────────
 function initPareto(prefix, sys) {
   const sel = document.querySelector(`#${prefix}-par-metric`);
-  fillMetricSelect(sel, m => m.group !== "efficiency");
+  fillMetricSelect(sel, m => m.group !== "efficiency" && sysHasMetric(sys, m.key));
   sel.value = STATE[prefix].par_metric;
   sel.addEventListener("change", () => { STATE[prefix].par_metric = sel.value; renderPareto(prefix, sys); });
 
